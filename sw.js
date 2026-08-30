@@ -1,11 +1,15 @@
 /* Onstrength — service worker.
-   Bump CACHE_VERSION whenever you change index.html, or browsers will keep
-   serving the copy they already have. */
 
-const CACHE_VERSION = "onstrength-v3";
+   Bump CACHE_VERSION whenever you change index.html or app.html, or browsers
+   will keep serving the copy they already have. This is the single most common
+   reason an update appears to do nothing. */
+
+const CACHE_VERSION = "onstrength-v4";
+
 const SHELL = [
   "./",
   "./index.html",
+  "./app.html",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
@@ -28,7 +32,8 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys()
       .then((keys) => Promise.all(
-        keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k))
+        keys.filter((k) => k !== CACHE_VERSION && k !== CACHE_VERSION + "-fonts")
+            .map((k) => caches.delete(k))
       ))
       .then(() => self.clients.claim())
   );
@@ -57,16 +62,26 @@ self.addEventListener("fetch", (event) => {
 
   if (url.origin !== self.location.origin) return;
 
-  // The page itself: prefer the network so updates land, fall back to cache offline.
+  /* Pages: prefer the network so an update lands, fall back to cache offline.
+     There are two pages now, so each is cached under its own path — caching
+     every navigation as index.html would make the landing page and the app
+     overwrite each other. The query string is dropped from the cache key, so
+     app.html?demo=1 still resolves offline. */
   if (req.mode === "navigate") {
+    const key = url.pathname;
     event.respondWith(
       fetch(req)
         .then((res) => {
           const copy = res.clone();
-          caches.open(CACHE_VERSION).then((c) => c.put("./index.html", copy)).catch(() => {});
+          caches.open(CACHE_VERSION).then((c) => c.put(key, copy)).catch(() => {});
           return res;
         })
-        .catch(() => caches.match("./index.html").then((hit) => hit || caches.match("./")))
+        .catch(() =>
+          caches.match(key)
+            .then((hit) => hit || caches.match("./app.html"))
+            .then((hit) => hit || caches.match("./index.html"))
+            .then((hit) => hit || caches.match("./"))
+        )
     );
     return;
   }

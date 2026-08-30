@@ -2,7 +2,7 @@
   "name": "Onstrength — salary planning",
   "short_name": "Onstrength",
   "description": "Salary planning tool for public sector managers. Plan a cost centre year from its complement.",
-  "start_url": "./index.html",
+  "start_url": "./app.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

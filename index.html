@@ -3,1273 +3,339 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
+<title>Onstrength — salary planning for public sector managers</title>
+<meta name="description" content="Work out where your salary budget lands. Base salary costed by pay period from the published classification tables, plus your own estimates. Nothing leaves your browser.">
 <meta name="theme-color" content="#EFF1F3" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F151A" media="(prefers-color-scheme: dark)">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Onstrength">
-<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32">
 <link rel="icon" href="icons/favicon-64.png" sizes="64x64">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-</head>
-<body>
-<title>Onstrength</title>
+<link rel="manifest" href="manifest.webmanifest">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Onstrength — salary planning for public sector managers">
+<meta property="og:description" content="Work out where your salary budget lands, from your complement, by pay period. Nothing you enter leaves your browser.">
+<meta property="og:image" content="icons/icon-512.png">
+<meta name="twitter:card" content="summary">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 
 <style>
-:root {
-  --ground:#EEF2F5; --surface:#FFFFFF; --surface-2:#DEE7ED; --sunk:#F5F8FA;
-  --ink:#111A21; --ink-2:#42525E; --muted:#6B7C88;
-  --rule:#D5DEE5; --rule-2:#E6ECF1;
-  --base:#17607F; --base-soft:#DCEBF2; --on-base:#FFFFFF;
-  --est:#B0741A; --est-soft:#F8EDD8;
-  --good:#1B7A56; --bad:#A8452C; --bad-soft:#F8E4DE;
-  --focus:#17607F; --shadow:0 1px 2px rgba(17,26,33,.05),0 6px 20px -10px rgba(17,26,33,.18);
+:root{
+  --ground:#EFF1F3; --surface:#FFFFFF; --surface-2:#E3E8EB; --sunk:#F6F8F9;
+  --ink:#16232C; --ink-2:#33454F; --muted:#5B6B76; --rule:#DCE2E6;
+  --base:#17607F; --base-soft:#E4EEF2; --on-base:#FFFFFF;
+  --est:#B0741A; --good:#1B7A56;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --ground:#0F151A; --surface:#18212A; --surface-2:#25333E; --sunk:#141C23;
-    --ink:#E6EDF3; --ink-2:#B4C2CC; --muted:#8496A3;
-    --rule:#2A3843; --rule-2:#212C36;
-    --base:#57B6DC; --base-soft:#15303D; --on-base:#0A1319;
-    --est:#E0A94F; --est-soft:#32280F;
-    --good:#5AC191; --bad:#E2836A; --bad-soft:#361F19;
-    --focus:#57B6DC; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6);
+    --ground:#0F151A; --surface:#161F26; --surface-2:#243139; --sunk:#131C22;
+    --ink:#E9EEF1; --ink-2:#BCCAD3; --muted:#8FA0AB; --rule:#26333C;
+    --base:#4FA3C4; --base-soft:#12303D; --on-base:#08161C;
+    --est:#E0A94F; --good:#4FBE93;
   }
 }
 :root[data-theme="dark"]{
-  --ground:#0F151A; --surface:#18212A; --surface-2:#25333E; --sunk:#141C23;
-  --ink:#E6EDF3; --ink-2:#B4C2CC; --muted:#8496A3;
-  --rule:#2A3843; --rule-2:#212C36;
-  --base:#57B6DC; --base-soft:#15303D; --on-base:#0A1319;
-  --est:#E0A94F; --est-soft:#32280F;
-  --good:#5AC191; --bad:#E2836A; --bad-soft:#361F19;
-  --focus:#57B6DC; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6);
+  --ground:#0F151A; --surface:#161F26; --surface-2:#243139; --sunk:#131C22;
+  --ink:#E9EEF1; --ink-2:#BCCAD3; --muted:#8FA0AB; --rule:#26333C;
+  --base:#4FA3C4; --base-soft:#12303D; --on-base:#08161C;
+  --est:#E0A94F; --good:#4FBE93;
 }
 
 *{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--ground);color:var(--ink);
-  font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-size:15px;line-height:1.45;
-  -webkit-font-smoothing:antialiased;padding-bottom:100px}
-.num{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
-.wrap{max-width:580px;margin:0 auto;padding:22px 18px 0}
-h1{margin:0;text-wrap:balance}
-.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted)}
-.h-title{font-size:22px;font-weight:700;letter-spacing:-.5px}
-.sub{color:var(--muted);font-size:13px}
-.note{font-size:12.5px;color:var(--muted);line-height:1.5}
-
-.card{background:var(--surface);border:1px solid var(--rule);border-radius:8px}
-.card.lift{box-shadow:var(--shadow)}
-.pad{padding:18px 20px}
-.stack{display:flex;flex-direction:column}
-.g6{gap:6px}.g10{gap:10px}.g14{gap:14px}.g18{gap:18px}
-.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.rule{height:1px;background:var(--rule-2)}
-.grow{flex-grow:1}
-.cols{display:flex;flex-direction:column;gap:18px}
-
-.hero{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;
-  font-size:42px;font-weight:600;letter-spacing:-2px;line-height:1.04}
-.pos{color:var(--good)}.neg{color:var(--bad)}
-
-.comp{height:14px;border-radius:7px;overflow:hidden;display:flex;background:var(--surface-2)}
-.comp>i{display:block;height:100%}
-.dot{width:9px;height:9px;border-radius:3px;flex-shrink:0}
-
-button,.btn{font-family:inherit;font-size:14.5px;font-weight:500;border-radius:7px;
-  border:1px solid transparent;cursor:pointer;min-height:46px;padding:0 16px;
-  display:inline-flex;align-items:center;justify-content:center;gap:8px}
-.btn-primary{background:var(--base);color:var(--on-base);width:100%}
-.btn-ghost{background:var(--surface);color:var(--ink);border-color:var(--rule)}
-.btn-quiet{background:transparent;color:var(--base);border:none;min-height:40px;padding:0 6px;font-size:13.5px}
-.btn-sm{min-height:40px;font-size:13px;padding:0 12px}
-button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
-
-label.f{display:flex;flex-direction:column;gap:5px}
-label.f>span{font-size:12.5px;color:var(--ink-2);font-weight:500}
-input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink);background:var(--surface);
-  border:1px solid var(--rule);border-radius:7px;padding:11px 12px;min-height:46px;width:100%}
-input.num-in{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.checkline{display:flex;align-items:center;gap:10px;min-height:44px}
-.checkline input{width:20px;height:20px;min-height:20px;flex-shrink:0;accent-color:var(--base)}
-.checkline span{font-size:13px;color:var(--ink-2)}
-
-.chip{font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:500;letter-spacing:.4px;
-  text-transform:uppercase;padding:3px 7px;border-radius:4px;white-space:nowrap}
-.chip-vac{background:var(--est-soft);color:var(--est)}
-.chip-out{background:var(--bad-soft);color:var(--bad)}
-.chip-leave{background:var(--surface-2);color:var(--muted)}
-.chip-step{background:var(--base-soft);color:var(--base)}
-.chip-pt{background:var(--surface-2);color:var(--ink-2)}
-
-.li{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--rule-2);min-height:56px}
-.li:last-child{border-bottom:none}
-.li-t{font-size:14.5px;font-weight:500}
-.li-s{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);letter-spacing:.3px}
-.nick{color:var(--base);font-weight:600}
-
-.seg{display:flex;gap:6px;flex-wrap:wrap}
-.seg>button{min-height:40px;font-size:13px;padding:0 14px;border-radius:20px;
-  background:var(--surface);border:1px solid var(--rule);color:var(--ink-2)}
-.seg>button[aria-pressed="true"]{background:var(--base);color:var(--on-base);border-color:var(--base)}
-
-nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);
-  border-top:1px solid var(--rule);display:grid;grid-template-columns:repeat(4,1fr);
-  padding:6px 0 calc(10px + env(safe-area-inset-bottom,0px))}
-.tab{background:none;border:none;min-height:54px;padding:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:4px;color:var(--muted);font-size:10px;font-weight:500}
-.tab[aria-selected="true"]{color:var(--base)}
-.tab svg{width:21px;height:21px;flex-shrink:0}
-.brand,.railfoot{display:none}
-.sigfoot{padding:32px 0 8px;display:flex;flex-direction:column;gap:16px}
-.lockup{display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center}
-.lockmark{color:var(--ink)}
-.lockmark svg{width:34px;height:39px;display:block}
-.lockname{font-size:20px;font-weight:700;letter-spacing:-.5px;color:var(--ink)}
-.locktag{display:flex;flex-direction:column;gap:4px;text-align:center;
-  font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:1.3px;
-  text-transform:uppercase;color:var(--muted);line-height:1.5}
-.kmc{text-decoration:none}
-a.kmc:hover{text-decoration:underline}
-
-@media (min-width:900px){
-  body{padding-bottom:0;padding-left:246px}
-  nav.tabs{top:0;bottom:0;right:auto;width:246px;display:flex;flex-direction:column;
-    border-top:none;border-right:1px solid var(--rule);padding:0 12px 16px;gap:3px}
-  .brand{display:flex;flex-direction:column;align-items:center;padding:26px 10px 20px}
-  .brandrow{display:flex;align-items:center;justify-content:center;gap:9px;font-size:16.5px;
-    font-weight:700;letter-spacing:-.4px;color:var(--ink)}
-  .brandrow svg{width:19px;height:19px;flex-shrink:0;color:var(--base)}
-  .brandtag{display:flex;flex-direction:column;gap:3px;text-align:center;
-    font-family:'IBM Plex Mono',monospace;font-size:8.5px;font-weight:500;
-    letter-spacing:1.05px;text-transform:uppercase;color:var(--muted);margin-top:9px;line-height:1.5}
-  .tab{flex-direction:row;justify-content:flex-start;gap:12px;padding:0 12px;font-size:14px;
-    min-height:44px;border-radius:7px;width:100%}
-  .tab[aria-selected="true"]{background:var(--base-soft)}
-  .railfoot{display:flex;flex-direction:column;gap:10px;margin-top:auto;padding:20px 12px 0}
-  .wrap{max-width:1060px;padding:34px 36px 70px}
-  .sigfoot{display:none}
-  .cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
-  .cols.lean{grid-template-columns:1.55fr 1fr}
-  .cols>*{min-width:0}
-  .h-title{font-size:26px}
-  .hero{font-size:52px}
-  .btn-primary{width:auto;align-self:flex-start;padding:0 28px}
-  .btn-primary.full{width:100%}
-}
-
-.hidden{display:none!important}
-.empty{text-align:center;color:var(--muted);font-size:13.5px;padding:30px 20px}
+  font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-size:16px;line-height:1.55;
+  -webkit-font-smoothing:antialiased}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+img{max-width:100%;display:block}
 a{color:var(--base)}
-a:hover{color:var(--ink)}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;
+  letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)}
+
+/* ---- masthead ---- */
+header{padding:44px 0 8px;text-align:center}
+.lockmark{color:var(--ink);display:flex;justify-content:center}
+.lockmark svg{width:38px;height:44px}
+.lockname{font-size:25px;font-weight:700;letter-spacing:-.7px;margin-top:11px}
+.locktag{display:flex;flex-direction:column;gap:3px;margin-top:8px;
+  font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:500;
+  letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);line-height:1.5}
+
+/* ---- hero ---- */
+.hero{padding:38px 0 10px;display:grid;gap:34px;align-items:center}
+h1{margin:0;font-size:31px;line-height:1.15;letter-spacing:-1px;font-weight:700;text-wrap:balance}
+.lede{font-size:16.5px;color:var(--ink-2);margin:16px 0 0;max-width:34em}
+.cta{display:flex;flex-wrap:wrap;gap:11px;margin-top:26px;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  min-height:52px;padding:0 26px;border-radius:11px;font-size:15.5px;font-weight:600;
+  font-family:inherit;text-decoration:none;border:1px solid transparent;cursor:pointer}
+.btn-primary{background:var(--base);color:var(--on-base)}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-ghost{background:var(--surface);color:var(--ink);border-color:var(--rule)}
+.btn-ghost:hover{border-color:var(--muted)}
+.reassure{font-size:13px;color:var(--muted);margin-top:14px}
+
+/* ---- phone ---- */
+.phone{justify-self:center;width:288px;max-width:100%;padding:11px;border-radius:34px;
+  background:var(--surface);border:1px solid var(--rule);
+  box-shadow:0 20px 44px -22px rgba(11,26,36,.42)}
+.phone img{border-radius:24px;width:100%}
+
+/* ---- sections ---- */
+section{padding:46px 0}
+.sec-h{font-size:22px;font-weight:700;letter-spacing:-.6px;margin:0 0 6px}
+.sec-s{color:var(--muted);font-size:14.5px;margin:0 0 24px;max-width:44em}
+.grid3{display:grid;gap:16px}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:22px}
+.card h3{margin:0 0 8px;font-size:16px;font-weight:700;letter-spacing:-.3px}
+.card p{margin:0;font-size:14.5px;color:var(--ink-2);line-height:1.6}
+.tick{width:22px;height:22px;border-radius:6px;background:var(--base-soft);color:var(--base);
+  display:flex;align-items:center;justify-content:center;margin-bottom:13px}
+.tick svg{width:13px;height:13px}
+
+/* ---- equation ---- */
+.eq{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:24px 22px}
+.eqrow{display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+  padding:11px 0;border-bottom:1px solid var(--rule)}
+.eqrow:last-child{border-bottom:none;padding-bottom:0}
+.eqrow b{font-weight:600;font-size:14.5px}
+.eqrow span{font-size:13px;color:var(--muted);text-align:right}
+.eqtot{margin-top:6px;padding-top:14px;border-top:2px solid var(--ink);
+  display:flex;justify-content:space-between;font-weight:700;font-size:15px}
+
+/* ---- honest ---- */
+.honest{background:var(--sunk);border:1px solid var(--rule);border-radius:14px;padding:24px 22px;margin-top:16px}
+.honest li{font-size:14.5px;color:var(--ink-2);margin-bottom:11px;line-height:1.6}
+.honest li:last-child{margin-bottom:0}
+.honest strong{color:var(--ink)}
+.honest ul{margin:0;padding-left:20px}
+
+/* ---- install ---- */
+#install .card{padding:24px 22px}
+.steps{margin:16px 0 0;padding-left:22px}
+.steps li{font-size:14.5px;color:var(--ink-2);margin-bottom:10px;line-height:1.6}
+.shareicon{display:inline-flex;vertical-align:-4px;width:17px;height:17px;color:var(--base)}
+.note{font-size:13px;color:var(--muted);line-height:1.6}
+.hidden{display:none!important}
+
+/* ---- footer ---- */
+footer{padding:40px 0 54px;text-align:center;border-top:1px solid var(--rule);margin-top:20px}
+footer .kmc{font-weight:600;color:var(--ink-2);text-decoration:none}
+footer a.kmc:hover{text-decoration:underline}
+
+@media (max-width:559px){
+  .eqrow{flex-direction:column;gap:3px}
+  .eqrow span{text-align:left}
+}
+@media (min-width:860px){
+  .honest{margin-top:0}
+  header{padding-top:54px}
+  .hero{grid-template-columns:1.1fr .9fr;padding:48px 0 20px}
+  h1{font-size:42px;letter-spacing:-1.6px}
+  .grid3{grid-template-columns:repeat(3,1fr)}
+  .sec-h{font-size:25px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
+</head>
+<body>
 
-<div class="wrap stack g18" id="app">
+<div class="wrap">
 
-  <!-- SETUP -->
-  <section id="p-setup" class="stack g18">
-    <div class="card pad stack g10 hidden lift" id="intro" style="border-color:var(--base);background:var(--base-soft)">
-      <div class="stack g6">
-        <div style="font-size:17px;font-weight:700;letter-spacing:-.3px">Work out where your salary budget lands.</div>
-        <div style="font-size:13.5px;color:var(--ink-2);line-height:1.55">Enter your budget, build your complement from the published pay tables, add what you expect to spend on top, and see your year-end position. Then move things around and watch it change.</div>
+  <header>
+    <div class="lockmark"><svg viewBox="0 0 26 30" fill="none" aria-hidden="true"><rect x="0" y="0" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="9.5" y="0" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="19" y="0" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="0" y="8" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="9.5" y="8" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="19" y="8" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="0" y="16" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="9.5" y="16" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="19" y="16" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="0" y="24" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="10.2" y="24.7" width="5.6" height="4.6" rx="1.2" fill="none" stroke="var(--est)" stroke-width="1.4"/><rect x="19.7" y="24.7" width="5.6" height="4.6" rx="1.2" fill="none" stroke="var(--est)" stroke-width="1.4"/></svg></div>
+    <div class="lockname">Onstrength</div>
+    <div class="locktag"><span>Salary planning tool</span><span>for public sector managers</span></div>
+  </header>
+
+  <div class="hero">
+    <div>
+      <h1>Know where your salary budget lands.</h1>
+      <p class="lede">Enter your budget. Build your complement from the published pay tables.
+        Add what you expect to spend on top of base pay. Onstrength works out where the year
+        ends up — and tells you what to do about it.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="app.html">Open Onstrength</a>
+        <a class="btn btn-ghost" href="app.html?demo=1">See a worked example</a>
       </div>
-      <div class="note">Everything stays in this browser. No account, nothing uploaded, and nobody else — including me — can see what you enter.</div>
-      <button class="btn-ghost btn-sm" id="intro-x" style="align-self:flex-start">Got it</button>
+      <p class="reassure">Free. No account, no sign-up, nothing to install.
+        Nothing you enter ever leaves your browser.</p>
     </div>
+    <div class="phone"><img src="data:image/png;base64,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" width="360" height="720"
+      alt="The Onstrength forecast screen, showing a projected surplus of $90,059 against a $1.78M salary budget."></div>
+  </div>
 
-    <h1 class="h-title">Setup</h1>
-
-    <div class="cols">
-      <div class="card pad stack g14">
-        <div class="eyebrow">Your cost centre</div>
-        <div class="two">
-          <label class="f"><span>Name</span><input id="c-name" placeholder="Policy &amp; Programs"></label>
-          <label class="f"><span>Number</span><input class="num-in" id="c-code" placeholder="4120"></label>
-        </div>
-        <div class="two">
-          <label class="f"><span>Fiscal year starts</span><input type="date" id="c-fy"></label>
-          <label class="f"><span>Pay periods</span><input class="num-in" id="c-periods" inputmode="numeric"></label>
-        </div>
-        <label class="f"><span>Salary budget</span><input class="num-in" id="c-sal" inputmode="decimal" placeholder="1780000"></label>
-        <div class="two">
-          <label class="f"><span>Watch at (%)</span><input class="num-in" id="c-minor" inputmode="decimal" placeholder="5"></label>
-          <label class="f"><span>Act at (%)</span><input class="num-in" id="c-major" inputmode="decimal" placeholder="15"></label>
-        </div>
-        <button class="btn-primary full" id="c-save">Save</button>
-        <div class="note">Benefits and bonuses are not costed since they are charged centrally and never reach your budget.</div>
+  <section>
+    <h2 class="sec-h">The whole idea, in four lines</h2>
+    <p class="sec-s">One equation, and the only part you estimate is the part nobody can compute.</p>
+    <div class="two">
+      <div class="eq">
+        <div class="eqrow"><b>Your salary budget</b><span>What you were given</span></div>
+        <div class="eqrow"><b>− Base salary</b><span>Costed from your complement</span></div>
+        <div class="eqrow"><b>− Six estimates</b><span>Overtime, premiums, acting, bilingual,<br>retention, everything else</span></div>
+        <div class="eqtot"><span>= Where the year lands</span><span style="font-weight:500;font-size:12.5px;color:var(--muted);letter-spacing:.2px">Surplus, or pressure</span></div>
       </div>
-
-      <div class="stack g18">
-        <div class="card pad stack g14">
-          <div class="stack g6">
-            <div class="eyebrow">What you expect on top of base pay</div>
-            <div class="note">Your estimate for the whole year. Base salary is costed exactly from your complement; these are the judgement calls.</div>
-          </div>
-          <div class="stack g14" id="est-list"></div>
-          <div class="rule"></div>
-          <div class="row">
-            <span style="font-size:13.5px;font-weight:600">Total estimates</span>
-            <span class="num" id="est-total" style="font-weight:600;font-size:16px;color:var(--est)">$0</span>
-          </div>
-        </div>
-
-        <div class="card pad stack g10">
-          <div class="row"><span style="font-size:13px;font-weight:600">Pay rates</span>
-            <span class="num" style="font-size:11px;color:var(--muted)" id="rates-version"></span></div>
-          <div class="note" id="rates-note"></div>
-        </div>
-
-        <div class="card pad stack g10">
-          <div style="font-size:13px;font-weight:600">Start over</div>
-          <button class="btn-ghost btn-sm" id="c-demo" style="align-self:flex-start">Load an example cost centre</button>
-          <button class="btn-quiet" id="c-clear" style="color:var(--bad);align-self:flex-start">Erase everything</button>
-        </div>
+      <div class="honest">
+        <div class="eyebrow" style="margin-bottom:12px">What it deliberately doesn't do</div>
+        <ul>
+          <li><strong>It doesn't track actuals.</strong> This plans the year; it doesn't reconcile it. That's a later job.</li>
+          <li><strong>It doesn't count benefits or bonuses.</strong> They're charged centrally and never reach your budget.</li>
+          <li><strong>It isn't a system of record.</strong> Check anything that matters against the ledger.</li>
+        </ul>
       </div>
     </div>
   </section>
 
-  <!-- COMPLEMENT -->
-  <section id="p-roster" class="stack g18 hidden">
-    <div class="row">
-      <h1 class="h-title">Complement</h1>
-      <span class="num" style="font-size:11px;color:var(--muted)" id="roster-count"></span>
-    </div>
-    <div class="cols">
-      <div class="stack g14">
-        <div class="card stack" id="roster-list"></div>
-        <button class="btn-ghost" id="add-position">Add a position</button>
+  <section>
+    <h2 class="sec-h">Why the numbers hold up</h2>
+    <p class="sec-s">Precision should follow materiality. The 90% that can be computed exactly is computed exactly; the rest is your judgement, labelled as such.</p>
+    <div class="grid3">
+      <div class="card">
+        <div class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <h3>Costed by pay period</h3>
+        <p>107 classification groups, 720 levels, 3,454 published steps. A fiscal year is 26 periods of 14 days, and every position is costed that way — prorated by the day when someone starts on the 12th.</p>
       </div>
-
-      <div class="card pad stack g14 hidden lift" id="editor">
-        <div class="row"><span style="font-size:15px;font-weight:700" id="editor-title">New position</span>
-          <button class="btn-quiet" id="editor-close">Close</button></div>
-        <div class="rule"></div>
-
-        <label class="f"><span>Who's in it? <span style="color:var(--muted);font-weight:400">— stays on this device</span></span>
-          <input id="f-nick" placeholder="Bill" autocomplete="off"></label>
-
-        <div class="two">
-          <label class="f"><span>Position number</span><input class="num-in" id="f-num" inputmode="numeric" placeholder="3121"></label>
-          <label class="f"><span>Title</span><input id="f-title" placeholder="Financial Analyst"></label>
-        </div>
-
-        <label class="f"><span>Classification group</span><select id="f-group"></select></label>
-        <div class="two">
-          <label class="f"><span>Level</span><select id="f-level"></select></label>
-          <label class="f"><span id="f-step-label">Step</span><select id="f-step"></select></label>
-        </div>
-
-        <div class="stack g6" id="rate-box" style="background:var(--base-soft);border-radius:7px;padding:14px 16px">
-          <div class="row"><span style="font-size:12.5px;color:var(--ink-2)">Published rate</span>
-            <span class="num" style="font-weight:600;font-size:17px;color:var(--base)" id="f-rate">—</span></div>
-          <div class="note" id="f-rate-src"></div>
-        </div>
-
-        <label class="f hidden" id="w-custom"><span>Annual salary</span><input class="num-in" id="f-salary" inputmode="decimal" placeholder="102000"></label>
-        <label class="f hidden" id="w-hours"><span>Paid hours a year</span><input class="num-in" id="f-hours" inputmode="decimal" placeholder="1950"></label>
-
-        <div class="stack g6" id="w-fte">
-          <span style="font-size:12.5px;color:var(--ink-2);font-weight:500">Assigned hours</span>
-          <div style="display:flex;gap:10px;align-items:center">
-            <div class="seg grow" id="f-fte-presets">
-              <button type="button" data-fte="100" aria-pressed="true">Full time</button>
-              <button type="button" data-fte="80" aria-pressed="false">80%</button>
-              <button type="button" data-fte="60" aria-pressed="false">60%</button>
-              <button type="button" data-fte="50" aria-pressed="false">50%</button>
-            </div>
-            <input class="num-in" id="f-fte" inputmode="decimal" style="width:76px;flex-shrink:0;text-align:center" aria-label="Percentage of full time">
-          </div>
-        </div>
-        <div class="row hidden" id="fte-line" style="padding:0 2px">
-          <span class="note" id="fte-line-label"></span>
-          <span class="num" style="font-weight:600;font-size:14px" id="fte-annual">—</span>
-        </div>
-
-        <div class="checkline"><input type="checkbox" id="f-ftechg"><span>Hours change during the year</span></div>
-        <div class="two hidden" id="w-ftechg">
-          <label class="f"><span>Changes on</span><input type="date" id="f-ftedate"></label>
-          <label class="f"><span>Goes to (%)</span><input class="num-in" id="f-ftenext" inputmode="decimal" placeholder="80"></label>
-        </div>
-
-        <div class="checkline"><input type="checkbox" id="f-inc"><span>Moves up a step during the year</span></div>
-        <div class="two hidden" id="w-inc">
-          <label class="f"><span>Increment date</span><input type="date" id="f-incdate"></label>
-          <label class="f"><span>Goes to</span><input class="num-in" id="f-next" inputmode="decimal" readonly></label>
-        </div>
-
-        <div class="stack g6">
-          <span style="font-size:12.5px;color:var(--ink-2);font-weight:500">Status this year</span>
-          <div class="seg" id="f-mode">
-            <button type="button" data-mode="filled" aria-pressed="true">Filled all year</button>
-            <button type="button" data-mode="vacant" aria-pressed="false">Vacant</button>
-            <button type="button" data-mode="leaving" aria-pressed="false">Leaving</button>
-            <button type="button" data-mode="unpaid" aria-pressed="false">Unpaid leave</button>
-          </div>
-        </div>
-        <label class="f hidden" id="w-start"><span>Expected start date</span><input type="date" id="f-start"></label>
-        <label class="f hidden" id="w-end"><span>Last day</span><input type="date" id="f-end"></label>
-        <div class="two hidden" id="w-unpaid">
-          <label class="f"><span>Unpaid from</span><input type="date" id="f-ufrom"></label>
-          <label class="f"><span>Back on</span><input type="date" id="f-uto"></label>
-        </div>
-
-        <div class="row" style="background:var(--sunk);border-radius:7px;padding:14px 16px">
-          <span style="font-size:12.5px;color:var(--ink-2)">Costs you this year</span>
-          <span class="num" style="font-weight:600;font-size:16px" id="f-preview">$0</span>
-        </div>
-        <button class="btn-primary full" id="f-save">Save position</button>
-        <button class="btn-quiet hidden" id="f-delete" style="color:var(--bad)">Delete this position</button>
+      <div class="card">
+        <div class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <h3>Sliced at every change</h3>
+        <p>A step increment, a move to 80%, a period of unpaid leave, a departure in November — each one cuts the year, and each slice is costed at the rate and hours in force. Nothing is averaged.</p>
+      </div>
+      <div class="card">
+        <div class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <h3>Nothing leaves your device</h3>
+        <p>No account, no server, no upload. Your roster lives in your own browser storage. Names are optional and stay local — which is why this link can be shared freely.</p>
       </div>
     </div>
   </section>
 
-  <!-- FORECAST -->
-  <section id="p-forecast" class="stack g18 hidden">
-    <div class="row">
-      <div class="stack g6">
-        <div class="eyebrow" id="cc-label">Cost centre</div>
-        <h1 class="h-title">Where you'll land</h1>
-      </div>
-      <div class="num" style="font-size:11px;color:var(--muted);text-align:right" id="fy-label"></div>
+  <section id="install">
+    <h2 class="sec-h">Put it on your phone</h2>
+    <p class="sec-s" id="ins-sub">Optional. It works perfectly as a link — this just gives it an icon and makes it work with no signal.</p>
+
+    <div class="card" id="ins-standalone" style="display:none">
+      <h3 style="color:var(--good)">You're running the installed app.</h3>
+      <p>Nothing more to do. It works offline from here.</p>
     </div>
 
-    <div class="card pad stack g18 lift">
-      <div class="stack g6">
-        <div class="eyebrow" id="var-label">Projected surplus</div>
-        <div class="hero" id="var-num">—</div>
-        <div class="sub" id="var-pct"></div>
-      </div>
-      <div class="stack g10">
-        <div class="comp">
-          <i id="comp-base" style="width:0;background:var(--base)"></i>
-          <i id="comp-est" style="width:0;background:var(--est)"></i>
-        </div>
-        <div style="display:flex;gap:20px;flex-wrap:wrap">
-          <div style="display:flex;align-items:center;gap:8px">
-            <span class="dot" style="background:var(--base)"></span>
-            <span class="note">Base salary</span><span class="num" style="font-size:12px" id="lg-base"></span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <span class="dot" id="lg-dot2" style="background:var(--est)"></span>
-            <span class="note">Estimates</span><span class="num" style="font-size:12px" id="lg-est"></span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <span class="dot" id="lg-dot3" style="background:var(--surface-2)"></span>
-            <span class="note" id="lg-lab3">Unspent</span><span class="num" style="font-size:12px" id="lg-rest"></span>
-          </div>
-        </div>
-      </div>
+    <div class="card" id="ins-prompt" style="display:none">
+      <h3>One tap</h3>
+      <p style="margin-bottom:16px">Your browser can install this directly.</p>
+      <button class="btn btn-primary" id="ins-btn">Install Onstrength</button>
     </div>
 
-    <div class="card pad stack g14 hidden" id="advice" style="border-left-width:4px">
-      <div class="stack g6">
-        <div class="eyebrow" id="adv-band"></div>
-        <div style="font-size:17px;font-weight:700;letter-spacing:-.3px;text-wrap:balance" id="adv-title"></div>
-        <div style="font-size:13.5px;color:var(--ink-2);line-height:1.55" id="adv-meaning"></div>
-      </div>
-      <div class="rule"></div>
-      <div class="stack g10" id="adv-actions"></div>
-      <div class="rule"></div>
-      <div class="stack g10">
-        <div class="stack g6">
-          <div class="eyebrow">What Finance will ask</div>
-          <div style="font-size:13.5px;font-style:italic" id="adv-ask"></div>
-        </div>
-        <button class="btn-ghost btn-sm" id="adv-copy" style="align-self:flex-start">Copy a note for Finance</button>
-      </div>
+    <div class="card" id="ins-ios" style="display:none">
+      <h3>On iPhone or iPad</h3>
+      <ol class="steps">
+        <li>Tap the <b>Share</b> button
+          <span class="shareicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V3"/><path d="M8 7l4-4 4 4"/><path d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7"/></svg></span>
+          — the box with an arrow coming out of the top, in the bar at the bottom of the screen.</li>
+        <li><b>Scroll the sheet up</b>, past the row of app icons, into the grey list of actions below.</li>
+        <li>Tap <b>Add to Home Screen</b>, then <b>Add</b>.</li>
+      </ol>
+      <p class="note" style="margin-top:16px"><b>Not in the list?</b> Scroll that list to the very bottom and tap
+        <b>Edit Actions…</b> — if "Add to Home Screen" is there with a green <b>+</b>, tap it and it'll come back.
+        If it isn't there at all, your phone is managed by your employer and the option is switched off.
+        That's not something you can change, and it doesn't matter — the link works exactly the same in the browser.</p>
+      <p class="note" style="margin-top:10px"><b>Reading this inside another app?</b> Links opened from email, Teams or
+        LinkedIn run in a cut-down browser with no install option. Tap <b>•••</b> or <b>Open in Safari</b> first.</p>
     </div>
 
-    <div class="cols lean">
-      <div class="card stack">
-        <div class="pad row"><span style="font-size:13.5px;font-weight:600">The plan</span>
-          <span class="num" style="font-size:11px;color:var(--muted)" id="person-years"></span></div>
-        <div class="rule"></div>
-        <div id="breakdown" class="stack"></div>
-      </div>
-      <div class="stack g18">
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-          <div class="card stack g6" style="padding:15px"><div class="num" style="font-size:22px;font-weight:600" id="k-filled">0</div><div class="sub" style="font-size:10.5px">Filled</div></div>
-          <div class="card stack g6" style="padding:15px"><div class="num" style="font-size:22px;font-weight:600;color:var(--est)" id="k-vacant">0</div><div class="sub" style="font-size:10.5px">Vacant</div></div>
-          <div class="card stack g6" style="padding:15px"><div class="num" style="font-size:22px;font-weight:600" id="k-other">0</div><div class="sub" style="font-size:10.5px">Leave / out</div></div>
-        </div>
-        <div class="note" id="fresh-note"></div>
-      </div>
+    <div class="card" id="ins-other" style="display:none">
+      <h3>On this device</h3>
+      <p>Open your browser's menu and look for <b>Install app</b> or <b>Add to Home screen</b>.
+        Not every browser offers it — and if yours doesn't, nothing is lost. The link works the same either way.</p>
     </div>
   </section>
 
-  <!-- WHAT IF -->
-  <section id="p-scenario" class="stack g18 hidden">
-    <div class="stack g6">
-      <h1 class="h-title">What if?</h1>
-      <div class="sub">Stack up changes you are considering and see where the year lands if they all happen.</div>
-    </div>
-    <div class="cols">
-      <div class="stack g14">
-        <div class="stack g6">
-          <span style="font-size:12.5px;color:var(--ink-2);font-weight:500">Add a change</span>
-          <div class="seg" id="move-add">
-            <button type="button" data-kind="start">Move a start date</button>
-            <button type="button" data-kind="unfilled">Leave a job unfilled</button>
-            <button type="button" data-kind="end">Plan a departure</button>
-            <button type="button" data-kind="hours">Change someone's hours</button>
-            <button type="button" data-kind="add">Add a position</button>
-          </div>
-        </div>
-        <div class="stack g10" id="move-list"></div>
-      </div>
-      <div class="stack g18">
-        <div class="card pad stack g14 lift">
-          <div class="stack g6">
-            <div class="eyebrow">Year-end position becomes</div>
-            <div class="num" id="s-var" style="font-size:32px;font-weight:600;letter-spacing:-1.4px">—</div>
-          </div>
-          <div class="rule"></div>
-          <div class="row"><span class="sub">As things stand</span><span class="num" id="s-base">—</span></div>
-          <div class="row"><span style="font-size:13px;font-weight:600">Difference</span><span class="num" id="s-delta" style="font-size:17px;font-weight:600">—</span></div>
-          <div class="row"><span class="sub">People funded</span><span class="num" id="s-py">—</span></div>
-        </div>
-        <div class="two">
-          <button class="btn-ghost" id="s-clear">Discard all</button>
-          <button class="btn-primary full" id="s-apply">Make these real</button>
-        </div>
-        <div class="note">Making them real writes the changes onto your complement. Nothing is saved until you do.</div>
-      </div>
-    </div>
-  </section>
-
-  <footer class="sigfoot">
-    <div class="rule"></div>
-    <div class="lockup">
-      <div class="lockmark"><svg viewBox="0 0 26 30" fill="none" aria-hidden="true"><rect x="0" y="0" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="9.5" y="0" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="19" y="0" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="0" y="8" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="9.5" y="8" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="19" y="8" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="0" y="16" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="9.5" y="16" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="19" y="16" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="0" y="24" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="10.2" y="24.7" width="5.6" height="4.6" rx="1.2" fill="none" stroke="var(--est)" stroke-width="1.4"/><rect x="19.7" y="24.7" width="5.6" height="4.6" rx="1.2" fill="none" stroke="var(--est)" stroke-width="1.4"/></svg></div>
-      <div class="lockname">Onstrength</div>
-      <div class="locktag"><span>Salary planning tool</span><span>for public sector managers</span></div>
-    </div>
-    <div class="note" style="line-height:1.7;text-align:center">
-      <span class="kmc" style="color:var(--ink-2);font-weight:600">Kiska Management Consultants</span><br>
-      Nothing you enter leaves this browser.<br>
-      <a href="mailto:jonathankiska@gmail.com?subject=Onstrength">Send feedback</a>
-    </div>
+  <footer>
+    <div class="lockmark" style="opacity:.55"><svg viewBox="0 0 26 30" fill="none" aria-hidden="true"><rect x="0" y="0" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="9.5" y="0" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="19" y="0" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="0" y="8" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="9.5" y="8" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="19" y="8" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="0" y="16" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="9.5" y="16" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="19" y="16" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="0" y="24" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="10.2" y="24.7" width="5.6" height="4.6" rx="1.2" fill="none" stroke="var(--est)" stroke-width="1.4"/><rect x="19.7" y="24.7" width="5.6" height="4.6" rx="1.2" fill="none" stroke="var(--est)" stroke-width="1.4"/></svg></div>
+    <p style="margin:14px 0 0;font-size:14px">
+      <span class="kmc">Kiska Management Consultants</span><br>
+      <span class="note">A planning tool, not a system of record.<br>
+      Rate figures come from a published aggregator — verify against the collective agreement
+      before anyone relies on a number.</span><br>
+      <a href="mailto:jonathankiska@gmail.com?subject=Onstrength" style="font-size:13.5px">Send feedback</a>
+    </p>
   </footer>
 
 </div>
 
-<nav class="tabs" role="tablist">
-  <div class="brand">
-    <div class="brandrow"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="2" width="9" height="9" rx="2.4" fill="currentColor"/><rect x="13" y="2" width="9" height="9" rx="2.4" fill="currentColor"/><rect x="2" y="13" width="9" height="9" rx="2.4" fill="currentColor"/><rect x="13.9" y="13.9" width="7.2" height="7.2" rx="1.8" fill="none" stroke="var(--est)" stroke-width="1.8"/></svg>Onstrength</div>
-    <div class="brandtag"><span>Salary planning tool</span><span>for public sector managers</span></div>
-  </div>
-  <button class="tab" role="tab" data-tab="setup" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-2.9 1.2V21a2 2 0 11-4 0v-.1A1.7 1.7 0 007 19.4a1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1A1.7 1.7 0 003 15a2 2 0 010-4 1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1A1.7 1.7 0 009 4.6 2 2 0 0111 3a2 2 0 014 0 1.7 1.7 0 001.1 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V11a2 2 0 010 4z"/></svg>Setup</button>
-  <button class="tab" role="tab" data-tab="roster" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8"/><path d="M8 13h8"/><path d="M8 17h4"/></svg>Complement</button>
-  <button class="tab" role="tab" data-tab="forecast" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 5-8"/><path d="M3 21h18"/></svg>Forecast</button>
-  <button class="tab" role="tab" data-tab="scenario" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3-3"/><path d="M20 16H7l3 3"/></svg>What if</button>
-  <div class="railfoot">
-    <div class="rule"></div>
-    <div class="note" style="line-height:1.6">
-      <span class="kmc" style="color:var(--ink-2);font-weight:600">Kiska Management Consultants</span><br>
-      Nothing you enter leaves this browser.<br>
-      <a href="mailto:jonathankiska@gmail.com?subject=Onstrength">Send feedback</a>
-    </div>
-  </div>
-</nav>
-
 <script>
 (function () {
   "use strict";
-  var DAY = 86400000, KEY = "complement.v3";
 
-  /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
-     in the app becomes a link to it. Leave it empty and they stay plain text —
-     better than shipping a link that goes nowhere. */
+  /* Put a LinkedIn (or any) URL here and the brand line becomes a link to it.
+     Empty ships plain text, which beats a link that goes nowhere. */
   var KMC_URL = "";
 
-  var BUILTIN = {"version":"gc-2026-08-full","source":"Published Government of Canada rates-of-pay schedules, compiled from fedpay.ca","retrieved":"2026-08-23","groups":{"AC":{"name":"Actuarial Science","effective":"2025-10-01","unit":"annual","levels":{"AC-01":[87938,91492,95040,98587,102823,107039,111024,114841,118675,123125,127746,132363,137751,143041,148533,154237],"AC-02":[133204,137401,141606,146719,152018,157315,162605,168068,173716,179553],"AC-03":[148827,153231,158251,163682,169311,175124,180938,186855,192965,199274]}},"AG":{"name":"Agriculture","effective":"2025-10-01","unit":"annual","levels":{"AG-01":[72458,75162,77868,80570,83280,85423],"AG-02":[74292,77774,81255,84756,88218,91521,96340,101162],"AG-03":[93431,97624,101804,105991,110176,114363,118547,120292],"AG-04":[115894,120056,124223,128388,132710,137710],"AG-05":[128349,133432,138514,143592,146416,150293]}},"AI":{"name":"Air Traffic Control","effective":"2025-07-01","unit":"annual","levels":{"AI-01":[65761,69294,72828,76356,79893,83426,86965,90491,94030,100261],"AI-02":[79246,82774,86312,89844,93378,96910,100442,103978,107511,113743],"AI-03":[94645,98180,101720,105260,108799,112337,115869,119408,122938,129171],"AI-04":[111856,115787,119724,123652,127581,131506,135441,139374,145605],"AI-05":[115787,119724,123651,127580,131504,135440,139372,143301,149530],"AI-06":[120733,124658,128592,132524,136452,140389,144317,148246,154479],"AI-07":[127402,131331,135262,139194,143127,147054,150983,154909,159933]}},"AR":{"name":"Architecture and Town Planning","effective":"2025-10-01","unit":"annual","levels":{"AR-02":[77884,81016,84140,87252,90378,93501],"AR-03":[95571,99080,102572,106062,108869,111668],"AR-04":[108447,112269,116088,119905,123061,126214],"AR-05":[121756,126079,130402,134723,138266,141808],"AR-06":[135086,139555,144027,148502,152423,156341],"AR-07":[145752,150587,155447,160307,168391,176475]}},"AS":{"name":"Administrative Services","effective":"2024-06-21","unit":"annual","levels":{"AS-01":[61786,64135,66572,69106],"AS-02":[68849,71464,74180],"AS-03":[73798,76599,79511],"AS-04":[80612,83675,87108],"AS-05":[96235,99892,104044],"AS-06":[107193,111267,115642],"AS-07":[112834,117128,121573,125225,129017],"AS-08":[116509,137135]}},"AU":{"name":"Auditing","effective":"2025-11-07","unit":"annual","levels":{"AU-01":[69070,72064,75035,78020,81004,83996,86984,89970,92670],"AU-02":[85907,88855,91816,94768,97718,100674,103626,107140],"AU-03":[98456,102141,105643,109144,112641,116138,119623],"AU-04":[111067,115085,119037,122999,126961,130921,134849],"AU-05":[114452,118174,121907,125626,129348,133077,137068],"AU-06":[125594,129732,133871,138015,142158,146302,150692]}},"BI":{"name":"Biological Sciences","effective":"2025-10-01","unit":"annual","levels":{"BI-01":[72458,75162,77868,80570,83280,85423],"BI-02":[74292,77774,81255,84756,88218,91521,96340,101162],"BI-03":[93431,97624,101804,105991,110176,114363,118547,120292],"BI-04":[115894,120056,124223,128388,132710,137710],"BI-05":[128349,133432,138514,143592,146416,150293]}},"CAI":{"name":"Civil Aviation Inspector","effective":"2026-01-26","unit":"annual","levels":{"CAI-01":[113124,116138,119226,122413,125684],"CAI-02":[120893,124124,127452,130864,134381,137992,141787],"CAI-03":[128846,132303,135858,139516,143275,147148,151123],"CAI-04":[136610,140292,144072,147960,151965,156074,160308],"CAI-05":[146933,150901,154991,159199,163518,167963,172529]}},"CEO":{"name":"Crown Corporation CEOs","effective":"2025-04-01","unit":"annual","range":true,"note":"A salary range, not a step grid — the two figures are the minimum and maximum.","levels":{"CEO-01":[161000,189400],"CEO-02":[192900,226900],"CEO-03":[231200,272000],"CEO-04":[277100,326000],"CEO-05":[332400,391000],"CEO-06":[398800,469100],"CEO-07":[478300,562700],"CEO-08":[573500,674700]}},"CH":{"name":"Chemistry","effective":"2025-10-01","unit":"annual","levels":{"CH-01":[72458,75162,77868,80570,83280,85423],"CH-02":[74292,77774,81255,84756,88218,91521,96340,101162],"CH-03":[93431,97624,101804,105991,110176,114363,118547,120292],"CH-04":[115894,120056,124223,128388,132710,137710],"CH-05":[128349,133432,138514,143592,146416,150293]}},"CM":{"name":"Communications","effective":"2024-06-21","unit":"annual","levels":{"CM-01":[37933,39090,40237,41399],"CM-02":[43238,44517,45801],"CM-03":[47678,49087,50511],"CM-04":[52909,54504,56093],"CM-05":[55384,57041,58728,60388],"CM-06":[60292,62148,63969,65807,67638,69485],"CM-07":[66044,68064,70078,72096,74119,76137]}},"CO":{"name":"Commerce","effective":"2025-06-22","unit":"annual","levels":{"CO-01":[69552,72682,75826,78949,82089,85225,88354,91493],"CO-02":[89966,94416,98874,103319,107773,112215,116684,121133,128102],"CO-03":[111682,116727,121771,126812,131854,136598,141340],"CO-04":[126947,132389,137506,142618,147734,152845]}},"CR":{"name":"Clerical and Regulatory","effective":"2024-06-21","unit":"annual","levels":{"CR-01":[41947,42820,43708,44593,45457,46342],"CR-02":[45531,46581,47614,48654],"CR-03":[51642,52996,54350,55707],"CR-04":[57217,58738,60255,61761],"CR-05":[62533,64250,65986,67699],"CR-06":[71176,73048,74903,76779],"CR-07":[78952,81137,83324,85533]}},"CT":{"name":"Comptrollership","effective":"2025-11-07","unit":"annual","levels":{"CT-EAV-01":[69070,72064,75035,78020,81004,83996,86984,89970,92670],"CT-EAV-02":[85907,88855,91816,94768,97718,100674,103626,106736],"CT-EAV-03":[98456,102141,105643,109144,112641,116138,119623],"CT-EAV-04":[111067,115085,119037,122999,126961,130921,134849],"CT-EAV-05":[123552,127569,131599,135614,139632,143658,147965],"CT-EAV-06":[135579,140046,144514,148988,153461,157934,162673],"CT-FIN-01":[66982,71485,75979,80475,84972,89466,93965],"CT-FIN-02":[81534,86382,91226,96070,100915,105762,110607],"CT-FIN-03":[104239,108631,113017,117409,121799,126674,134326],"CT-FIN-04":[117501,122481,127473,132467,137458,142993,151719],"CT-IAU-01":[69070,72064,75035,78020,81004,83996,86984,89970,92670],"CT-IAU-02":[85907,88855,91816,94768,97718,100674,103626,107140],"CT-IAU-03":[98456,102141,105643,109144,112641,116138,119623],"CT-IAU-04":[111067,115085,119037,122999,126961,130921,134849]}},"CX":{"name":"Correctional Services","effective":"2025-06-01","unit":"annual","levels":{"CX-1":[77510,82027,86811,91886,97266],"CX-2":[82122,86915,91991,97373,103079],"CX-3":[89108,94317,99840,105699,111905],"CX-4":[96705,102371,108382,114751,121498]}},"DD":{"name":"Drafting and Illustration","effective":"2024-06-22","unit":"annual","levels":{"DD-1":[37260,38565,39865,41180,42477,43777,45079,46884],"DD-2":[45912,47616,49291,50990,52678,54362,56060,58307],"DD-3":[56498,58388,60291,62188,64678],"DD-4":[58196,60257,62308,64370,66409,68451,71193],"DD-5":[68093,70458,72816,75179,78187],"DD-6":[73075,75627,78164,80719,83944],"DD-7":[79365,82161,84955,87751,91261],"DD-8":[83525,86498,89464,92413,96110],"DD-9":[87225,90337,93447,96545,100408]}},"DE":{"name":"Dentistry","effective":"2025-10-01","unit":"annual","levels":{"DE-01":[104698,109805,114906,119998,125103,130199,135404,140820],"DE-02":[115954,119233,124788,130320,135866,141417,147074,152957],"DE-03":[123682,129722,135760,141806,147840,153884,160036,166437]}},"DM":{"name":"Deputy Minister","effective":"2025-04-01","unit":"annual","range":true,"note":"A salary range, not a step grid — the two figures are the minimum and maximum.","levels":{"DM-01":[248400,292200],"DM-02":[285300,335600],"DM-03":[319600,375900],"DM-04":[357600,420600]}},"DS":{"name":"Defence Scientific Service","effective":"2025-10-01","unit":"annual","levels":{"DS-2":[66932,72980,82405,84983,88184],"DS-3":[88184,91396,94607,97813,101026,104240,107451],"DS-4":[114539,117679,120818,123958,127098,130237,133377,136517,139655,142795,145934],"DS-5":[135182,138367,141559,144748,147939,151126,154684,158212,161688,165155],"DS-6":[155336,158881,162430,165981,169533,173072,176619],"DS-7":[169168,172720,176271,179825,183376],"DS-7A":[154267,181490],"DS-7B":[172376,202796],"DS-8":[221612,260718]}},"EC":{"name":"Economics and Social Science Services","effective":"2025-06-22","unit":"annual","levels":{"EC-01":[62871,65066,67349,70647,73087],"EC-02":[70338,72044,74567,77952,80642],"EC-03":[77690,79904,82120,84975,87907],"EC-04":[83862,86733,89731,93812,97051],"EC-05":[100265,103324,106701,111558,115404],"EC-06":[113278,117248,121465,126991,131375],"EC-07":[127991,131855,135850,142037,146936],"EC-08":[139155,143008,147053,153740,159046]}},"ED":{"name":"Education","effective":"2024-07-01","unit":"annual","levels":{"ED-EST-L1":[59274,62746,66218,69687,73153,76624,80107,83579],"ED-EST-L2":[63928,67058,70179,73300,76420,79542,82662,85798,88886],"ED-EST-L3":[69627,73388,77145,80914,84672,88431,92193,95953,99716],"ED-EST-L4":[78612,82566,86519,90474,94429,98388,102341,106299,110259,114216],"ED-EST-L5":[84400,88835,93255,97687,102117,106548,110986,115410,119844,124272],"ED-EST-L6":[90483,94734,98997,103246,107511,111763,116016,120272,124533,128784],"ED-EDS":[79885,84055,87074,90089,93107],"ED-EDS-06":[127175,130836,135181],"ED-LAT-03":[99276,103628,107979,112326,116680]}},"EG":{"name":"Engineering and Scientific Support","effective":"2024-06-22","unit":"annual","levels":{"EG-1":[53898,56050,58296,60625,63049,65577,67757],"EG-2":[59291,61655,64128,66687,69355,72134,74534],"EG-3":[65216,67826,70538,73357,76292,79345,81985],"EG-4":[71741,74608,77594,80697,83921,87282,90184],"EG-5":[78909,82062,85350,88760,92316,96005,99200],"EG-6":[86801,90271,93889,97639,101543,105606,109119],"EG-7":[95484,99301,103275,107403,111704,116170,120034],"EG-8":[105034,109232,113597,118145,122871,127785,132037]}},"EL":{"name":"Electronics","effective":"2025-09-01","unit":"annual","levels":{"EL-01":[42776,44765,46772,48772,50778,52775,54771,56768,58762,62958],"EL-02":[58836,61088,65963,70836,75900],"EL-03":[65350,67846,73248,78656,84276],"EL-04":[72848,75640,78448,81254,84503,90190],"EL-05":[80772,83895,87005,90114,93721,100029],"EL-06":[89141,92598,96055,99515,103499,110468],"EL-07":[97664,101274,104894,108510,112851,120446],"EL-08":[105427,109133,112836,116537,121199,129353],"EL-09":[113211,117227,121244,125260,130269,139038]}},"EN":{"name":"Engineering and Land Survey","effective":"2025-10-01","unit":"annual","levels":{"EN-ENG-02":[81945,85045,87916,90792,93676],"EN-ENG-03":[100684,104303,107913,111515,115126,118732,122337],"EN-ENG-04":[117820,121733,125656,129575,133493,137411],"EN-ENG-05":[134962,139500,144063,148626,153199,157770],"EN-ENG-06":[150544,155388,160242,165085,169933,174775],"EN-SUR-01":[79774,82758,85755,88950,92150],"EN-SUR-02":[100359,103973,107571,111168,114767,118364,121962],"EN-SUR-03":[110456,113345,116236,119128,122028,124921,130206,134115],"EN-SUR-04":[122620,127022,131071,135123,139167,143213,147511,149723],"EN-SUR-05":[137560,142250,146950,151659,156349,161049,165880],"EN-SUR-06":[142384,147259,152152,157045,161933,166822,172453,177625,182954]}},"ETP":{"name":"Engineering Test Pilot","effective":"2026-01-26","unit":"annual","levels":{"ETP-01":[158684,162987,167419,171942,176630,181455,186445],"ETP-02":[171400,176065,180872,185813,190893,196143]}},"EU":{"name":"Educational Support","effective":"2024-07-01","unit":"annual","levels":{"EU-TEA":[46772,48411,50052,51686,53318,54972,56606],"EU-PHE-01":[54215,55822,57411,58991,60585,62182,63767],"EU-PHE-02":[92151,94173,96214,98253,100290,102314]}},"EX":{"name":"Executive","effective":"2025-04-01","unit":"annual","range":true,"note":"A range, not a step grid — the two figures are the minimum and maximum. At-risk performance pay sits on top and is not forecast here.","levels":{"EX-01":[137524,161773],"EX-02":[154178,181365],"EX-03":[172548,202918],"EX-04":[197774,232676],"EX-05":[221654,260719]}},"FB":{"name":"Border Services","effective":"2025-06-21","unit":"annual","levels":{"FB-01":[75051,77746,80538,83437],"FB-02":[80344,83275,86311,89462],"FB-03":[86915,91991,97373,103079],"FB-04":[93811,97337,100997,104798,108077],"FB-05":[102404,106313,110371,114585,117865],"FB-06":[112618,116980,121512,126223,129502],"FB-07":[124831,129736,134835,140141,143418],"FB-08":[139668,145163,150880,156825]}},"FI":{"name":"Financial Management","effective":"2025-11-07","unit":"annual","levels":{"FI-01":[66982,71485,75979,80475,84972,89466,93965],"FI-02":[81534,86382,91226,96070,100915,105762,110607],"FI-03":[104239,108631,113017,117409,121799,126674,134326],"FI-04":[117501,122481,127473,132467,137458,142993,151719]}},"FO":{"name":"Forestry","effective":"2025-10-01","unit":"annual","levels":{"FO-01":[70393,72569,75091,77635,81764,84773,87764,90749,93742,96735,100276],"FO-02":[93148,96046,99114,102512,105580,108609,111636,115056],"FO-03":[108807,111891,114933,118754,122524,126297,130120],"FO-04":[122258,125633,129003,132386,135619,138855,142436]}},"FR":{"name":"Firefighters","effective":"2024-08-05","unit":"annual","levels":{"FR-1":[83445,85586,91913,94948,98075],"FR-2":[96732,99994,103275],"FR-3":[109785],"FR-4":[116695],"FR-5":[124496],"FR-6":[132900],"FR-7":[141905],"FR-8":[151417]}},"FS":{"name":"Foreign Service","effective":"2025-07-01","unit":"annual","levels":{"FS-01":[81792,85063,88466,92004,95684,99512,103494],"FS-02":[92448,96608,100955,105495,110246,115206,120387,128977],"FS-03":[111372,115821,120459,125274,130288,135498,143739],"FS-04":[135498,140920,146556,152417,162462]}},"GC":{"name":"Governor in Council Appointees","effective":"2025-04-01","unit":"annual","range":true,"note":"A salary range, not a step grid — the two figures are the minimum and maximum.","levels":{"GC-01":[95700,112500],"GC-02":[109600,128900],"GC-03":[126800,149100],"GC-04":[145400,171000],"GC-05":[167100,196500],"GC-06":[192100,225900],"GC-07":[220700,259600],"GC-08":[253300,298000],"GC-09":[291600,343000],"GC-10":[334900,393900]}},"GCQ":{"name":"Governor in Council Quasi-judicial Appointees","effective":"2025-04-01","unit":"annual","range":true,"note":"A salary range, not a step grid — the two figures are the minimum and maximum.","levels":{"GCQ-01":[105500,124100],"GCQ-02":[121100,142400],"GCQ-03":[139700,164300],"GCQ-04":[160400,188600],"GCQ-05":[184200,216600],"GCQ-06":[225300,265000],"GCQ-07":[259100,304800],"GCQ-08":[297500,349900],"GCQ-09":[341800,402100],"GCQ-10":[403000,474100]}},"GL-AIM":{"name":"General Labour — Aircraft Instrument Mechanic","effective":"2024-08-05","unit":"hourly","levels":{"GL-AIM-09":[32.9,34.35,35.77],"GL-AIM-10":[34.18,35.67,37.13],"GL-AIM-11":[35.49,37.04,38.58],"GL-AIM-12":[36.71,38.31,39.9],"GL-AIM-13":[37.91,39.52,41.19],"GL-AIM-14":[39.08,40.79,42.5]}},"GL-AMW":{"name":"General Labour — Automotive Mechanical Worker","effective":"2024-08-05","unit":"hourly","levels":{"GL-AMW-01":[24.47,25.54,26.58],"GL-AMW-02":[25.23,26.38,27.45],"GL-AMW-03":[26.17,27.27,28.44],"GL-AMW-04":[27,28.2,29.35],"GL-AMW-05":[27.94,29.18,30.37],"GL-AMW-06":[28.94,30.23,31.45],"GL-AMW-07":[29.93,31.24,32.56],"GL-AMW-08":[31.1,32.43,33.79],"GL-AMW-09":[32.34,33.75,35.15],"GL-AMW-10":[33.54,34.98,36.46],"GL-AMW-11":[34.79,36.28,37.77],"GL-AMW-12":[36.07,37.63,39.21],"GL-AMW-13":[37.27,38.89,40.49],"GL-AMW-14":[38.44,40.15,41.79]}},"GL-COI":{"name":"General Labour — Core Industrial","effective":"2024-08-05","unit":"hourly","levels":{"GL-COI-09":[35.65,37.17,38.71],"GL-COI-10":[36.97,38.59,40.19],"GL-COI-11":[38.36,40.05,41.68],"GL-COI-12":[39.74,41.45,43.17],"GL-COI-13":[41.07,42.88,44.64],"GL-COI-14":[42.46,44.34,46.16]}},"GL-EIM":{"name":"General Labour — Electronic and Instrument Mechanic","effective":"2024-08-05","unit":"hourly","levels":{"GL-EIM-09":[35.42,36.98,38.54],"GL-EIM-10":[37.73,39.38,41],"GL-EIM-11":[39.09,40.82,42.51],"GL-EIM-12":[40.51,42.29,44.04],"GL-EIM-13":[41.9,43.68,45.54],"GL-EIM-14":[43.31,45.14,47.07]}},"GL-ELE":{"name":"General Labour — Electrical","effective":"2024-08-05","unit":"hourly","levels":{"GL-ELE-02":[23.79,24.83,25.87],"GL-ELE-03":[24.58,25.63,26.73],"GL-ELE-04":[25.31,26.41,27.49],"GL-ELE-05":[26.3,27.41,28.57],"GL-ELE-06":[27.15,28.29,29.51],"GL-ELE-07":[28.08,29.25,30.5],"GL-ELE-08":[29.15,30.41,31.7],"GL-ELE-09":[30.24,31.52,32.85],"GL-ELE-10":[31.4,32.79,34.16],"GL-ELE-11":[32.59,34.02,35.41],"GL-ELE-12":[33.7,35.15,36.65],"GL-ELE-13":[34.85,36.36,37.84],"GL-ELE-14":[35.95,37.49,39.08]}},"GL-GHW":{"name":"General Labour — General Heating Worker","effective":"2024-08-05","unit":"hourly","levels":{"GL-GHW-03":[28.92,30.21,31.42],"GL-GHW-04":[29.84,31.16,32.43],"GL-GHW-05":[30.82,32.18,33.52],"GL-GHW-06":[31.98,33.32,34.75],"GL-GHW-07":[32.9,34.35,35.77],"GL-GHW-08":[34.26,35.72,37.2],"GL-GHW-10":[36.07,37.63,39.21],"GL-GHW-11":[36.19,37.73,39.33],"GL-GHW-12":[37.83,39.51,41.16]}},"GL-INM":{"name":"General Labour — Industrial Mechanic","effective":"2024-08-05","unit":"hourly","levels":{"GL-INM-09":[31.55,32.89,34.29],"GL-INM-10":[32.74,34.15,35.57],"GL-INM-11":[33.93,35.4,36.85],"GL-INM-12":[35.15,36.69,38.22],"GL-INM-13":[36.28,37.83,39.44],"GL-INM-14":[37.48,39.13,40.76]}},"GL-MAM":{"name":"General Labour — Machine and Tool Maintaining","effective":"2024-08-05","unit":"hourly","levels":{"GL-MAM-05":[29.54,30.87,32.14],"GL-MAM-06":[30.59,31.93,33.24],"GL-MAM-07":[31.63,33,34.38],"GL-MAM-08":[32.92,34.37,35.8],"GL-MAM-09":[34.22,35.71,37.2],"GL-MAM-10":[35.6,37.13,38.67],"GL-MAM-11":[36.85,38.45,40.05],"GL-MAM-12":[38.21,39.86,41.49],"GL-MAM-13":[39.47,41.21,42.93],"GL-MAM-14":[40.74,42.52,44.31]}},"GL-MAN":{"name":"General Labour — Manual","effective":"2024-08-05","unit":"hourly","levels":{"GL-MAN-01":[25.55,26.66,27.77],"GL-MAN-02":[26.4,27.53,28.68],"GL-MAN-03":[27.3,28.51,29.68],"GL-MAN-04":[28.24,29.48,30.7],"GL-MAN-05":[29.2,30.45,31.73],"GL-MAN-06":[30.23,31.52,32.84],"GL-MAN-07":[31.24,32.62,33.95],"GL-MAN-08":[32.63,34.02,35.46],"GL-MAN-09":[33.84,35.34,36.79],"GL-MAN-10":[35.17,36.71,38.24],"GL-MAN-11":[36.47,38.06,39.63],"GL-MAN-12":[37.72,39.38,41.01],"GL-MAN-13":[39.09,40.83,42.51],"GL-MAN-14":[40.33,42.06,43.82]}},"GL-MDO":{"name":"General Labour — Motor Drive Operator","effective":"2024-08-05","unit":"hourly","levels":{"GL-MDO-01":[23.86,24.91,25.94],"GL-MDO-02":[24.69,25.74,26.85],"GL-MDO-03":[25.54,26.65,27.76],"GL-MDO-04":[26.38,27.55,28.67],"GL-MDO-05":[27.83,29.01,30.26],"GL-MDO-06":[28.82,30.09,31.31],"GL-MDO-07":[29.79,31.09,32.38],"GL-MDO-08":[30.99,32.3,33.67],"GL-MDO-09":[32.17,33.57,34.98],"GL-MDO-10":[33.42,34.88,36.3],"GL-MDO-11":[34.61,36.09,37.61],"GL-MDO-12":[35.87,37.44,39],"GL-MDO-13":[37.1,38.69,40.34],"GL-MDO-14":[38.27,39.93,41.57]}},"GL-MOC":{"name":"General Labour — Motor Car Operating","effective":"2024-08-05","unit":"hourly","levels":{"GL-MOC-01":[25.02,26.12,27.21],"GL-MOC-02":[25.82,26.94,28.09],"GL-MOC-03":[26.8,27.93,29.12],"GL-MOC-04":[27.6,28.78,30.03],"GL-MOC-05":[28.61,29.84,31.11],"GL-MOC-06":[29.62,30.92,32.21],"GL-MOC-07":[30.69,32.03,33.32],"GL-MOC-08":[31.98,33.32,34.75],"GL-MOC-09":[33.14,34.62,36.05],"GL-MOC-10":[34.41,35.9,37.41],"GL-MOC-11":[35.7,37.25,38.81],"GL-MOC-12":[36.91,38.52,40.15],"GL-MOC-13":[38.18,39.85,41.48],"GL-MOC-14":[39.43,41.16,42.86]}},"GL-MST":{"name":"General Labour — Miscellaneous","effective":"2024-08-05","unit":"hourly","levels":{"GL-MST-09":[30.32,31.66,32.94],"GL-MST-10":[31.43,32.83,34.22],"GL-MST-11":[32.57,33.96,35.39],"GL-MST-12":[33.72,35.17,36.66],"GL-MST-13":[34.83,36.34,37.83],"GL-MST-14":[36.05,37.6,39.17]}},"GL-PCF":{"name":"General Labour — Primary Care Facility","effective":"2024-08-05","unit":"hourly","levels":{"GL-PCF-06":[32.31,33.73,35.14],"GL-PCF-07":[33.42,34.88,36.35],"GL-PCF-08":[34.84,36.35,37.83],"GL-PCF-09":[36.23,37.77,39.38],"GL-PCF-10":[37.66,39.31,40.94],"GL-PCF-11":[39.02,40.68,42.4],"GL-PCF-12":[40.42,42.16,43.95],"GL-PCF-13":[41.85,43.66,45.46],"GL-PCF-14":[43.22,45.08,46.99]}},"GL-PIP":{"name":"General Labour — Pipefitting","effective":"2024-08-05","unit":"hourly","levels":{"GL-PIP-09":[35.57,37.13,38.7],"GL-PIP-10":[37.07,38.69,40.27],"GL-PIP-11":[38.37,39.99,41.71],"GL-PIP-12":[39.71,41.43,43.16],"GL-PIP-13":[41.09,42.86,44.64],"GL-PIP-14":[42.46,44.32,46.15]}},"GL-PRW":{"name":"General Labour — Primary Work","effective":"2024-08-05","unit":"hourly","levels":{"GL-PRW-05":[29.2,30.45,31.73],"GL-PRW-06":[30.3,31.63,32.91],"GL-PRW-07":[31.27,32.67,33.98],"GL-PRW-08":[32.67,34.06,35.48],"GL-PRW-09":[33.93,35.4,36.85],"GL-PRW-10":[35.24,36.76,38.31],"GL-PRW-11":[36.54,38.14,39.72],"GL-PRW-12":[37.78,39.47,41.12],"GL-PRW-13":[39.1,40.84,42.54],"GL-PRW-14":[40.43,42.21,43.97]}},"GL-SMW":{"name":"General Labour — Structural and Metalworking","effective":"2024-08-05","unit":"hourly","levels":{"GL-SMW-08":[36.3,37.84,39.45],"GL-SMW-09":[37.78,39.44,41.12],"GL-SMW-10":[39.29,41.01,42.73],"GL-SMW-11":[40.71,42.53,44.31],"GL-SMW-12":[42.16,44.01,45.83],"GL-SMW-13":[43.66,45.55,47.43],"GL-SMW-14":[45.1,47.07,49.01]}},"GL-VHE":{"name":"General Labour — Vehicle Equipment","effective":"2024-08-05","unit":"hourly","levels":{"GL-VHE-08":[35.03,36.51,38.03],"GL-VHE-09":[36.4,37.97,39.56],"GL-VHE-10":[37.86,39.5,41.12],"GL-VHE-11":[39.19,40.88,42.57],"GL-VHE-12":[40.62,42.4,44.12],"GL-VHE-13":[41.97,43.82,45.62],"GL-VHE-14":[43.33,45.2,47.1]}},"GL-WOW":{"name":"General Labour — Woodworking","effective":"2024-08-05","unit":"hourly","levels":{"GL-WOW-09":[33.82,35.31,36.78],"GL-WOW-10":[35.18,36.69,38.23],"GL-WOW-11":[36.46,38.04,39.63],"GL-WOW-12":[37.78,39.43,41.09],"GL-WOW-13":[39.05,40.76,42.47],"GL-WOW-14":[40.33,42.04,43.83]}},"GS":{"name":"General Services","effective":"2024-08-05","unit":"hourly","levels":{"GS-01":[18.59,19.38,20.2],"GS-02":[22.32,23.32,24.3],"GS-03":[26.12,27.26,28.39],"GS-04":[27.46,28.65,29.85],"GS-05":[30.66,31.96,33.28],"GS-06":[31.61,32.96,34.35],"GS-07":[33.08,34.53,35.98],"GS-08":[34.66,36.16,37.68],"GS-09":[37.9,39.53,41.2],"GS-10":[39.95,41.7,43.43],"GS-11":[41.5,43.35,45.12],"GS-12":[43.25,45.09,47],"GS-13":[44.92,46.87,48.84]}},"GS-FOS":{"name":"General Services — Food Services","effective":"2024-08-05","unit":"hourly","levels":{"GS-FOS-00":[16.65,18.64,20.65,22.64,24.64,26.61,28.61,30.66]}},"GT":{"name":"General Technical","effective":"2024-06-22","unit":"annual","levels":{"GT-1":[51899,53329,54759,56176,58424],"GT-2":[59518,61244,62965,64690,67276],"GT-3":[66559,68555,70568,72567,75472],"GT-4":[74995,77316,79648,81985,85266],"GT-5":[84174,86750,89343,92025,95704],"GT-6":[93148,96188,99250,102302,106393],"GT-7":[106746,110340,113931,117341,122034],"GT-8":[121092,124933,128748,132566,137872]}},"HP":{"name":"Heating, Power and Stationary Plant Operations","effective":"2024-08-05","unit":"hourly","levels":{"HP-01":[30.81,31.51,32.14],"HP-02":[33.68,34.48,35.24],"HP-03":[36.66,37.58,38.52],"HP-04":[41.17,42.26,43.25],"HP-05":[44.36,45.43,46.56],"HP-06":[44.51,45.72,46.88,48.06,49.31],"HP-07":[48.33,49.55,50.96,52.24,53.66],"HP-08":[51.86,53.28,54.72,56.13,57.62],"HP-09":[54.97,56.56,58.25,59.87,61.69]}},"HPS":{"name":"Helicopter Pilot and Supervisor","effective":"2026-01-26","unit":"annual","levels":{"HPS-01":[123994,126706,130187,133674,137267,141042,144920],"HPS-02":[129318,132573,136285,139999,143774,147728,151790],"HPS-03":[136058,140494,144772,149193,153228,157442,161771]}},"HR":{"name":"Historical Research","effective":"2025-10-01","unit":"annual","levels":{"HR-1":[73250,75909,78572,81240],"HR-2":[81970,84859,87763,90664,93383],"HR-3":[93783,97126,100475,103815],"HR-4":[109026,113071,117109,121148],"HR-5":[117703,123756,129812,135867]}},"HS-HDO":{"name":"Hospital Services — Home Duty Officer","effective":"2024-08-05","unit":"hourly","levels":{"HS-HDO-01":[25.88,26.98,28.13],"HS-HDO-02":[28.33,29.59,30.81],"HS-HDO-03":[30.26,31.57,32.88],"HS-HDO-04":[31.61,32.96,34.35],"HS-HDO-05":[34.57,36.09,37.59],"HS-HDO-06":[35.55,37.08,38.65],"HS-HDO-07":[37.16,38.79,40.39],"HS-HDO-08":[38.83,40.51,42.22],"HS-HDO-09":[42.64,44.47,46.34],"HS-HDO-10":[44.81,46.73,48.71]}},"HS-PHS":{"name":"Hospital Services — Public Health Services","effective":"2024-08-05","unit":"hourly","levels":{"HS-PHS-01":[24.6,25.65,26.74],"HS-PHS-02":[27.07,28.25,29.43],"HS-PHS-03":[29.55,30.85,32.16],"HS-PHS-04":[31.87,33.26,34.66],"HS-PHS-05":[34.8,36.3,37.78],"HS-PHS-06":[36.45,38.02,39.59],"HS-PHS-07":[37.64,39.26,40.92],"HS-PHS-08":[40.79,42.56,44.35],"HS-PHS-09":[44.58,46.54,48.47],"HS-PHS-10":[46.81,48.85,50.9]}},"IS":{"name":"Information Services","effective":"2024-06-21","unit":"annual","levels":{"IS-01":[61786,64135,66572,69106],"IS-02":[68849,71464,74180],"IS-03":[80612,83675,87108],"IS-04":[96235,99892,104044],"IS-05":[107193,111267,115642],"IS-06":[112834,117128,121573,125225,129017]}},"IT":{"name":"Information Technology","effective":"2024-12-22","unit":"annual","levels":{"IT-01":[69361,71925,74485,77031,79574,82120,84661,89382],"IT-02":[85854,88603,91348,94095,96844,99589,102335,105080],"IT-03":[101343,104833,108324,111817,115306,118791,122281,125914],"IT-04":[116037,120038,124039,128039,132039,136041,140039,144434],"IT-05":[133582,138563,143539,148520,153503,158485,163465,168446,174076]}},"LC":{"name":"Law Management","effective":"2025-04-01","unit":"annual","range":true,"note":"A salary range, not a step grid — the two figures are the minimum and maximum.","levels":{"LC-01":[169714,228094],"LC-02":[193473,244726],"LC-03":[210106,251516],"LC-04":[211350,257737]}},"LES-IM":{"name":"Law Enforcement Support — Immigration","effective":"2025-01-01","unit":"annual","levels":{"LES-IM-01":[60763,63190,65721,68343,71081,73919,76878,79952],"LES-IM-02":[66825,69500,72286,75176,78184,81312,84563,87946],"LES-IM-03":[75760,78792,81946,85223,88631,92178,95864]}},"LES-TO":{"name":"Law Enforcement Support — Technical Operations","effective":"2025-01-01","unit":"annual","levels":{"LES-TO-01":[65714,68352,71076,73924,76879,79953],"LES-TO-02":[72282,75176,78190,81314,84563,87946],"LES-TO-03":[78794,81949,85228,88626,92174,95861],"LES-TO-04":[85884,89312,92894,96609,100471,104489]}},"LI":{"name":"Lightkeepers","effective":"2024-08-05","unit":"annual","levels":{"LI-01":[46061,47342,48582,49862,51126],"LI-02":[46575,48266,50008,51728,53450],"LI-03":[50936,52599,54257,55918],"LI-04":[54748,56334,57948,59519],"LI-05":[58632,60261,61872,63472],"LI-06":[62651,64543,66441,68349],"LI-07":[67927,69744,71595,73427],"LI-08":[73672,75491,77304,79099],"LI-09":[79082,80934,82795,85274]}},"LP":{"name":"Law Practitioner","effective":"2025-05-10","unit":"annual","levels":{"LP-01":[93262,97649,102238,107044,112075,117340,122855,128628],"LP-02":[130382,136509,142922,149642,156674,164036,171748,179821,188273,197120,206386],"LP-03":[165373,173147,181284,189805,198727,208064,217844,228084]}},"LS":{"name":"Library Science","effective":"2024-07-01","unit":"annual","levels":{"LS-1":[73440,75715,77991,80267,82537,84814,87089,89366],"LS-2":[81212,83890,86570,89240,92086],"LS-3":[94999,98055,101098,104153,107202],"LS-4":[98353,101903,105438,108993,112540,116087],"LS-5":[118587,122468,126342,130218,134098,137979]}},"MA":{"name":"Mathematics","effective":"2025-10-01","unit":"annual","levels":{"MA-2":[68826,70786,72739,74825,77270,79679,82430],"MA-3":[83791,86684,89578,92497,95421,98715],"MA-4":[100053,103020,106279,109550,112800,116691],"MA-5":[117212,120484,124595,128657,133095],"MA-6":[130574,134707,138663,142505,147422],"MA-7":[142974,146865,150758,154674,160009]}},"MD-MOF":{"name":"Medicine — Medical Officer","effective":"2025-10-01","unit":"annual","levels":{"MD-MOF-01":[154431,160778,167135,173494,179847,186206,192569,198916],"MD-MOF-02":[190890,197507,204128,210744,217614,224198],"MD-MOF-03":[217945,225626,232969,240012],"MD-MOF-04":[241777,249727,257476,264917],"MD-MOF-05":[259261,307408]}},"MD-MSP":{"name":"Medicine — Medical Specialist","effective":"2025-10-01","unit":"annual","levels":{"MD-MSP-01":[225257,232281,240271],"MD-MSP-02":[251281,258380,266454],"MD-MSP-03":[265473,301276]}},"MT":{"name":"Meteorology","effective":"2025-10-01","unit":"annual","levels":{"MT-02":[73196,76545,79896,83241,86579,89921,93698],"MT-03":[89705,93024,96355,99674,102986,108481,113981],"MT-04":[92107,95624,98776,101763,104750,109193,113635,118080],"MT-05":[101235,104368,107498,110640,113781,118251,122726,127203],"MT-06":[110043,113520,117000,120484,126515,132545,138571],"MT-07":[119825,123687,127547,131404,137273,143144,149017],"MT-08":[131654,135752,139745,142919,148755,154597,160441]}},"ND":{"name":"Nutrition and Dietetics","effective":"2025-10-01","unit":"annual","levels":{"ND-ADV-1":[86718,89391,92325,95229,98250,101272,104391],"ND-ADV-2":[97953,101389,104815,108246,111830,115424,119129],"ND-ADV-3":[109427,113577,117727,121861,126002,129391,132785,136264],"ND-DIT-1":[83561,85667,87904,90166,92429,94795,97262,99731,102264],"ND-DIT-2":[93757,96264,98784,101667,104406,107147,109965],"ND-DIT-3":[100845,103554,106527,109461,112522,115576,118708],"ND-DIT-4":[115496,118674,121861,125041,128223,131407,134665],"ND-HME-1":[87103,89323,91563,93899,96321,98753,101252],"ND-HME-2":[92874,95457,98064,100665,103365,105989,108615,111308],"ND-HME-3":[101516,104379,107231,110201,113287,116231,119173,122188],"ND-HME-4":[114323,117905,121471,125032,128726,132418,136219]}},"NU":{"name":"Nursing","effective":"2025-10-01","unit":"annual","levels":{"NU-EMA-1":[94258,96614,99030,101504,104040,106643],"NU-EMA-2":[102884,105459,108096,110795,113570,116408],"NU-HOS-1":[92983,94104],"NU-HOS-2":[95230,97472,99718,101965,104203,106456],"NU-HOS-3":[95896,98085,100266,102449,104630,106814,109001],"NU-HOS-4":[99042,101389,103717,106075,108410,110753,113084,115426],"NU-HOS-5":[103761,106414,109067,111725,114371,117037,119693,122344],"NU-HOS-6":[109001,112178,115360,118526,121716,124894,128072,131257],"NU-HOS-7":[120299,123930,127565,131191,134821,138449,142073,145702],"NU-HOS-8":[122572,126646,130713,134788,138456,142923,146988,150525,154064],"NU-PRA-01":[120156,122503,124831,127189,129524,131867,134198,136540],"NU-PRA-02":[121356,124009,126662,129320,131966,134632,137288,139939],"NU-PRA-03":[124250,127427,130609,133775,136965,140143,143321,146506],"NU-PRA-04":[133202,136833,140468,144094,147724,151352,154976,158605],"NU-PRA-05":[135475,139549,143616,147691,151359,155826,159891,163428,166967]}},"OM":{"name":"Organization and Methods","effective":"2024-10-01","unit":"annual","levels":{"OM-DEV":[32477,57102],"OM-01":[48604,51250,53893,56542,59182,61863,64508,67157],"OM-02":[68197,71112,74028,76940],"OM-03":[73596,77475,81324,85173,88999],"OM-04":[90626,94695,98673,102709],"OM-05":[102583,107121,111644,116185]}},"OP":{"name":"Occupational and Physical Therapy","effective":"2025-10-01","unit":"annual","levels":{"OP-1":[95159,97621,100155,102697,105236,107769,110313,112855],"OP-2":[100973,103648,106420,109190,111968,114737,117511,120292],"OP-3":[107234,110133,113138,116142,119138,122141,125147,128149]}},"PC":{"name":"Physical Sciences","effective":"2025-10-01","unit":"annual","levels":{"PC-01":[73901,76955,80005,83062,86119],"PC-02":[84382,87726,91057,94405,97740,101162],"PC-03":[101672,105530,109409,113263,117127,120986],"PC-04":[117799,121918,126040,130164,134281,138404],"PC-05":[132710,137265,141841,146416,150988]}},"PE":{"name":"Personnel Administration","effective":"2025-10-01","unit":"annual","levels":{"PE-DEV":[41400,64261],"PE-01":[64261,67060,70040,73173,76463,79935],"PE-02":[81058,83912,86881,89969],"PE-03":[90894,94144,97519,101029],"PE-04":[101055,104584,108381,112324],"PE-05":[113155,117299,121603,126079],"PE-06":[119994,139847]}},"PG":{"name":"Purchasing and Supply","effective":"2025-06-22","unit":"annual","levels":{"PG-01":[53647,56271,58886,61499,64124,66740,70223],"PG-02":[70030,73018,75991,79954],"PG-03":[77966,81293,84612,89033],"PG-04":[92491,96455,100418,105689],"PG-05":[108871,113545,117925,122295],"PG-06":[119920,124357,128780,133203]}},"PH":{"name":"Pharmacy","effective":"2025-10-01","unit":"annual","levels":{"PH-1":[103437,106900,110483,114064,117648,121342],"PH-2":[111241,115688,120605,125524,130442,135555],"PH-3":[123070,127996,133114,138232,143353,148657]}},"PI":{"name":"Primary Products Inspection","effective":"2024-06-22","unit":"annual","levels":{"PI-1":[57328,59218,61108,63009,65523,68147],"PI-2":[61098,63154,65223,67282,69975,72773],"PI-3":[65542,67822,70088,72352,75250,78259],"PI-4":[69486,71932,74389,76826,79271,82444,85740],"PI-5":[78538,81400,84272,87124,90612,94237],"PI-6":[85813,89004,92182,95375,99195,103159],"PI-7":[93401,96822,100227,103669,107712,112019],"PI-CGC-8":[104883,109337,113794,118236,122963]}},"PM":{"name":"Programme Administration","effective":"2024-06-21","unit":"annual","levels":{"PM-01":[61786,64135,66572,69106],"PM-02":[68849,71464,74180],"PM-03":[73798,76599,79511],"PM-04":[80612,83675,87108],"PM-05":[96235,99892,104044],"PM-06":[112834,117128,121573,125225,129017]}},"PM-MCO":{"name":"Programme Administration — Mediation and Conciliation","effective":"2025-04-01","unit":"annual","range":true,"note":"A salary range, not a step grid — the two figures are the minimum and maximum. Levels 01 to 03 carry an earlier effective date on the source.","levels":{"PM-MCO-01":[96394,104217],"PM-MCO-02":[113024,129233],"PM-MCO-03":[116704,137365],"PM-MCO-04":[137611,161893]}},"PO-IMA":{"name":"Police Operations — Intelligence","effective":"2025-01-01","unit":"annual","levels":{"PO-IMA-01":[60763,63190,65721,68343,71081,73919,76878,79952],"PO-IMA-02":[66825,69500,72286,75176,78184,81312,84563,87946],"PO-IMA-03":[75760,78792,81946,85223,88631,92178,95864]}},"PO-TCO":{"name":"Police Operations — Telecommunications","effective":"2025-01-01","unit":"annual","levels":{"PO-TCO-01":[65714,68352,71076,73924,76879,79953],"PO-TCO-02":[72282,75176,78190,81314,84563,87946],"PO-TCO-03":[78794,81949,85228,88626,92174,95861],"PO-TCO-04":[85884,89312,92894,96609,100471,104489]}},"PRS":{"name":"Printing Operations (Supervisory)","effective":"2024-08-05","unit":"annual","levels":{"PRS-01":[62268,64918,67676,70553,73551,76678,79934],"PRS-02":[70137,73116,76226,79464,82844,86364,90036],"PRS-03":[78780,82125,85620,89253,93051,97002,101125],"PRS-04":[88235,91984,95893,99969,104219,108647,113266],"PRS-05":[98875,103081,107464,112028,116790,121751,126930]}},"PS":{"name":"Psychology","effective":"2025-10-01","unit":"annual","levels":{"PS-1":[67094,70031,72962,75893,78832,81761,84704],"PS-2":[86527,90187,93864,97525,101199,104870],"PS-3":[105672,110047,114410,118799,123196],"PS-4":[118887,123894,128907,133918,138927],"PS-5":[133298,138996,144695,150122,155409]}},"PY":{"name":"Photography","effective":"2024-06-22","unit":"annual","levels":{"PY-01":[41191,42287,43383,44470,46248],"PY-02":[47052,48381,49705,51006,53047],"PY-03":[51289,52758,54250,55733,57963],"PY-04":[55347,56994,58653,60297,62712],"PY-05":[58403,60012,61664,63383,65245,67852],"PY-06":[62569,64456,66391,68373,70425,73246],"PY-07":[66690,68692,70760,72879,75059,78067]}},"RO":{"name":"Radio Operations","effective":"2025-05-01","unit":"annual","levels":{"RO-00":[34543,35237,35933,36602,37274,37944,39461],"RO-01":[50706,54431,58158,61885,65614,69342,72114],"RO-02":[58126,61025,63920,66818,69714,72615,75520],"RO-03":[64944,68883,72820,76753,80689,84625,88010],"RO-04":[70178,74486,78798,83105,87412,91722,95391],"RO-05":[75938,80657,85374,90094,94811,99534,103515],"RO-06":[83890,89321,94751,100181,105612,111045,115488]}},"SC":{"name":"Ships' Crew","effective":"2024-08-05","unit":"annual","levels":{"SC-01":[65640],"SC-02":[67068],"SC-03":[69240],"SC-04":[71496],"SC-05":[73788],"SC-06":[76236],"SC-07":[78708]}},"SE":{"name":"Scientific Research","effective":"2025-10-01","unit":"annual","levels":{"SE-REM-1":[111725,116052,120374,124696,129016,133345,137660,141985,146309],"SE-REM-2":[128830,133195,137567,141939,146309,150675,155042,159411],"SE-RES-1":[68264,71854,75441,79039,82626,86209,89807,92503],"SE-RES-2":[84758,90039,95312,100590,105873,111140,116421,121703,126967,130775],"SE-RES-3":[107117,111343,115571,119795,124023,128257,132483,136712,140939,145166],"SE-RES-4":[128281,132978,137669,142361,147061,151745,156439,161136],"SE-RES-5":[140460,145600,150743,155879,161022,166160,171306,176445]}},"SG-PAT":{"name":"Scientific Regulation — PAT","effective":"2025-10-01","unit":"annual","levels":{"SG-PAT-02":[82617,85496,88358,91232],"SG-PAT-03":[87347,90690,94023,97369,100695,104046,107392],"SG-PAT-04":[101393,104840,108098,111152,114216,117273,120733,124188],"SG-PAT-05":[113170,116599,120040,123477,126899,130311,133749,137191],"SG-PAT-06":[125427,128859,132304,135766,139230,142698,146668,150649],"SG-PAT-07":[130688,133932,137988,141693,145400,149454,155206,160953,166701],"SG-PAT-08":[150923,155564,161622,167950,173835,179950,186064]}},"SG-SRE":{"name":"Scientific Regulation — SRE","effective":"2025-10-01","unit":"annual","levels":{"SG-SRE-02":[74408,77355,80288,83242,86193,89420],"SG-SRE-03":[80983,84396,87826,91233,94631,98069,101497,105472],"SG-SRE-04":[95754,99149,102348,105540,109156,112765,116625],"SG-SRE-05":[105713,109307,112898,116469,120059,123654,127657],"SG-SRE-06":[111610,115131,118652,122204,125747,129301,133163],"SG-SRE-07":[119035,123187,126981,131134,135289,139437,143842],"SG-SRE-08":[124897,129283,133670,138059,142440,146835,151751]}},"SO-FLP":{"name":"Ships' Officers — Fleet","effective":"2025-04-01","unit":"annual","levels":{"SO-FLP-01":[80287,83104,86026,88948],"SO-FLP-02":[86151,89178,92329,95543],"SO-FLP-03":[92663,95960,99299,102764],"SO-FLP-04":[98486,101887,105435,109129],"SO-FLP-05":[105373,109046,112886,116851],"SO-FLP-06":[112135,116016,120107,124323],"SO-FLP-07":[118834,122883,127244,131711]}},"SO-INS":{"name":"Ships' Officers — Inspection","effective":"2025-04-01","unit":"annual","levels":{"SO-INS-01":[112176,116663,121317,126180,131210,136469,141937,147614],"SO-INS-02":[121359,126222,131272,136511,141979,147655,153561,159697]}},"SO-MAO":{"name":"Ships' Officers — Marine Operations","effective":"2025-04-01","unit":"annual","levels":{"SO-MAO-01":[73984,76635,79306,82061,84962],"SO-MAO-02":[84252,87216,90346,93518],"SO-MAO-03":[87299,91306,94499,97839],"SO-MAO-04":[92600,96461,99926,103411],"SO-MAO-05":[98611,102660,106291,110006],"SO-MAO-06":[103536,107147,110924,114722],"SO-MAO-07":[107460,111154,115098,119147],"SO-MAO-08":[113032,117060,121088,125345],"SO-MAO-09":[121693,125971,130354,134925],"SO-MAO-10":[132650,137283,142166,147071],"SO-MAO-11":[146048,151120,156525,161930],"SO-MAO-12":[159217,164769,170508,176539]}},"SO-RAD":{"name":"Ships' Officers — Radio","effective":"2025-04-01","unit":"annual","levels":{"SO-RAD-01":[85400,88426,91536,94708],"SO-RAD-02":[90325,93435,96732,100113],"SO-RAD-03":[94708,97964,101386,104955]}},"SR":{"name":"Ship Repair (East)","effective":"2026-01-01","unit":"annual","levels":{"SR-01":[71104,74026,76969],"SR-02":[74610,77699,80767],"SR-03":[78993,82186,85442],"SR-04":[87821,91244,94979],"SR-05":[90367,93936,97672],"SR-06":[93539,97233,101115],"SR-07":[94520,98214,102180],"SR-08":[95167,99049,102931],"SR-09":[96440,100280,104350],"SR-10":[98193,102096,106291],"SR-11":[99717,103682,107940],"SR-12":[100802,104851,109004]}},"SR-MGT":{"name":"Ship Repair — Management (West)","effective":"2026-01-31","unit":"annual","levels":{"SR-MGT-02":[125199,130203,135416,140829],"SR-MGT-03":[143538,149283,155256,161464]}},"SRC":{"name":"Ship Repair Chargehand (East)","effective":"2025-04-01","unit":"annual","levels":{"SRC-01":[106907,111184,116742,123105]}},"STD":{"name":"Steward","effective":"2024-08-05","unit":"annual","levels":{"STD-01":[65640],"STD-02":[67068],"STD-03":[69240],"STD-04":[71496],"STD-05":[73788],"STD-06":[76236],"STD-07":[78708]}},"SW":{"name":"Social Work","effective":"2025-10-01","unit":"annual","levels":{"SW-CHA-1":[67062,69675,72277,74892,77506,80211,83010],"SW-CHA-2":[76331,79318,82309,85306,88289,91379,94578],"SW-CHA-3":[89371,92448,95539,98603,101705,104909,108214],"SW-SCW-1":[63810,66388,68975,71556,74140,76724,79309,81982,84745],"SW-SCW-2":[70460,73322,76189,79053,81915,84778,87746,90817],"SW-SCW-3":[78845,82057,85269,88491,91713,94927,98250,101689],"SW-SCW-4":[96578,99833,103104,106353,109948,113666,117508,121479],"SW-SCW-5":[106827,110791,114760,118729,122697,126668,130772,135009]}},"TI":{"name":"Technical Inspection","effective":"2024-06-22","unit":"annual","levels":{"TI-1":[54407,55932,57464,59008,61366],"TI-2":[57346,59007,60645,62284,64776],"TI-3":[64305,66227,68135,70044,72845],"TI-4":[70791,72956,75124,77289,80379],"TI-5":[79037,81534,84025,86515,89972],"TI-6":[88792,91678,94559,97444,101342],"TI-7":[97742,100849,103966,107080,111365],"TI-8":[108495,112138,115770,119125,123889]}},"TR":{"name":"Translation","effective":"2025-04-19","unit":"annual","levels":{"TR-01":[67270,69021,70764,72507,74249],"TR-02":[73555,76863,80179,83482,86800,90100,93415,97156],"TR-03":[90174,94121,98059,101999,105943,109896,114350],"TR-04":[98895,102675,106453,110235,114014,117797,122300,126655],"TR-05":[123960,127449,130934,134425,137916]}},"UT":{"name":"University Teaching","effective":"2021-07-01","unit":"annual","levels":{"UT-01":[71942,75317,78697,82070,85444,88822,92195],"UT-02":[90811,94172,97533,100892,104251,107608,110968,114330],"UT-03":[114724,118118,121512,124904,128297,131688,135080,138473],"UT-04":[137960,141352,144743,148136,151528,154922,158314,161704,165100]}},"VM":{"name":"Veterinary Medicine","effective":"2025-10-01","unit":"annual","levels":{"VM-01":[86409,89933,93429,96953,100836,104880],"VM-02":[100821,104780,108730,112680,117186,121873],"VM-03":[111148,115535,119948,124348,129319,134491],"VM-04":[124915,128962,132932,136419,140850,145427],"VM-05":[136925,140865,144811,148755,153221,157818]}},"WP":{"name":"Welfare Programmes","effective":"2024-06-21","unit":"annual","levels":{"WP-01":[46685,48827,50962,53102,55248,57375,59507,61641],"WP-02":[58101,60523,62923,65343,67758,70180,72599,76231],"WP-03":[69036,71797,74561,77319,80082,82845,86160,89607],"WP-04":[78017,81140,84251,87364,90471,94090,97855,103279],"WP-05":[93462,97200,100958,104711,108462,112805,117317],"WP-06":[111490,116345,121199,126051,131093,136340],"WP-07":[107937,143124]}}}};
-  var RATEMETA = BUILTIN, RATES = BUILTIN.groups;
+  var el = function (id) { return document.getElementById(id); };
+  var show = function (id) { el(id).style.display = "block"; };
 
-  /* The five lines a manager estimates, plus a catch-all. Annual figures. */
-  var EST_LINES = [
-    { id:"overtime",  name:"Overtime",            hint:"Coverage, peaks, anything worked beyond standard hours." },
-    { id:"premiums",  name:"Salary premiums",     hint:"Shift, weekend, standby and call-back." },
-    { id:"acting",    name:"Acting pay",          hint:"The differential when someone acts in a higher position." },
-    { id:"bilingual", name:"Bilingual bonus",     hint:"Paid on bilingual-imperative positions." },
-    { id:"retention", name:"Retention allowance", hint:"Terminable and retention allowances." },
-    { id:"other",     name:"Other salary costs",  hint:"Severance, payouts, retroactive pay, anything else." }
-  ];
-
-  function toTs(s){ if(!s) return null; var p=s.split("-"); return Date.UTC(+p[0],+p[1]-1,+p[2]); }
-  function toIso(ts){ return new Date(ts).toISOString().slice(0,10); }
-  function money(n){ return (n<0?"−$":"$")+Math.round(Math.abs(n)).toLocaleString("en-CA"); }
-  function signed(n){ return (n>=0?"+":"−")+"$"+Math.round(Math.abs(n)).toLocaleString("en-CA"); }
-  var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  var MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
-  function fmtDate(ts){ var d=new Date(ts); return MON[d.getUTCMonth()]+" "+d.getUTCDate()+", "+d.getUTCFullYear(); }
-  function shortDate(ts){ var d=new Date(ts); return MON[d.getUTCMonth()]+" "+d.getUTCDate(); }
-  function el(id){ return document.getElementById(id); }
-  function num(v){ var n=parseFloat(String(v).replace(/[^0-9.\-]/g,"")); return isFinite(n)?n:0; }
-  function esc(s){ return String(s).replace(/[<>&]/g,function(c){return {"<":"&lt;",">":"&gt;","&":"&amp;"}[c];}); }
-
-  var state=null, editing=null, moves=[];
-
-  function blank(){
-    return { cc:{ name:"", code:"", fy:"2026-04-01", periods:26, salaryBudget:0, bandMinor:5, bandMajor:15 },
-      estimates:{}, positions:[], nicknames:{} };
+  if (KMC_URL) {
+    Array.prototype.forEach.call(document.querySelectorAll(".kmc"), function (n) {
+      var a = document.createElement("a");
+      a.className = "kmc"; a.href = KMC_URL; a.target = "_blank"; a.rel = "noopener noreferrer";
+      a.textContent = n.textContent;
+      n.parentNode.replaceChild(a, n);
+    });
   }
-  function load(){
-    try{ var raw=localStorage.getItem(KEY); if(raw){ var p=JSON.parse(raw);
-      if(p&&p.cc){ p.estimates=p.estimates||{}; p.nicknames=p.nicknames||{}; p.positions=p.positions||[]; return p; } } }catch(e){}
-    return blank();
+
+  /* Already installed? Say so and stop. */
+  var standalone = window.matchMedia("(display-mode: standalone)").matches ||
+                   window.navigator.standalone === true;
+  if (standalone) {
+    show("ins-standalone");
+    el("ins-sub").textContent = "";
+    return;
   }
-  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} }
 
-  // ---- the engine -------------------------------------------------------
-  function fyStart(){ return toTs(state.cc.fy)||toTs("2026-04-01"); }
-  function nPeriods(){ return Math.max(1,Math.round(state.cc.periods||26)); }
-  function fyEnd(){ return fyStart()+nPeriods()*14*DAY; }
+  var ua = navigator.userAgent;
+  var iOS = /iPad|iPhone|iPod/.test(ua) ||
+            (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
-  function paidSpans(p,startOverride){
-    var s=fyStart(), e=fyEnd(), from=s, to=e;
-    if(p.mode==="vacant"){ var st=toTs(startOverride||p.start); if(!st) return []; from=Math.max(s,st); }
-    else if(p.mode==="leaving"){ var en=toTs(p.end); if(en) to=Math.min(e,en+DAY); }
-    if(to<=from) return [];
-    if(p.mode==="unpaid"){
-      var uf=toTs(p.ufrom), ut=toTs(p.uto);
-      if(uf&&ut&&ut>uf){
-        var out=[];
-        if(uf>from) out.push([from,Math.min(uf,to)]);
-        if(ut<to) out.push([Math.max(ut,from),to]);
-        return out.filter(function(x){return x[1]>x[0];});
+  /* Chrome and Edge hand us a real install prompt. Prefer it over instructions. */
+  var deferred = null;
+  window.addEventListener("beforeinstallprompt", function (e) {
+    e.preventDefault();
+    deferred = e;
+    el("ins-ios").style.display = "none";
+    el("ins-other").style.display = "none";
+    show("ins-prompt");
+  });
+
+  el("ins-btn").addEventListener("click", function () {
+    if (!deferred) return;
+    deferred.prompt();
+    deferred.userChoice.then(function (c) {
+      if (c.outcome === "accepted") {
+        el("ins-prompt").style.display = "none";
+        show("ins-standalone");
       }
-    }
-    return [[from,to]];
-  }
-  function rateAt(p,ts){ var inc=p.incdate?toTs(p.incdate):null; return (inc&&ts>=inc&&num(p.next))?num(p.next):num(p.salary); }
-  function fteAt(p,ts){
-    var base=(p.fte==null||p.fte==="")?100:num(p.fte);
-    var chg=p.ftedate?toTs(p.ftedate):null;
-    if(chg&&ts>=chg){ var nx=num(p.ftenext); if(nx>0) return nx; }
-    return base>0?base:100;
-  }
-  function breakpoints(p,a,b){
-    var pts=[a,b];
-    [p.incdate,p.ftedate].forEach(function(d){ if(!d) return; var t=toTs(d); if(t>a&&t<b) pts.push(t); });
-    pts.sort(function(x,y){return x-y;});
-    return pts;
-  }
-  function costOf(p,startOverride){
-    if(!num(p.salary)) return 0;
-    var spans=paidSpans(p,startOverride); if(!spans.length) return 0;
-    var s=fyStart(), N=nPeriods(), total=0;
-    for(var i=0;i<N;i++){
-      var ps=s+i*14*DAY, pe=ps+14*DAY;
-      for(var j=0;j<spans.length;j++){
-        var a=Math.max(ps,spans[j][0]), b=Math.min(pe,spans[j][1]);
-        if(b<=a) continue;
-        var pts=breakpoints(p,a,b);
-        for(var k=0;k<pts.length-1;k++){
-          var s0=pts[k], e0=pts[k+1]; if(e0<=s0) continue;
-          var mid=s0+(e0-s0)/2;
-          total += (rateAt(p,mid)/N)*((e0-s0)/DAY/14)*(fteAt(p,mid)/100);
-        }
-      }
-    }
-    return total;
-  }
-  function fteYears(p,so){
-    var yr=nPeriods()*14, out=0;
-    paidSpans(p,so).forEach(function(sp){
-      var pts=breakpoints(p,sp[0],sp[1]);
-      for(var k=0;k<pts.length-1;k++){
-        var s0=pts[k], e0=pts[k+1], mid=s0+(e0-s0)/2;
-        out += ((e0-s0)/DAY/yr)*(fteAt(p,mid)/100);
-      }
-    });
-    return out;
-  }
-  function establishedFte(){
-    var t=0; state.positions.forEach(function(p){ t+=((p.fte==null||p.fte==="")?100:num(p.fte))/100; }); return t;
-  }
-  function estTotal(){ var t=0; EST_LINES.forEach(function(L){ t+=num((state.estimates||{})[L.id]); }); return t; }
-  function forecastOn(ps){
-    var base=0; ps.forEach(function(p){ base+=costOf(p,null); });
-    var est=estTotal(), budget=num(state.cc.salaryBudget), projected=base+est;
-    return { base:base, est:est, projected:projected, budget:budget, variance:budget-projected };
-  }
-  function forecast(){ return forecastOn(state.positions); }
-
-  // ---- advice -----------------------------------------------------------
-  function fyPhase(){
-    var st=new Date(fyStart()), now=new Date();
-    var m=(now.getUTCFullYear()-st.getUTCFullYear())*12+(now.getUTCMonth()-st.getUTCMonth());
-    if(m<0)m=0; if(m>11)m=11;
-    return m<=3?"early":m<=7?"mid":m<=10?"late":"end";
-  }
-  function bandOf(f){
-    if(!f.budget) return null;
-    var pct=f.variance/f.budget*100;
-    var minor=num(state.cc.bandMinor)||5, major=num(state.cc.bandMajor)||15;
-    if(major<=minor) major=minor+1;
-    if(pct>=major) return "bigSurplus";
-    if(pct>=minor) return "surplus";
-    if(pct>=0) return "onTrack";
-    if(pct>-minor) return "slightOver";
-    if(pct>-major) return "over";
-    return "bigOver";
-  }
-  var ADVICE = {
-    bigSurplus:{ tone:"est", label:"Large surplus",
-      early:{ t:"You are not going to spend this.", m:"A gap this wide before the summer is rarely timing. It usually means vacancies nobody intends to fill, or a budget built on a complement you do not actually have.",
-        a:["Check that every vacancy has a start date somebody believes in.","Ask whether the funded establishment matches the plan you were given.","Raise it with Finance now — a surplus you declare in June is a decision, one they find in February is a problem."], q:"Why was the budget set this high?" },
-      mid:{ t:"Decide what happens to this, now.", m:"Anything not posted by now will not have someone in the chair before March. From here the surplus is largely locked in.",
-        a:["Decide which vacancies you are genuinely filling this year, and close the rest.","Put the money against something concrete on the What if tab.","Start the transfer conversation — approvals take longer than the spending does."], q:"What is driving this, and what are you doing with it?" },
-      late:{ t:"This is heading for a lapse.", m:"There is not enough year left to hire into it. What is left is a spending decision with a deadline.",
-        a:["Get a transfer request in this month, not next.","Look for things that can be completed before March 31 — term contracts, equipment, an evaluation.","Tell Finance before Finance tells you."], q:"Why was this not flagged in the fall?" },
-      end:{ t:"Too late to spend it.", m:"The number now is a reporting exercise. What is left is making sure next year's budget is built on what actually happened.",
-        a:["Write down why the gap opened while you still remember.","Take the explanation into the next budget build."], q:"Will this recur next year?" } },
-    surplus:{ tone:"good", label:"Surplus",
-      early:{ t:"Comfortable, and normal for this point in the year.", m:"Most of this is vacancy timing rather than anything structural. It will narrow as people start.",
-        a:["Sanity-check the start dates on your vacancies.","Note now what you would spend it on if it holds — that list is much harder to write in January."], q:"Nothing yet. Keep an eye on it." },
-      mid:{ t:"Real enough to plan around, early enough to use.", m:"At this point in the year a surplus this size usually survives to March.",
-        a:["Decide what it funds and get the approval moving.","If you intend to fill a vacancy this year, post it now.","Draft the transfer — it is easier to withdraw one than to rush one."], q:"What is the surplus, and what is your plan for it?" },
-      late:{ t:"Commit it or lose it.", m:"Transfers need approval time and purchases need to land before year end. The window is measured in weeks.",
-        a:["Move on the transfer this month.","Prefer things that complete quickly over things that start quickly."], q:"What are you doing with it before March 31?" },
-      end:{ t:"This will lapse.", m:"Record why, so the same gap does not reappear next year unexplained.",
-        a:["Capture the reason while it is fresh.","Feed it into the budget build."], q:"What caused it?" } },
-    onTrack:{ tone:"good", label:"On budget",
-      early:{ t:"Tracking close to budget.", m:"Nothing here needs your attention yet.", a:[], q:"Nothing to explain." },
-      mid:{ t:"Tracking close to budget.", m:"The plan is behaving. Your estimates are what will move it from here.", a:["Revisit the estimates if overtime or acting pay is running differently from what you assumed."], q:"Nothing to explain." },
-      late:{ t:"Tracking close to budget.", m:"A tight landing is the best outcome there is, and it is worth saying so out loud at the review.", a:[], q:"Nothing to explain — say so plainly." },
-      end:{ t:"Landed on budget.", m:"Worth noting in the file. Accurate forecasting is something managers get credit for far too rarely.", a:[], q:"Nothing to explain." } },
-    slightOver:{ tone:"est", label:"Slightly over",
-      early:{ t:"A small overrun, this early, is usually the estimates.", m:"Base salary rarely surprises anyone. Overtime, premiums and acting pay do.",
-        a:["Check each estimate against what you are actually seeing.","If one is a rate rather than a blip, raise it so the plan tells the truth."], q:"Is this a blip or a rate?" },
-      mid:{ t:"Small, but it is not closing on its own.", m:"Half the year is gone. Whatever is causing this has had time to establish itself.",
-        a:["Find the driver — overtime, acting pay, an earlier start than planned.","Look for an offsetting saving before it grows."], q:"What is the cause, and is it contained?" },
-      late:{ t:"Small overrun, little time left.", m:"A modest overrun is usually absorbable, but only if Finance hears about it before year end.",
-        a:["Flag it at the next review rather than the last one.","Identify what you could hold back if you need to."], q:"Can you absorb it, or do you need help?" },
-      end:{ t:"Slightly over.", m:"Small enough to explain, large enough to be asked about.", a:["Have the one-line reason ready."], q:"What went over?" } },
-    over:{ tone:"bad", label:"Over budget",
-      early:{ t:"Real, and early enough to do something about.", m:"An overrun this size in the first months of the year almost always grows if left alone.",
-        a:["Identify the driver precisely.","Consider pushing a vacancy start date — the What if tab will show what that buys you.","Talk to Finance now, while the options are still yours."], q:"What caused it and what is your plan?" },
-      mid:{ t:"You need a plan for this.", m:"There is still room to act, but the levers get shorter every month.",
-        a:["Hold a vacancy open rather than filling it.","Bring the estimates back to something you can defend.","Ask about a transfer in — the earlier the request, the better it lands."], q:"How will you land the year?" },
-      late:{ t:"Escalate this.", m:"An overrun found in February is far more damaging than the same overrun flagged in November, because nobody has options left.",
-        a:["Tell your director and Finance this week.","Bring the number, the cause and what you have already done.","Do not wait for the scheduled review."], q:"Why are we hearing this now?" },
-      end:{ t:"Over budget at year end.", m:"The task now is a clear, defensible explanation.", a:["Write it while you still remember the detail."], q:"What happened?" } },
-    bigOver:{ tone:"bad", label:"Serious overrun",
-      early:{ t:"Check the numbers before you do anything else.", m:"An overrun this large is more often a data problem than a real one — a salary at the wrong level, a vacancy marked filled, hours set wrong.",
-        a:["Check the largest positions on your complement first.","Check your estimates are annual figures, not monthly.","If it survives that, escalate today."], q:"Is this real?" },
-      mid:{ t:"Check the numbers, then escalate today.", m:"If the figure is right, this is beyond what a cost centre absorbs on its own.",
-        a:["Rule out a data error first.","Then tell your director and Finance the same day.","Bring options, not just the number."], q:"Is this real, and what do you need?" },
-      late:{ t:"Escalate immediately.", m:"At this size and this late, this is a departmental problem rather than a cost centre one.",
-        a:["Check the data, then escalate the same day.","Expect to be asked what you knew and when."], q:"Why are we hearing this now?" },
-      end:{ t:"Serious overrun at year end.", m:"Expect scrutiny. A clear timeline is the most useful thing you can bring.", a:["Assemble what you knew and when."], q:"When did you know?" } }
-  };
-
-  function financeNote(f){
-    var cc=state.cc, now=new Date(), out=[];
-    out.push((cc.code?"CC "+cc.code+" — ":"")+(cc.name||"Cost centre")+" — salary plan as at "+MONTHS[now.getUTCMonth()]+" "+now.getUTCFullYear()+".");
-    out.push("Salary budget "+money(f.budget)+". Base salary from the complement "+money(f.base)+
-      ", plus "+money(f.est)+" of estimated other salary costs. Projected "+money(f.projected)+
-      " — "+(f.variance>=0?"a surplus of ":"an overrun of ")+money(Math.abs(f.variance))+
-      " ("+Math.abs(f.variance/f.budget*100).toFixed(1)+"%).");
-    var vac=state.positions.filter(function(p){return p.mode==="vacant";});
-    if(vac.length){
-      out.push("Vacancies: "+vac.map(function(p){
-        return (p.title||"position")+(p.num?" ("+p.num+")":"")+(p.start?", expected "+fmtDate(toTs(p.start)):", no start date");
-      }).join("; ")+".");
-    }
-    var lv=state.positions.filter(function(p){return p.mode==="unpaid";});
-    var lf=state.positions.filter(function(p){return p.mode==="leaving";});
-    if(lv.length) out.push(lv.length+" position"+(lv.length>1?"s":"")+" on unpaid leave during the year.");
-    if(lf.length) out.push(lf.length+" departure"+(lf.length>1?"s":"")+" during the year.");
-    var set=EST_LINES.filter(function(L){return num(state.estimates[L.id])>0;});
-    if(set.length) out.push("Estimates: "+set.map(function(L){return L.name.toLowerCase()+" "+money(num(state.estimates[L.id]));}).join("; ")+".");
-    out.push("A forecast, not a ledger extract. Benefits excluded — charged centrally.");
-    return out.join("\n\n");
-  }
-
-  function renderAdvice(f){
-    var card=el("advice"), band=bandOf(f);
-    if(!band){ card.classList.add("hidden"); return; }
-    card.classList.remove("hidden");
-    var set=ADVICE[band], msg=set[fyPhase()];
-    var colour = set.tone==="bad" ? "var(--bad)" : set.tone==="est" ? "var(--est)" : "var(--good)";
-    card.style.borderLeftColor=colour;
-    el("adv-band").textContent=set.label+" — "+Math.abs(f.variance/f.budget*100).toFixed(1)+"% of budget";
-    el("adv-band").style.color=colour;
-    el("adv-title").textContent=msg.t;
-    el("adv-meaning").textContent=msg.m;
-    el("adv-actions").innerHTML = msg.a.length
-      ? msg.a.map(function(x){
-          return '<div style="display:flex;gap:11px;align-items:flex-start">'+
-            '<span class="dot" style="background:'+colour+';margin-top:7px"></span>'+
-            '<span style="font-size:13.5px;line-height:1.5">'+esc(x)+"</span></div>";
-        }).join("")
-      : '<div class="note">No action needed.</div>';
-    el("adv-ask").textContent="“"+msg.q+"”";
-  }
-
-  // ---- forecast page ----------------------------------------------------
-  function renderForecast(){
-    var f=forecast(), cc=state.cc;
-    el("cc-label").textContent=(cc.code||cc.name)?("CC "+(cc.code||"")+(cc.name?" · "+cc.name:"")).trim():"No cost centre set up yet";
-    var fs=new Date(fyStart()), fe=new Date(fyEnd()-DAY);
-    el("fy-label").textContent="FY "+String(fs.getUTCFullYear()).slice(2)+"–"+String(fe.getUTCFullYear()).slice(2)+" · "+nPeriods()+" PP";
-
-    var over=f.variance<0;
-    el("var-label").textContent=over?"Projected overrun":"Projected surplus";
-    var hero=el("var-num");
-    hero.textContent=f.budget?signed(f.variance):"—";
-    hero.className="hero "+(over?"neg":"pos");
-    el("var-pct").textContent=f.budget?(Math.abs(f.variance/f.budget*100).toFixed(1)+"% of your salary budget"):"Set a salary budget to see this.";
-
-    var span=Math.max(f.budget,f.projected)||1;
-    el("comp-base").style.width=(f.base/span*100)+"%";
-    el("comp-est").style.width=(f.est/span*100)+"%";
-    el("comp-est").style.background=over?"var(--bad)":"var(--est)";
-    el("lg-dot2").style.background=over?"var(--bad)":"var(--est)";
-    el("lg-base").textContent=money(f.base);
-    el("lg-est").textContent=money(f.est);
-    el("lg-lab3").textContent=over?"Over budget":"Unspent";
-    el("lg-dot3").style.background=over?"var(--bad)":"var(--surface-2)";
-    el("lg-rest").textContent=money(Math.abs(f.variance));
-
-    var rows=[["Salary budget",f.budget,""],["Base salary, from your complement",-f.base,"Costed by pay period from the published tables"]];
-    EST_LINES.forEach(function(L){
-      var v=num(state.estimates[L.id]);
-      if(v) rows.push([L.name,-v,"Your estimate for the year"]);
-    });
-    el("breakdown").innerHTML = rows.map(function(r){
-      return '<div class="li"><span class="grow stack g6" style="min-width:0">'+
-        '<span style="font-size:13.5px">'+esc(r[0])+"</span>"+
-        (r[2]?'<span class="note">'+esc(r[2])+"</span>":"")+
-        '</span><span class="num" style="font-size:13px;white-space:nowrap">'+money(r[1])+"</span></div>";
-    }).join("")+
-      '<div class="li" style="background:var(--sunk)"><span class="grow" style="font-size:13.5px;font-weight:600">'+
-      (over?"Over budget by":"Left over")+'</span><span class="num" style="font-size:13.5px;font-weight:600;color:'+
-      (over?"var(--bad)":"var(--good)")+'">'+money(Math.abs(f.variance))+"</span></div>";
-
-    var py=0; state.positions.forEach(function(p){ py+=fteYears(p,null); });
-    el("person-years").textContent=state.positions.length?py.toFixed(1)+" of "+establishedFte().toFixed(1)+" person-years":"";
-
-    var c={filled:0,vacant:0,other:0};
-    state.positions.forEach(function(p){
-      if(p.mode==="vacant") c.vacant++; else if(p.mode==="filled") c.filled++; else { c.other++; c.filled++; }
-    });
-    el("k-filled").textContent=c.filled; el("k-vacant").textContent=c.vacant; el("k-other").textContent=c.other;
-    el("fresh-note").textContent=state.positions.length?"":"Nothing here yet. Add your positions on the Complement tab, or load the example from Setup.";
-    renderAdvice(f);
-  }
-
-  // ---- roster -----------------------------------------------------------
-  function chipFor(p){
-    if(p.mode==="vacant") return '<span class="chip chip-vac">Vacant'+(p.start?" · "+shortDate(toTs(p.start)):" · no date")+"</span>";
-    if(p.mode==="leaving") return '<span class="chip chip-out">Out'+(p.end?" · "+shortDate(toTs(p.end)):"")+"</span>";
-    if(p.mode==="unpaid") return '<span class="chip chip-leave">Unpaid leave</span>';
-    return "";
-  }
-  function nickOf(id){ return (state.nicknames&&state.nicknames[id])||""; }
-
-  function renderRoster(){
-    el("roster-count").textContent=state.positions.length+" positions · "+establishedFte().toFixed(1)+" FTE";
-    var host=el("roster-list");
-    if(!state.positions.length){ host.innerHTML='<div class="empty">No positions yet.</div>'; return; }
-    host.innerHTML=state.positions.map(function(p){
-      var cost=costOf(p,null), nick=nickOf(p.id);
-      var fte=(p.fte==null||p.fte==="")?100:num(p.fte);
-      var label = p.mode==="vacant" ? esc(p.title||"Untitled")
-        : (nick ? esc(nick)+' <span style="color:var(--muted);font-weight:400">· '+esc(p.title||"")+"</span>" : esc(p.title||"Untitled"));
-      var dim = cost < num(p.salary)*fte/100 - 1 ? ' style="color:var(--est)"' : "";
-      return '<button class="li" data-edit="'+p.id+'" style="width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--rule-2);border-radius:0">'+
-        '<span class="grow stack g6"><span class="li-t'+(p.mode!=="vacant"&&nick?" nick":"")+'">'+label+"</span>"+
-        '<span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="li-s">'+esc(p.num||"—")+
-        (p.level?" · "+esc(p.level)+(p.step?" step "+p.step:""):"")+"</span>"+chipFor(p)+
-        (fte!==100?'<span class="chip chip-pt">'+fte+"% time</span>":"")+
-        (p.ftedate?'<span class="chip chip-pt">→ '+num(p.ftenext)+"% "+shortDate(toTs(p.ftedate))+"</span>":"")+
-        (p.incdate?'<span class="chip chip-step">Step up '+shortDate(toTs(p.incdate))+"</span>":"")+"</span></span>"+
-        '<span class="num" style="font-size:12.5px"'+dim+">"+money(cost)+"</span></button>";
-    }).join("");
-    Array.prototype.forEach.call(host.querySelectorAll("[data-edit]"),function(b){
-      b.addEventListener("click",function(){ openEditor(b.getAttribute("data-edit")); });
-    });
-  }
-
-  // ---- rate picker ------------------------------------------------------
-  function fillGroups(){
-    el("f-group").innerHTML=Object.keys(RATES).sort().map(function(g){
-      return '<option value="'+g+'">'+g+" — "+esc(RATES[g].name)+"</option>";
-    }).join("")+'<option value="">Other — type a salary</option>';
-  }
-  function fillLevels(group,keep){
-    var sel=el("f-level");
-    if(!group){ sel.innerHTML=""; sel.disabled=true; return; }
-    sel.disabled=false;
-    sel.innerHTML=Object.keys(RATES[group].levels).map(function(l){return '<option value="'+l+'">'+l+"</option>";}).join("");
-    if(keep&&RATES[group].levels[keep]) sel.value=keep;
-  }
-  function fillSteps(group,level,keep){
-    var sel=el("f-step"), lbl=el("f-step-label");
-    if(!group||!level||!RATES[group]||!RATES[group].levels[level]){ sel.innerHTML=""; sel.disabled=true; lbl.textContent="Step"; return; }
-    sel.disabled=false;
-    var grp=RATES[group], steps=grp.levels[level], isRange=!!grp.range&&steps.length===2;
-    lbl.textContent=isRange?"In range":"Step";
-    sel.innerHTML=steps.map(function(v,i){
-      return '<option value="'+(i+1)+'">'+(isRange?(i===0?"Minimum":"Maximum"):("Step "+(i+1)+" of "+steps.length))+"</option>";
-    }).join("");
-    if(keep&&keep>=1&&keep<=steps.length) sel.value=keep;
-  }
-  function rateFor(g,l,st){
-    if(!g||!RATES[g]||!RATES[g].levels[l]) return null;
-    var arr=RATES[g].levels[l];
-    return arr[Math.max(0,Math.min(arr.length-1,(st||1)-1))];
-  }
-  function nextStepRate(g,l,st){
-    if(!g||!RATES[g]||!RATES[g].levels[l]) return null;
-    var arr=RATES[g].levels[l];
-    return st<arr.length?arr[st]:arr[arr.length-1];
-  }
-  function isHourly(g){ return !!(g&&RATES[g]&&RATES[g].unit==="hourly"); }
-  function paidHours(){ return num(el("f-hours").value)||1950; }
-  function annualOf(g,l,st){
-    if(!g) return num(el("f-salary").value);
-    var r=rateFor(g,l,st)||0;
-    return isHourly(g)?r*paidHours():r;
-  }
-  function syncRate(){
-    var g=el("f-group").value, l=el("f-level").value, st=parseInt(el("f-step").value,10)||1;
-    var custom=!g, grp=custom?null:RATES[g], hourly=isHourly(g);
-    el("rate-box").classList.toggle("hidden",custom);
-    el("w-custom").classList.toggle("hidden",!custom);
-    el("w-hours").classList.toggle("hidden",!hourly);
-    el("w-fte").classList.toggle("hidden",hourly);
-    if(hourly&&!el("f-hours").value) el("f-hours").value=1950;
-    if(!custom){
-      var r=rateFor(g,l,st)||0;
-      el("f-rate").textContent=hourly?("$"+r.toFixed(2)+"/hr"):money(r);
-      el("f-rate-src").textContent=grp.name+" — published rates in effect "+fmtDate(toTs(grp.effective))+"."+
-        (hourly?" Hourly — multiplied by the paid hours below.":"")+(grp.note?" "+grp.note:"");
-      var nx=nextStepRate(g,l,st);
-      el("f-next").value=nx?(hourly?"$"+nx.toFixed(2)+"/hr":money(nx)):"";
-    }
-    var annual=annualOf(g,l,st);
-    var fte=hourly?100:(num(el("f-fte").value)||100);
-    var part=!hourly&&fte!==100;
-    el("fte-line").classList.toggle("hidden",!((part||hourly)&&annual));
-    if(hourly&&annual){
-      el("fte-line-label").textContent="At "+paidHours().toLocaleString("en-CA")+" paid hours a year";
-      el("fte-annual").textContent=money(annual);
-    } else if(part&&annual){
-      el("fte-line-label").textContent="At "+fte+"% of full time";
-      el("fte-annual").textContent=money(annual*fte/100);
-    }
-    Array.prototype.forEach.call(el("f-fte-presets").children,function(b){
-      b.setAttribute("aria-pressed",num(b.getAttribute("data-fte"))===fte?"true":"false");
-    });
-    previewCost();
-  }
-  function modeOf(){ var b=el("f-mode").querySelector('[aria-pressed="true"]'); return b?b.getAttribute("data-mode"):"filled"; }
-  function setMode(m){
-    Array.prototype.forEach.call(el("f-mode").children,function(b){ b.setAttribute("aria-pressed",b.getAttribute("data-mode")===m?"true":"false"); });
-    el("w-start").classList.toggle("hidden",m!=="vacant");
-    el("w-end").classList.toggle("hidden",m!=="leaving");
-    el("w-unpaid").classList.toggle("hidden",m!=="unpaid");
-    el("f-nick").disabled=(m==="vacant");
-    el("f-nick").placeholder=m==="vacant"?"Nobody yet — it's a vacancy":"Bill";
-    if(m==="vacant") el("f-nick").value="";
-    previewCost();
-  }
-  function draft(){
-    var g=el("f-group").value, l=el("f-level").value, st=parseInt(el("f-step").value,10)||1;
-    var hourly=isHourly(g), salary=annualOf(g,l,st);
-    var inc=el("f-inc").checked, fchg=el("f-ftechg").checked, nextAnnual=0;
-    if(inc){ if(g){ var nr=nextStepRate(g,l,st)||0; nextAnnual=hourly?nr*paidHours():nr; } else nextAnnual=salary; }
-    return { id:editing||("p"+Date.now()+Math.floor(Math.random()*1000)),
-      num:el("f-num").value.trim(), title:el("f-title").value.trim(),
-      group:g, level:g?l:"", step:g?st:0, salary:salary,
-      hours:hourly?paidHours():0, fte:hourly?100:(num(el("f-fte").value)||100),
-      ftedate:fchg?el("f-ftedate").value:"", ftenext:fchg?num(el("f-ftenext").value):0,
-      incdate:inc?el("f-incdate").value:"", next:inc?nextAnnual:0,
-      mode:modeOf(), start:el("f-start").value, end:el("f-end").value,
-      ufrom:el("f-ufrom").value, uto:el("f-uto").value };
-  }
-  function previewCost(){ el("f-preview").textContent=money(costOf(draft(),null)); }
-
-  function openEditor(id){
-    editing=id||null;
-    var p=id?state.positions.filter(function(x){return x.id===id;})[0]:null;
-    el("editor-title").textContent=p?"Edit position":"New position";
-    el("f-num").value=p?p.num||"":"";
-    el("f-title").value=p?p.title||"":"";
-    el("f-nick").value=p?nickOf(p.id):"";
-    var g=p?(p.group||""):"EC";
-    el("f-group").value=g;
-    fillLevels(g,p?p.level:null);
-    fillSteps(g,el("f-level").value,p?p.step:null);
-    el("f-salary").value=p&&!p.group?p.salary||"":"";
-    el("f-hours").value=p&&p.hours?p.hours:"";
-    el("f-fte").value=p?((p.fte==null||p.fte==="")?100:p.fte):100;
-    el("f-ftechg").checked=!!(p&&p.ftedate);
-    el("w-ftechg").classList.toggle("hidden",!(p&&p.ftedate));
-    el("f-ftedate").value=p?p.ftedate||"":"";
-    el("f-ftenext").value=p&&p.ftenext?p.ftenext:"";
-    el("f-inc").checked=!!(p&&p.incdate);
-    el("w-inc").classList.toggle("hidden",!(p&&p.incdate));
-    el("f-incdate").value=p?p.incdate||"":"";
-    el("f-start").value=p?p.start||"":"";
-    el("f-end").value=p?p.end||"":"";
-    el("f-ufrom").value=p?p.ufrom||"":"";
-    el("f-uto").value=p?p.uto||"":"";
-    setMode(p?p.mode:"filled");
-    syncRate();
-    el("f-delete").classList.toggle("hidden",!p);
-    el("editor").classList.remove("hidden");
-    if(window.innerWidth<900) el("editor").scrollIntoView({behavior:"smooth",block:"start"});
-  }
-  function closeEditor(){ el("editor").classList.add("hidden"); editing=null; }
-
-  // ---- estimates --------------------------------------------------------
-  function renderEstimates(){
-    el("est-list").innerHTML=EST_LINES.map(function(L){
-      return '<div class="row" style="gap:12px;align-items:flex-end">'+
-        '<span class="grow stack g6" style="min-width:0">'+
-          '<span style="font-size:13.5px;font-weight:500">'+esc(L.name)+"</span>"+
-          '<span class="note">'+esc(L.hint)+"</span></span>"+
-        '<input class="num-in" data-est="'+L.id+'" inputmode="decimal" placeholder="0" style="width:120px;flex-shrink:0;text-align:right" value="'+
-          (num(state.estimates[L.id])||"")+'"></div>';
-    }).join("");
-    Array.prototype.forEach.call(el("est-list").querySelectorAll("[data-est]"),function(inp){
-      inp.addEventListener("input",function(){
-        var id=inp.getAttribute("data-est"), v=inp.value.trim();
-        if(v==="") delete state.estimates[id]; else state.estimates[id]=num(v);
-        save(); el("est-total").textContent=money(estTotal()); renderForecast();
-      });
-    });
-    el("est-total").textContent=money(estTotal());
-  }
-
-  function renderSetup(){
-    var c=state.cc;
-    el("c-name").value=c.name||""; el("c-code").value=c.code||"";
-    el("c-fy").value=c.fy||"2026-04-01"; el("c-periods").value=c.periods||26;
-    el("c-sal").value=c.salaryBudget||"";
-    el("c-minor").value=c.bandMinor||5; el("c-major").value=c.bandMajor||15;
-    renderEstimates();
-    var keys=Object.keys(RATES), levels=0, steps=0;
-    keys.forEach(function(g){ Object.keys(RATES[g].levels).forEach(function(l){ levels++; steps+=RATES[g].levels[l].length; }); });
-    el("rates-version").textContent=RATEMETA.version;
-    el("rates-note").textContent=keys.length+" Government of Canada classification groups, "+levels+" levels, "+steps+
-      " steps. Each group follows its own collective agreement, so effective dates differ. Check a figure against the agreement before relying on it, and pick Other for anything the tables do not cover.";
-  }
-
-  // ---- scenario ---------------------------------------------------------
-  function clonePositions(){
-    return state.positions.map(function(p){ var c={}; for(var k in p) if(Object.prototype.hasOwnProperty.call(p,k)) c[k]=p[k]; return c; });
-  }
-  function withMoves(list){
-    var ps=clonePositions(), by={};
-    ps.forEach(function(p){ by[p.id]=p; });
-    list.forEach(function(m){
-      if(!m.on) return;
-      if(m.kind==="add"){ if(m.pos&&num(m.pos.salary)) ps.push(m.pos); return; }
-      var p=by[m.posId]; if(!p) return;
-      if(m.kind==="start"){ p.mode="vacant"; p.start=m.date; }
-      else if(m.kind==="unfilled"){ p.mode="vacant"; p.start=""; }
-      else if(m.kind==="end"){ p.mode="leaving"; p.end=m.date; p.ufrom=""; p.uto=""; }
-      else if(m.kind==="hours"){ p.fte=num(m.fte)||100; p.ftedate=""; p.ftenext=0; }
-    });
-    return ps;
-  }
-  function newMove(kind){
-    var eligible=state.positions.filter(function(p){
-      if(kind==="start") return p.mode==="vacant";
-      if(kind==="add") return true;
-      return p.mode!=="vacant";
-    });
-    if(kind!=="add"&&!eligible.length) return null;
-    var m={ id:"m"+Date.now()+Math.floor(Math.random()*999), kind:kind, on:true };
-    if(kind==="add"){
-      var g="EC", lv=Object.keys(RATES[g].levels)[3]||Object.keys(RATES[g].levels)[0];
-      m.pos={ id:"add"+m.id, num:"new", title:"New position", group:g, level:lv, step:1,
-        salary:rateFor(g,lv,1), fte:100, hours:0, mode:"vacant",
-        start:toIso(fyStart()), end:"", ufrom:"", uto:"", incdate:"", next:0, ftedate:"", ftenext:0 };
-    } else {
-      var p0=eligible[0];
-      m.posId=p0.id;
-      if(kind==="start") m.date=p0.start||toIso(fyStart());
-      if(kind==="end") m.date=p0.end||toIso(fyEnd()-90*DAY);
-      if(kind==="hours") m.fte=80;
-    }
-    return m;
-  }
-  function moveEffect(m){
-    var one=forecastOn(withMoves([{on:true,kind:m.kind,posId:m.posId,date:m.date,fte:m.fte,pos:m.pos}]));
-    return one.variance - forecastOn(state.positions).variance;
-  }
-  var KIND_LABEL={start:"Start date",unfilled:"Leave unfilled",end:"Departure",hours:"Hours",add:"New position"};
-  function posOptions(kind,selected){
-    return state.positions.filter(function(p){ return kind==="start" ? p.mode==="vacant" : p.mode!=="vacant"; })
-      .map(function(p){
-        var nick=nickOf(p.id);
-        var label=(p.mode!=="vacant"&&nick?nick+" — ":"")+(p.title||"Untitled")+(p.num?" ("+p.num+")":"");
-        return '<option value="'+p.id+'"'+(p.id===selected?" selected":"")+">"+esc(label)+"</option>";
-      }).join("");
-  }
-  function renderScenario(){
-    var host=el("move-list");
-    if(!moves.length){
-      host.innerHTML='<div class="card empty">No changes yet. Pick one above and the year-end number moves with it.</div>';
-    } else {
-      host.innerHTML=moves.map(function(m){
-        var eff=moveEffect(m), body="";
-        if(m.kind==="add"){
-          var g=m.pos.group||"EC";
-          body='<label class="f"><span>Title</span><input data-mv="title" data-id="'+m.id+'" value="'+esc(m.pos.title)+'"></label>'+
-            '<label class="f"><span>Group</span><select data-mv="group" data-id="'+m.id+'">'+
-              Object.keys(RATES).sort().map(function(k){return '<option value="'+k+'"'+(k===g?" selected":"")+">"+k+" — "+esc(RATES[k].name)+"</option>";}).join("")+
-            "</select></label>"+
-            '<div class="two"><label class="f"><span>Level</span><select data-mv="level" data-id="'+m.id+'">'+
-              Object.keys(RATES[g].levels).map(function(k){return '<option value="'+k+'"'+(k===m.pos.level?" selected":"")+">"+k+"</option>";}).join("")+
-            "</select></label>"+
-            '<label class="f"><span>Starts</span><input type="date" data-mv="start" data-id="'+m.id+'" value="'+(m.pos.start||"")+'"></label></div>';
-        } else {
-          body='<label class="f"><span>Which position</span><select data-mv="pos" data-id="'+m.id+'">'+posOptions(m.kind,m.posId)+"</select></label>";
-          if(m.kind==="start"||m.kind==="end")
-            body+='<label class="f"><span>'+(m.kind==="start"?"Starts":"Last day")+'</span><input type="date" data-mv="date" data-id="'+m.id+'" value="'+(m.date||"")+'"></label>';
-          if(m.kind==="hours")
-            body+='<label class="f"><span>Goes to (% of full time)</span><input class="num-in" data-mv="fte" data-id="'+m.id+'" inputmode="decimal" value="'+(m.fte||80)+'"></label>';
-        }
-        return '<div class="card pad stack g14">'+
-          '<div class="row"><div class="checkline" style="min-height:0">'+
-            '<input type="checkbox" data-mv="on" data-id="'+m.id+'"'+(m.on?" checked":"")+'>'+
-            '<span style="font-size:13px;font-weight:600;color:var(--ink)">'+KIND_LABEL[m.kind]+"</span></div>"+
-            '<button class="btn-quiet" data-mv="del" data-id="'+m.id+'" style="color:var(--muted)">Remove</button></div>'+
-          '<div class="rule"></div>'+body+
-          '<div class="row"><span class="sub">On its own</span><span class="num '+(eff>0?"pos":eff<0?"neg":"")+
-            '" style="font-weight:600" id="eff-'+m.id+'">'+(Math.abs(eff)<1?"no change":signed(eff))+"</span></div></div>";
-      }).join("");
-
-      Array.prototype.forEach.call(host.querySelectorAll("[data-mv]"),function(node){
-        var id=node.getAttribute("data-id"), what=node.getAttribute("data-mv");
-        if(what==="del"){
-          node.addEventListener("click",function(){ moves=moves.filter(function(x){return x.id!==id;}); renderScenario(); });
-          return;
-        }
-        var ev=(node.tagName==="SELECT"||node.type==="checkbox"||node.type==="date")?"change":"input";
-        node.addEventListener(ev,function(){
-          var m=moves.filter(function(x){return x.id===id;})[0]; if(!m) return;
-          var reshape=false;
-          if(what==="on") m.on=node.checked;
-          else if(what==="pos") m.posId=node.value;
-          else if(what==="date") m.date=node.value;
-          else if(what==="fte") m.fte=num(node.value);
-          else if(what==="title") m.pos.title=node.value;
-          else if(what==="start") m.pos.start=node.value;
-          else if(what==="group"){
-            m.pos.group=node.value;
-            m.pos.level=Object.keys(RATES[node.value].levels)[0];
-            m.pos.step=1; m.pos.salary=rateFor(m.pos.group,m.pos.level,1); reshape=true;
-          } else if(what==="level"){
-            m.pos.level=node.value; m.pos.step=1; m.pos.salary=rateFor(m.pos.group,m.pos.level,1);
-          }
-          if(reshape){ renderScenario(); return; }
-          refreshMoveEffect(m); drawScenario();
-        });
-      });
-    }
-    drawScenario();
-  }
-  function refreshMoveEffect(m){
-    var node=el("eff-"+m.id); if(!node) return;
-    var eff=moveEffect(m);
-    node.textContent=Math.abs(eff)<1?"no change":signed(eff);
-    node.className="num "+(eff>0?"pos":eff<0?"neg":"");
-  }
-  function drawScenario(){
-    var basef=forecastOn(state.positions), f=forecastOn(withMoves(moves));
-    var sEl=el("s-var");
-    sEl.textContent=f.budget?signed(f.variance):"—";
-    sEl.className="num "+(f.variance<0?"neg":"pos");
-    el("s-base").textContent=f.budget?signed(basef.variance):"—";
-    var d=f.variance-basef.variance, dEl=el("s-delta");
-    dEl.textContent=Math.abs(d)<1?"no change":signed(d);
-    dEl.className="num "+(Math.abs(d)<1?"":(d>0?"pos":"neg"));
-    var py=0; withMoves(moves).forEach(function(p){ py+=fteYears(p,null); });
-    el("s-py").textContent=py.toFixed(1)+" person-years";
-  }
-
-  function renderAll(){ renderForecast(); renderRoster(); renderScenario(); renderSetup(); }
-
-  // ---- tabs -------------------------------------------------------------
-  var PAGES=["setup","roster","forecast","scenario"];
-  function show(tab){
-    PAGES.forEach(function(p){ el("p-"+p).classList.toggle("hidden",p!==tab); });
-    Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){
-      b.setAttribute("aria-selected",b.getAttribute("data-tab")===tab?"true":"false");
-    });
-    window.scrollTo(0,0);
-  }
-  Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){
-    b.addEventListener("click",function(){ show(b.getAttribute("data-tab")); });
-  });
-
-  // ---- wiring -----------------------------------------------------------
-  fillGroups();
-  el("add-position").addEventListener("click",function(){ openEditor(null); });
-  el("editor-close").addEventListener("click",closeEditor);
-  Array.prototype.forEach.call(el("f-mode").children,function(b){
-    b.addEventListener("click",function(){ setMode(b.getAttribute("data-mode")); });
-  });
-  el("f-group").addEventListener("change",function(){
-    var g=el("f-group").value; fillLevels(g,null); fillSteps(g,el("f-level").value,null); syncRate();
-  });
-  el("f-level").addEventListener("change",function(){ fillSteps(el("f-group").value,el("f-level").value,null); syncRate(); });
-  el("f-step").addEventListener("change",syncRate);
-  el("f-inc").addEventListener("change",function(){ el("w-inc").classList.toggle("hidden",!el("f-inc").checked); syncRate(); });
-  el("f-ftechg").addEventListener("change",function(){ el("w-ftechg").classList.toggle("hidden",!el("f-ftechg").checked); syncRate(); });
-  el("f-fte").addEventListener("input",syncRate);
-  el("f-hours").addEventListener("input",syncRate);
-  Array.prototype.forEach.call(el("f-fte-presets").children,function(b){
-    b.addEventListener("click",function(){ el("f-fte").value=b.getAttribute("data-fte"); syncRate(); });
-  });
-  ["f-salary","f-start","f-end","f-ufrom","f-uto","f-incdate","f-ftedate","f-ftenext"].forEach(function(id){
-    el(id).addEventListener("input",previewCost);
-  });
-  el("f-save").addEventListener("click",function(){
-    var p=draft();
-    if(!p.title&&!p.num){ el("f-title").focus(); return; }
-    var i=-1; state.positions.forEach(function(x,k){ if(x.id===p.id) i=k; });
-    if(i>=0) state.positions[i]=p; else state.positions.push(p);
-    var nick=el("f-nick").value.trim();
-    if(nick&&p.mode!=="vacant") state.nicknames[p.id]=nick; else delete state.nicknames[p.id];
-    save(); closeEditor(); renderAll();
-  });
-  el("f-delete").addEventListener("click",function(){
-    state.positions=state.positions.filter(function(x){return x.id!==editing;});
-    delete state.nicknames[editing];
-    save(); closeEditor(); renderAll();
-  });
-
-  Array.prototype.forEach.call(el("move-add").children,function(b){
-    b.addEventListener("click",function(){
-      var m=newMove(b.getAttribute("data-kind"));
-      if(!m){ var old=b.textContent; b.textContent="Nothing eligible"; setTimeout(function(){b.textContent=old;},1600); return; }
-      moves.push(m); renderScenario();
+      deferred = null;
     });
   });
-  el("s-clear").addEventListener("click",function(){ moves=[]; renderScenario(); });
-  el("s-apply").addEventListener("click",function(){
-    if(!moves.filter(function(m){return m.on;}).length) return;
-    state.positions=withMoves(moves); moves=[];
-    save(); renderAll(); show("forecast");
-  });
 
-  el("adv-copy").addEventListener("click",function(){
-    var text=financeNote(forecast());
-    var t=document.createElement("textarea");
-    t.value=text; t.style.cssText="position:fixed;left:-9999px;top:0";
-    document.body.appendChild(t); t.select();
-    var done=false;
-    try{ done=document.execCommand("copy"); }catch(e){}
-    document.body.removeChild(t);
-    if(!done&&navigator.clipboard){ navigator.clipboard.writeText(text).catch(function(){}); done=true; }
-    el("adv-copy").textContent=done?"Copied":"Could not copy";
-    setTimeout(function(){ el("adv-copy").textContent="Copy a note for Finance"; },1800);
-  });
+  /* No prompt yet: show whichever set of instructions actually applies. A moment's
+     delay lets beforeinstallprompt fire first where it is going to. */
+  setTimeout(function () {
+    if (deferred || el("ins-prompt").style.display === "block") return;
+    show(iOS ? "ins-ios" : "ins-other");
+  }, 700);
 
-  el("c-save").addEventListener("click",function(){
-    state.cc={ name:el("c-name").value.trim(), code:el("c-code").value.trim(),
-      fy:el("c-fy").value||"2026-04-01", periods:Math.max(1,Math.round(num(el("c-periods").value)||26)),
-      salaryBudget:num(el("c-sal").value),
-      bandMinor:num(el("c-minor").value)||5, bandMajor:num(el("c-major").value)||15 };
-    save(); renderAll(); show("forecast");
-  });
-  el("c-clear").addEventListener("click",function(){
-    var b=el("c-clear");
-    if(b.dataset.armed!=="1"){ b.dataset.armed="1"; b.textContent="Click again to erase everything";
-      setTimeout(function(){ b.dataset.armed="0"; b.textContent="Erase everything"; },3500); return; }
-    state=blank(); save(); renderAll(); show("setup");
-  });
-  el("c-demo").addEventListener("click",function(){ state=demo(); save(); renderAll(); show("forecast"); });
-  el("intro-x").addEventListener("click",function(){
-    el("intro").classList.add("hidden");
-    try{ localStorage.setItem("complement.seen","1"); }catch(e){}
-  });
-
-  // ---- the example ------------------------------------------------------
-  function demo(){
-    var rows=[
-      ["EC","EC-07",4,"Manager, Policy & Programs","filled",null,null,null,"Dana",""],
-      ["EC","EC-06",3,"Senior Policy Analyst","vacant","2026-10-01",null,null,"",""],
-      ["EC","EC-05",4,"Policy Analyst","filled",null,null,null,"Priya","2026-09-14"],
-      ["EC","EC-05",2,"Policy Analyst","filled",null,null,null,"Marc",""],
-      ["PM","PM-04",1,"Program Officer","vacant","2026-12-01",null,null,"",""],
-      ["PM","PM-04",3,"Program Officer","unpaid",null,null,["2026-09-01","2027-03-02"],"Aisha",""],
-      ["PM","PM-04",2,"Program Officer","filled",null,null,null,"Tom",""],
-      ["AS","AS-04",2,"Administrative Coordinator","filled",null,null,null,"Jen",""],
-      ["EC","EC-05",3,"Policy Analyst","filled",null,null,null,"Sam",""],
-      ["EC","EC-04",5,"Policy Analyst","filled",null,null,null,"Wei","2026-11-02"],
-      ["EC","EC-04",3,"Research Officer","filled",null,null,null,"Nadia",""],
-      ["EC","EC-04",2,"Research Officer","filled",null,null,null,"Owen",""],
-      ["PM","PM-03",3,"Program Officer","filled",null,null,null,"Leah",""],
-      ["PM","PM-03",1,"Program Officer","filled",null,null,null,"Chris",""],
-      ["FI","FI-03",2,"Financial Analyst","filled",null,null,null,"Bill",""],
-      ["FI","FI-02",4,"Financial Analyst","filled",null,null,null,"Rosa",""],
-      ["AS","AS-02",1,"Administrative Assistant","filled",null,null,null,"Kofi",""],
-      ["AS","AS-02",3,"Administrative Assistant","filled",null,null,null,"Ingrid",""],
-      ["EC","EC-07",2,"Senior Advisor","leaving",null,"2026-11-28",null,"Paul",""],
-      ["PM","PM-05",1,"Project Coordinator","filled",null,null,null,"Yuki",""]
-    ];
-    var positions=[], nicknames={}, ftes={7:80,11:60,17:50};
-    rows.forEach(function(r,i){
-      var id="d"+i, inc=r[9];
-      positions.push({ id:id, num:String(3120+i), title:r[3], group:r[0], level:r[1], step:r[2],
-        salary:rateFor(r[0],r[1],r[2]), fte:ftes[i]||100,
-        ftedate:i===3?"2027-01-04":"", ftenext:i===3?80:0,
-        incdate:inc||"", next:inc?nextStepRate(r[0],r[1],r[2]):0,
-        mode:r[4], start:r[4]==="vacant"?r[5]:"", end:r[4]==="leaving"?r[6]:"",
-        ufrom:r[7]?r[7][0]:"", uto:r[7]?r[7][1]:"", hours:0 });
-      if(r[8]) nicknames[id]=r[8];
-    });
-    return {
-      cc:{ name:"Policy & Programs", code:"4120", fy:"2026-04-01", periods:26,
-        salaryBudget:1780000, bandMinor:5, bandMajor:15 },
-      estimates:{ overtime:21000, premiums:12500, acting:9000, bilingual:4800, retention:6000, other:8000 },
-      positions:positions, nicknames:nicknames };
-  }
-
-  state=load();
-  var seen=false;
-  try{ seen=localStorage.getItem("complement.seen")==="1"; }catch(e){}
-  var fresh=!state.positions.length&&!state.cc.name&&!state.cc.code;
-  if(fresh&&!seen) el("intro").classList.remove("hidden");
-  if(KMC_URL){
-    Array.prototype.forEach.call(document.querySelectorAll(".kmc"),function(el){
-      var a=document.createElement("a");
-      a.className="kmc"; a.href=KMC_URL; a.target="_blank"; a.rel="noopener noreferrer";
-      a.style.cssText=el.style.cssText; a.textContent=el.textContent;
-      el.parentNode.replaceChild(a,el);
+  /* Register the worker from the landing page too, so a visitor who never opens
+     the app still gets it cached and ready. */
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").catch(function () {});
     });
   }
-
-  save();
-  renderAll();
-  show(fresh?"setup":"forecast");
 })();
-</script>
-
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js').catch(function () {});
-  });
-}
 </script>
 </body>
 </html>
