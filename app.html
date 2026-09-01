@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
-<meta name="theme-color" content="#EFF1F3" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0F151A" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101322" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -19,54 +19,77 @@
 <title>Onstrength</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
 
 <style>
 :root {
-  --ground:#EEF2F5; --surface:#FFFFFF; --surface-2:#DEE7ED; --sunk:#F5F8FA;
-  --ink:#111A21; --ink-2:#42525E; --muted:#6B7C88;
-  --rule:#D5DEE5; --rule-2:#E6ECF1;
-  --base:#17607F; --base-soft:#DCEBF2; --on-base:#FFFFFF;
-  --est:#B0741A; --est-soft:#F8EDD8;
-  --good:#1B7A56; --bad:#A8452C; --bad-soft:#F8E4DE;
-  --focus:#17607F; --shadow:0 1px 2px rgba(17,26,33,.05),0 6px 20px -10px rgba(17,26,33,.18);
+  --ground:#F4F5FA; --surface:#FFFFFF; --surface-2:#E8EAF3; --sunk:#F7F8FC;
+  --ink:#171B2E; --ink-2:#414863; --muted:#7B819E;
+  --rule:#E6E8F2; --rule-2:#EFF1F7;
+  --base:#1D6E8E; --base-soft:#E3F0F6; --on-base:#FFFFFF;
+  --est:#B87A1E; --est-soft:#FBF0DC;
+  --good:#12805C; --bad:#C2503A; --bad-soft:#FBE7E2;
+  --hero-a:#1D6E8E; --hero-b:#134F67; --hero-over-a:#B3543C; --hero-over-b:#8A3A26;
+  --focus:#17607F; --ring:rgba(23,96,127,.22);
+  --shadow-sm:0 1px 2px rgba(17,26,33,.04),0 1px 3px rgba(17,26,33,.05);
+  --shadow:0 1px 2px rgba(17,26,33,.05),0 8px 24px -12px rgba(17,26,33,.22);
+  --r-sm:12px; --r-md:20px;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --ground:#0F151A; --surface:#18212A; --surface-2:#25333E; --sunk:#141C23;
-    --ink:#E6EDF3; --ink-2:#B4C2CC; --muted:#8496A3;
-    --rule:#2A3843; --rule-2:#212C36;
-    --base:#57B6DC; --base-soft:#15303D; --on-base:#0A1319;
-    --est:#E0A94F; --est-soft:#32280F;
-    --good:#5AC191; --bad:#E2836A; --bad-soft:#361F19;
-    --focus:#57B6DC; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6);
+    --ground:#101322; --surface:#191D30; --surface-2:#262C45; --sunk:#141827;
+    --ink:#EAECF7; --ink-2:#BCC1DA; --muted:#8B92B4;
+    --rule:#2A3050; --rule-2:#222741;
+    --base:#54AECD; --base-soft:#16334A; --on-base:#08131A;
+    --est:#E4B061; --est-soft:#33290F;
+    --good:#4FC79A; --bad:#E28A72; --bad-soft:#3A1F18;
+    --hero-a:#1B6A89; --hero-b:#113F55; --hero-over-a:#9E4A34; --hero-over-b:#6E2E1E;
+    --focus:#57B6DC; --ring:rgba(87,182,220,.28);
+    --shadow-sm:0 1px 2px rgba(0,0,0,.28),0 1px 3px rgba(0,0,0,.34);
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px -14px rgba(0,0,0,.7);
   }
 }
 :root[data-theme="dark"]{
-  --ground:#0F151A; --surface:#18212A; --surface-2:#25333E; --sunk:#141C23;
-  --ink:#E6EDF3; --ink-2:#B4C2CC; --muted:#8496A3;
-  --rule:#2A3843; --rule-2:#212C36;
-  --base:#57B6DC; --base-soft:#15303D; --on-base:#0A1319;
-  --est:#E0A94F; --est-soft:#32280F;
-  --good:#5AC191; --bad:#E2836A; --bad-soft:#361F19;
-  --focus:#57B6DC; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6);
+  --ground:#101322; --surface:#191D30; --surface-2:#262C45; --sunk:#141827;
+  --ink:#EAECF7; --ink-2:#BCC1DA; --muted:#8B92B4;
+  --rule:#2A3050; --rule-2:#222741;
+  --base:#54AECD; --base-soft:#16334A; --on-base:#08131A;
+  --est:#E4B061; --est-soft:#33290F;
+  --good:#4FC79A; --bad:#E28A72; --bad-soft:#3A1F18;
+  --hero-a:#1B6A89; --hero-b:#113F55; --hero-over-a:#9E4A34; --hero-over-b:#6E2E1E;
+  --focus:#57B6DC; --ring:rgba(87,182,220,.28);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.28),0 1px 3px rgba(0,0,0,.34);
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px -14px rgba(0,0,0,.7);
 }
 
 *{box-sizing:border-box}
 body{margin:0;background:var(--ground);color:var(--ink);
-  font-family:'Archivo','Helvetica Neue',Arial,sans-serif;font-size:15px;line-height:1.45;
+  font-family:'Plus Jakarta Sans','Helvetica Neue',Arial,sans-serif;font-size:15px;line-height:1.5;
   -webkit-font-smoothing:antialiased;padding-bottom:100px}
-.num{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1}
 .wrap{max-width:580px;margin:0 auto;padding:22px 18px 0}
 h1{margin:0;text-wrap:balance}
-.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted)}
-.h-title{font-size:22px;font-weight:700;letter-spacing:-.5px}
-.sub{color:var(--muted);font-size:13px}
-.note{font-size:12.5px;color:var(--muted);line-height:1.5}
+.eyebrow{font-size:10.5px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted)}
+.h-title{font-size:24px;font-weight:800;letter-spacing:-.7px;line-height:1.2}
+.sub{color:var(--muted);font-size:13.5px;line-height:1.5}
+.note{font-size:12.5px;color:var(--muted);line-height:1.55}
 
-.card{background:var(--surface);border:1px solid var(--rule);border-radius:8px}
-.card.lift{box-shadow:var(--shadow)}
-.pad{padding:18px 20px}
+.card{background:var(--surface);border:1px solid var(--rule-2);border-radius:var(--r-md);
+  box-shadow:var(--shadow-sm)}
+.card.lift{box-shadow:var(--shadow);border-color:transparent}
+
+/* The forecast panel carries the verdict in its colour, so the design move
+   keeps the signal rather than trading it for a gradient. */
+.heroCard{background:linear-gradient(150deg,var(--hero-a) 0%,var(--hero-b) 100%);
+  border-color:transparent;box-shadow:0 14px 30px -16px rgba(19,79,103,.55)}
+.heroCard.over{background:linear-gradient(150deg,var(--hero-over-a) 0%,var(--hero-over-b) 100%);
+  box-shadow:0 14px 30px -16px rgba(138,58,38,.55)}
+.heroCard .eyebrow{color:rgba(255,255,255,.72)}
+.heroCard .hero,.heroCard .hero.pos,.heroCard .hero.neg{color:#fff}
+.heroCard .sub,.heroCard .note{color:rgba(255,255,255,.78)}
+.heroCard .num{color:#fff}
+.heroCard .comp{background:rgba(0,0,0,.26)}
+.pad{padding:20px}
 .stack{display:flex;flex-direction:column}
 .g6{gap:6px}.g10{gap:10px}.g14{gap:14px}.g18{gap:18px}
 .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -74,51 +97,64 @@ h1{margin:0;text-wrap:balance}
 .grow{flex-grow:1}
 .cols{display:flex;flex-direction:column;gap:18px}
 
-.hero{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;
-  font-size:42px;font-weight:600;letter-spacing:-2px;line-height:1.04}
+.hero{font-variant-numeric:tabular-nums lining-nums;
+  font-size:44px;font-weight:800;letter-spacing:-2px;line-height:1.05}
 .pos{color:var(--good)}.neg{color:var(--bad)}
 
-.comp{height:14px;border-radius:7px;overflow:hidden;display:flex;background:var(--surface-2)}
+.comp{height:15px;border-radius:999px;overflow:hidden;display:flex;background:var(--surface-2)}
 .comp>i{display:block;height:100%}
-.dot{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+.dot{width:9px;height:9px;border-radius:999px;flex-shrink:0}
 
-button,.btn{font-family:inherit;font-size:14.5px;font-weight:500;border-radius:7px;
+button,.btn{font-family:inherit;font-size:14.5px;font-weight:500;border-radius:var(--r-sm);
   border:1px solid transparent;cursor:pointer;min-height:46px;padding:0 16px;
-  display:inline-flex;align-items:center;justify-content:center;gap:8px}
-.btn-primary{background:var(--base);color:var(--on-base);width:100%}
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  transition:background .14s ease,border-color .14s ease,box-shadow .14s ease,transform .06s ease}
+button:active,.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--base);color:var(--on-base);width:100%;font-weight:700;
+  box-shadow:0 2px 6px -2px rgba(29,110,142,.5)}
+.btn-primary:hover{filter:brightness(1.07)}
 .btn-ghost{background:var(--surface);color:var(--ink);border-color:var(--rule)}
+.btn-ghost:hover{border-color:var(--muted);background:var(--sunk)}
 .btn-quiet{background:transparent;color:var(--base);border:none;min-height:40px;padding:0 6px;font-size:13.5px}
 .btn-sm{min-height:40px;font-size:13px;padding:0 12px}
-button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,
+a:focus-visible{outline:none;border-color:var(--focus);box-shadow:0 0 0 3px var(--ring)}
 
 label.f{display:flex;flex-direction:column;gap:5px}
-label.f>span{font-size:12.5px;color:var(--ink-2);font-weight:500}
-input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink);background:var(--surface);
-  border:1px solid var(--rule);border-radius:7px;padding:11px 12px;min-height:46px;width:100%}
-input.num-in{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+label.f>span{font-size:12.5px;color:var(--ink-2);font-weight:500;letter-spacing:.1px}
+input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink);background:var(--sunk);
+  border:1px solid var(--rule);border-radius:var(--r-sm);padding:11px 13px;min-height:46px;width:100%;
+  transition:border-color .14s ease,box-shadow .14s ease,background .14s ease}
+input:hover,select:hover,textarea:hover{border-color:var(--muted)}
+input.num-in{font-variant-numeric:tabular-nums lining-nums}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .checkline{display:flex;align-items:center;gap:10px;min-height:44px}
 .checkline input{width:20px;height:20px;min-height:20px;flex-shrink:0;accent-color:var(--base)}
 .checkline span{font-size:13px;color:var(--ink-2)}
 
-.chip{font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:500;letter-spacing:.4px;
-  text-transform:uppercase;padding:3px 7px;border-radius:4px;white-space:nowrap}
+.chip{font-size:9.5px;font-weight:500;letter-spacing:.4px;
+  text-transform:uppercase;padding:3.5px 8px;border-radius:999px;white-space:nowrap}
 .chip-vac{background:var(--est-soft);color:var(--est)}
 .chip-out{background:var(--bad-soft);color:var(--bad)}
 .chip-leave{background:var(--surface-2);color:var(--muted)}
 .chip-step{background:var(--base-soft);color:var(--base)}
 .chip-pt{background:var(--surface-2);color:var(--ink-2)}
 
-.li{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--rule-2);min-height:56px}
+.li{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--rule-2);
+  min-height:56px;transition:background .14s ease}
+#roster-list .li{cursor:pointer}
+#roster-list .li:hover{background:var(--sunk)}
 .li:last-child{border-bottom:none}
-.li-t{font-size:14.5px;font-weight:500}
-.li-s{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);letter-spacing:.3px}
+.li-t{font-size:14.5px;font-weight:600}
+.li-s{font-size:10.5px;color:var(--muted);letter-spacing:.3px}
 .nick{color:var(--base);font-weight:600}
 
 .seg{display:flex;gap:6px;flex-wrap:wrap}
-.seg>button{min-height:40px;font-size:13px;padding:0 14px;border-radius:20px;
+.seg>button{min-height:40px;font-size:13px;padding:0 15px;border-radius:999px;
   background:var(--surface);border:1px solid var(--rule);color:var(--ink-2)}
-.seg>button[aria-pressed="true"]{background:var(--base);color:var(--on-base);border-color:var(--base)}
+.seg>button:hover{border-color:var(--muted)}
+.seg>button[aria-pressed="true"]{background:var(--base);color:var(--on-base);border-color:var(--base);
+  box-shadow:0 1px 2px rgba(17,26,33,.12)}
 
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);
   border-top:1px solid var(--rule);display:grid;grid-template-columns:repeat(4,1fr);
@@ -126,12 +162,13 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surf
 .tab{background:none;border:none;min-height:54px;padding:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:4px;color:var(--muted);font-size:10px;font-weight:500}
 .tab[aria-selected="true"]{color:var(--base)}
+.tab{transition:color .14s ease,background .14s ease}
 .tab svg{width:21px;height:21px;flex-shrink:0}
 .brand,.railfoot,.navhelp{display:none}
 .appbar{display:flex;align-items:center;justify-content:space-between;gap:12px;
   padding-bottom:14px;border-bottom:1px solid var(--rule)}
-.appbar-brand{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;
-  letter-spacing:-.35px;color:var(--ink)}
+.appbar-brand{display:flex;align-items:center;gap:8px;font-size:15.5px;font-weight:800;
+  letter-spacing:-.45px;color:var(--ink)}
 .appbar-brand svg{width:17px;height:17px;flex-shrink:0;color:var(--base)}
 .appbar-help{font-size:12.5px;font-weight:500;color:var(--base);text-decoration:none;white-space:nowrap}
 .helplink{font-size:12.5px;font-weight:500;color:var(--base);text-decoration:none;white-space:nowrap}
@@ -142,7 +179,7 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surf
 .lockmark svg{width:34px;height:39px;display:block}
 .lockname{font-size:20px;font-weight:700;letter-spacing:-.5px;color:var(--ink)}
 .locktag{display:flex;flex-direction:column;gap:4px;text-align:center;
-  font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:1.3px;
+  font-size:9px;font-weight:500;letter-spacing:1.3px;
   text-transform:uppercase;color:var(--muted);line-height:1.5}
 .kmc{text-decoration:none}
 a.kmc:hover{text-decoration:underline}
@@ -156,7 +193,7 @@ a.kmc:hover{text-decoration:underline}
     font-weight:700;letter-spacing:-.4px;color:var(--ink)}
   .brandrow svg{width:19px;height:19px;flex-shrink:0;color:var(--base)}
   .brandtag{display:flex;flex-direction:column;gap:3px;text-align:center;
-    font-family:'IBM Plex Mono',monospace;font-size:8.5px;font-weight:500;
+    font-size:8.5px;font-weight:500;
     letter-spacing:1.05px;text-transform:uppercase;color:var(--muted);margin-top:9px;line-height:1.5}
   .tab{flex-direction:row;justify-content:flex-start;gap:12px;padding:0 12px;font-size:14px;
     min-height:44px;border-radius:7px;width:100%}
@@ -358,7 +395,7 @@ a:hover{color:var(--ink)}
       <div class="num" style="font-size:11px;color:var(--muted);text-align:right" id="fy-label"></div>
     </div>
 
-    <div class="card pad stack g18 lift">
+    <div class="card pad stack g18 lift heroCard" id="hero-card">
       <div class="stack g6">
         <div class="eyebrow" id="var-label">Projected surplus</div>
         <div class="hero" id="var-num">—</div>
@@ -371,7 +408,7 @@ a:hover{color:var(--ink)}
         </div>
         <div style="display:flex;gap:20px;flex-wrap:wrap">
           <div style="display:flex;align-items:center;gap:8px">
-            <span class="dot" style="background:var(--base)"></span>
+            <span class="dot" style="background:rgba(255,255,255,.92)"></span>
             <span class="note">Base salary</span><span class="num" style="font-size:12px" id="lg-base"></span>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
@@ -379,7 +416,7 @@ a:hover{color:var(--ink)}
             <span class="note">Estimates</span><span class="num" style="font-size:12px" id="lg-est"></span>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
-            <span class="dot" id="lg-dot3" style="background:var(--surface-2)"></span>
+            <span class="dot" id="lg-dot3" style="background:rgba(0,0,0,.3)"></span>
             <span class="note" id="lg-lab3">Unspent</span><span class="num" style="font-size:12px" id="lg-rest"></span>
           </div>
         </div>
@@ -756,12 +793,14 @@ a:hover{color:var(--ink)}
     var span=Math.max(f.budget,f.projected)||1;
     el("comp-base").style.width=(f.base/span*100)+"%";
     el("comp-est").style.width=(f.est/span*100)+"%";
-    el("comp-est").style.background=over?"var(--bad)":"var(--est)";
-    el("lg-dot2").style.background=over?"var(--bad)":"var(--est)";
+    el("hero-card").classList.toggle("over",!!over);
+    el("comp-base").style.background="rgba(255,255,255,.92)";
+    el("comp-est").style.background=over?"#FFD9CE":"#F5C877";
+    el("lg-dot2").style.background=over?"#FFD9CE":"#F5C877";
     el("lg-base").textContent=money(f.base);
     el("lg-est").textContent=money(f.est);
     el("lg-lab3").textContent=over?"Over budget":"Unspent";
-    el("lg-dot3").style.background=over?"var(--bad)":"var(--surface-2)";
+    el("lg-dot3").style.background="rgba(0,0,0,.3)";
     el("lg-rest").textContent=money(Math.abs(f.variance));
 
     var rows=[["Salary budget",f.budget,""],["Base salary, from your complement",-f.base,"Costed by pay period from the published tables"]];
