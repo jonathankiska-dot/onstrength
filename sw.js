@@ -4,7 +4,7 @@
    will keep serving the copy they already have. This is the single most common
    reason an update appears to do nothing. */
 
-const CACHE_VERSION = "onstrength-v14";
+const CACHE_VERSION = "onstrength-v15";
 
 const SHELL = [
   "./",
