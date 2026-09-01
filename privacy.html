@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Privacy — Onstrength</title>
+<meta name="description" content="Onstrength stores everything in your own browser. No account, no server, nothing uploaded.">
+<meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101322" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="icon" href="icons/favicon-64.png" sizes="64x64">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --ground:#F4F5FA; --surface:#FFFFFF; --sunk:#F7F8FC;
+  --ink:#171B2E; --ink-2:#414863; --muted:#7B819E; --rule:#E6E8F2;
+  --base:#1D6E8E; --base-soft:#E3F0F6; --on-base:#FFFFFF;
+  --good:#12805C;
+  --shadow-sm:0 1px 2px rgba(17,26,33,.04),0 1px 3px rgba(17,26,33,.05);
+  --ring:rgba(29,110,142,.24); --r-sm:12px; --r-md:20px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#101322; --surface:#191D30; --sunk:#141827;
+    --ink:#EAECF7; --ink-2:#BCC1DA; --muted:#8B92B4; --rule:#2A3050;
+    --base:#54AECD; --base-soft:#16334A; --on-base:#08131A;
+    --good:#4FC79A;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.28),0 1px 3px rgba(0,0,0,.34);
+    --ring:rgba(79,163,196,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#101322; --surface:#191D30; --sunk:#141827;
+  --ink:#EAECF7; --ink-2:#BCC1DA; --muted:#8B92B4; --rule:#2A3050;
+  --base:#54AECD; --base-soft:#16334A; --on-base:#08131A;
+  --good:#4FC79A;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.28),0 1px 3px rgba(0,0,0,.34);
+  --ring:rgba(79,163,196,.3);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:'Plus Jakarta Sans','Helvetica Neue',Arial,sans-serif;font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased}
+a{color:var(--base)}
+.wrap{max-width:700px;margin:0 auto;padding:0 22px}
+
+.topbar{border-bottom:1px solid var(--rule);background:var(--surface);position:sticky;top:0;z-index:20}
+.topin{max-width:700px;margin:0 auto;padding:12px 22px;display:flex;align-items:center;
+  justify-content:space-between;gap:14px}
+.tb-brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:15.5px;
+  letter-spacing:-.35px;color:var(--ink);text-decoration:none}
+.tb-brand svg{width:19px;height:19px;flex-shrink:0;color:var(--base)}
+.tb-lock{display:flex;flex-direction:column;gap:2px;line-height:1.15}
+.tb-tag{font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.tb-open{display:inline-flex;align-items:center;min-height:38px;padding:0 16px;border-radius:var(--r-sm);
+  background:var(--base);color:var(--on-base);font-size:14px;font-weight:600;text-decoration:none;
+  white-space:nowrap;box-shadow:0 1px 2px rgba(17,26,33,.12)}
+a:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ring)}
+
+h1{margin:0;font-size:31px;line-height:1.12;letter-spacing:-1.2px;font-weight:800}
+.phead{padding:40px 0 6px}
+.updated{font-size:12.5px;color:var(--muted);margin:10px 0 0}
+.headline{background:var(--base-soft);border-radius:var(--r-md);padding:22px 22px 4px;margin:26px 0 0}
+.headline p{font-size:16.5px;color:var(--ink);font-weight:600;line-height:1.5}
+h2{font-size:18px;font-weight:800;letter-spacing:-.4px;margin:34px 0 8px}
+p{margin:0 0 14px;color:var(--ink-2);font-size:15.5px}
+p strong,li strong{color:var(--ink)}
+ul{margin:0 0 14px;padding-left:22px;color:var(--ink-2);font-size:15.5px}
+li{margin-bottom:9px}
+.mail{font-weight:600;word-break:break-all}
+footer{margin-top:44px;padding:30px 0 50px;border-top:1px solid var(--rule);text-align:center}
+.note{font-size:13px;color:var(--muted);line-height:1.7}
+.kmc{font-weight:700;color:var(--ink-2)}
+@media (min-width:760px){ h1{font-size:38px;letter-spacing:-1.7px} }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topin">
+    <a class="tb-brand" href="index.html"><svg viewBox="0 0 26 30" fill="none" aria-hidden="true"><rect x="0" y="0" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="9.5" y="0" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="19" y="0" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="0" y="8" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="9.5" y="8" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="19" y="8" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="0" y="16" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="9.5" y="16" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="19" y="16" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="0" y="24" width="7" height="6" rx="1.7" fill="currentColor"/><rect x="10.2" y="24.7" width="5.6" height="4.6" rx="1.2" fill="none" stroke="#B87A1E" stroke-width="1.4"/><rect x="19.7" y="24.7" width="5.6" height="4.6" rx="1.2" fill="none" stroke="#B87A1E" stroke-width="1.4"/></svg><span class="tb-lock"><span>Onstrength</span><span class="tb-tag">Salary planning tool</span></span></a>
+    <a class="tb-open" href="app.html">Open the tool</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="phead">
+    <h1>Privacy</h1>
+    <p class="updated">Last updated September 1, 2026</p>
+  </div>
+
+  <div class="headline">
+    <p>Everything you type into Onstrength stays in your own browser, on your own device.
+       There is no account, no server to send it to, and nothing is uploaded. Nobody else can
+       see your cost centre, your positions, the names you give them, or your budget —
+       not your department, not your colleagues, and not me.</p>
+  </div>
+
+  <h2>Where your roster actually lives</h2>
+  <p>In your browser's local storage, which is a private area of the browser on the device you
+    are using. It is written when you type and read when you return. It never travels.</p>
+  <p>Two consequences worth knowing, because they cut both ways:</p>
+  <ul>
+    <li><strong>It does not sync.</strong> Set it up on your laptop and it is not on your phone.
+      There is a copy-out box on the Setup tab for moving a roster between devices, and it leaves
+      names out by default.</li>
+    <li><strong>Clearing your browser data deletes it.</strong> If you clear site data, use a
+      private window, or your organisation wipes browser storage on a schedule, your roster goes
+      with it. There is no backup, because there is nowhere to back it up to.</li>
+  </ul>
+
+  <h2>What the site itself can see</h2>
+  <p>Being straight about this, because "nothing leaves your browser" is true of your data but
+    not of the fact that you visited:</p>
+  <ul>
+    <li><strong>No analytics, no tracking, no cookies.</strong> There is no Google Analytics, no
+      pixel, no advertising network, and nothing that follows you anywhere.</li>
+    <li><strong>The pages are hosted on GitHub Pages</strong>, which — like any web host — records
+      requests in its own server logs, including IP addresses. That tells GitHub someone loaded a
+      page. It tells them nothing about what you typed into it.</li>
+    <li><strong>The typefaces load from Google Fonts</strong>, which means Google's servers see the
+      request for the font file, and with it your IP address. Again: the page content, and
+      everything you enter, is never part of that request.</li>
+  </ul>
+
+  <h2>If you email me</h2>
+  <p>Then I have your email address and whatever you chose to write, the same as any email. I use
+    it to reply and to fix what you told me about. I do not add you to anything, and there is
+    nothing to unsubscribe from.</p>
+  <p>Please do not paste real salary data into a feedback email. I do not need it, and I would
+    rather not have it.</p>
+
+  <h2>Children</h2>
+  <p>This is a workplace tool for managers. It is not intended for anyone under 18 and collects
+    nothing from anybody.</p>
+
+  <h2>If this changes</h2>
+  <p>It would only change if the tool gained something that needed a server — accounts, sync, or
+    saved history. If that ever happens it will be obvious, because you would have to sign in,
+    and this page will say so before it does.</p>
+
+  <h2>Contact</h2>
+  <p>Questions, or anything here that does not match what you observe:<br>
+    <a class="mail" href="mailto:jkiska@onstrength.ca?subject=Onstrength%20privacy">jkiska@onstrength.ca</a></p>
+
+</div>
+
+<footer>
+  <p class="note">
+    <span class="kmc">Powered by KMC Inc.</span><br>
+    <a href="index.html">Home</a> &nbsp;·&nbsp; <a href="help.html">How to use it</a>
+    &nbsp;·&nbsp; <a href="mailto:jkiska@onstrength.ca?subject=Onstrength">jkiska@onstrength.ca</a><br>
+    A planning tool, not a system of record.
+  </p>
+</footer>
+
+</body>
+</html>

@@ -165,8 +165,10 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surf
 .tab{transition:color .14s ease,background .14s ease}
 .tab svg{width:21px;height:21px;flex-shrink:0}
 .brand,.railfoot,.navhelp{display:none}
-.appbar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+.appbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
   padding-bottom:14px;border-bottom:1px solid var(--rule)}
+.appbar-lock{display:flex;flex-direction:column;gap:3px}
+.appbar-tag{font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
 .appbar-brand{display:flex;align-items:center;gap:8px;font-size:15.5px;font-weight:800;
   letter-spacing:-.45px;color:var(--ink)}
 .appbar-brand svg{width:17px;height:17px;flex-shrink:0;color:var(--base)}
@@ -223,7 +225,10 @@ a:hover{color:var(--ink)}
 <div class="wrap stack g18" id="app">
 
   <div class="appbar">
+    <span class="appbar-lock">
     <span class="appbar-brand"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="2" width="9" height="9" rx="2.4" fill="currentColor"/><rect x="13" y="2" width="9" height="9" rx="2.4" fill="currentColor"/><rect x="2" y="13" width="9" height="9" rx="2.4" fill="currentColor"/><rect x="13.9" y="13.9" width="7.2" height="7.2" rx="1.8" fill="none" stroke="var(--est)" stroke-width="1.8"/></svg>Onstrength</span>
+      <span class="appbar-tag">Salary planning tool</span>
+    </span>
     <a class="appbar-help" href="help.html">How to use this &rsaquo;</a>
   </div>
 
@@ -507,9 +512,10 @@ a:hover{color:var(--ink)}
       <div class="locktag"><span>Salary planning tool</span><span>for public sector managers</span></div>
     </div>
     <div class="note" style="line-height:1.7;text-align:center">
-      <span class="kmc" style="color:var(--ink-2);font-weight:600">Kiska Management Consultants</span><br>
+      <span class="kmc" style="color:var(--ink-2);font-weight:700">Powered by KMC Inc.</span><br>
       Nothing you enter leaves this browser.<br>
-      <a href="help.html">How to use it</a> &nbsp;·&nbsp; <a href="mailto:jonathankiska@gmail.com?subject=Onstrength">Send feedback</a>
+      <a href="help.html">How to use it</a> &nbsp;·&nbsp; <a href="privacy.html">Privacy</a><br>
+      <a href="mailto:jkiska@onstrength.ca?subject=Onstrength">jkiska@onstrength.ca</a>
     </div>
   </footer>
 
@@ -528,9 +534,10 @@ a:hover{color:var(--ink)}
   <div class="railfoot">
     <div class="rule"></div>
     <div class="note" style="line-height:1.6">
-      <span class="kmc" style="color:var(--ink-2);font-weight:600">Kiska Management Consultants</span><br>
+      <span class="kmc" style="color:var(--ink-2);font-weight:700">Powered by KMC Inc.</span><br>
       Nothing you enter leaves this browser.<br>
-      <a href="help.html">How to use it</a> &nbsp;·&nbsp; <a href="mailto:jonathankiska@gmail.com?subject=Onstrength">Send feedback</a>
+      <a href="help.html">How to use it</a> &nbsp;·&nbsp; <a href="privacy.html">Privacy</a><br>
+      <a href="mailto:jkiska@onstrength.ca?subject=Onstrength">jkiska@onstrength.ca</a>
     </div>
   </div>
 </nav>
