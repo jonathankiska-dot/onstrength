@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-WnPmiyVEu7F61mEZQsBtMctUZjj9TVVCwo+nuLJ1zjI=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-WhPYruMbczwlBId/YMppDCLCpAXgzAZQYLK3ofzpIHw=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -250,6 +250,12 @@ a.kmc:hover{text-decoration:underline}
   .btn-primary.full{width:100%}
 }
 
+.demobar{position:sticky;top:0;z-index:30;display:flex;gap:14px;align-items:center;
+  justify-content:center;flex-wrap:wrap;padding:9px 16px;background:var(--est-soft);
+  border-bottom:1px solid var(--est);color:var(--ink);font-size:12.5px;line-height:1.4;
+  text-align:center}
+.demobar b{font-weight:700}
+.demobar a{color:var(--est);font-weight:600}
 .hidden{display:none!important}
 .empty{text-align:center;color:var(--muted);font-size:13.5px;padding:30px 20px}
 a{color:var(--base)}
@@ -668,7 +674,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v26";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v27";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -764,8 +770,12 @@ a:hover{color:var(--ink)}
          keeps its salary and becomes a custom rate, which is exactly what the
          app already supports. */
       var grp=sText(q.group,24), lvl=sText(q.level,24);
-      if(grp&&!(RATES&&RATES[grp])){ grp=""; lvl=""; }
-      else if(grp&&lvl&&!RATES[grp].levels[lvl]){ lvl=""; }
+      /* Blanking only the level left the group in place, so opening the
+         position defaulted to that group's first level and a plain Save
+         re-rated a $121k job to $67k with nothing on screen to show it. If
+         either half is unrecognised the whole classification goes and the
+         salary is kept as a custom rate. */
+      if(grp&&(!hasRate(grp)||(lvl&&!hasLevel(grp,lvl)))){ grp=""; lvl=""; }
       out.positions.push({
         id:id, num:sText(q.num,24), title:sText(q.title,120),
         group:grp, level:lvl, step:Math.round(sNum(q.step,0,99)),
@@ -790,10 +800,23 @@ a:hover{color:var(--ink)}
     return { cc:{ name:"", code:"", fy:"2026-04-01", periods:26, salaryBudget:0, bandMinor:5, bandMajor:15 },
       estimates:{}, positions:[], nicknames:{} };
   }
+  /* If reading storage fails, the startup save() must not then commit the
+     blank over the top — that turns any parse or sanitise error into a wipe.
+     The unreadable record is set aside instead, so it is not lost. */
+  var loadFailed=false;
   function load(){
-    try{ var raw=localStorage.getItem(KEY); if(raw){ var p=JSON.parse(raw);
-      if(p&&p.cc) return sanitise(p); } }catch(e){}
-    return blank();
+    var raw=null;
+    try{ raw=localStorage.getItem(KEY); }catch(e){ return blank(); }
+    if(!raw) return blank();
+    try{
+      var p=JSON.parse(raw);
+      if(p&&p.cc) return sanitise(p);
+      return blank();
+    }catch(e){
+      loadFailed=true;
+      try{ localStorage.setItem(KEY+".unreadable",raw); }catch(e2){}
+      return blank();
+    }
   }
   /* Demo mode is a look, not a session. The landing page links here with
      ?demo=1, and that link can be sent to anyone — so while it is on, nothing
@@ -801,15 +824,14 @@ a:hover{color:var(--ink)}
   var demoMode=false;
   function save(){
     if(demoMode) return;
-    try{
-      /* One step of undo for whole-state replacement. There is no server and no
-         backup, so an accidental wipe was final; now it is recoverable for as
-         long as the browser keeps it. */
-      var cur=localStorage.getItem(KEY);
-      if(cur) localStorage.setItem(KEY+".prev",cur);
-      localStorage.setItem(KEY,JSON.stringify(state));
-    }catch(e){}
+    try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){}
   }
+  /* A previous attempt kept a .prev snapshot as one step of undo. It was
+     removed: save() runs on nearly every keystroke, so the snapshot only ever
+     held the state from a moment ago, nothing read it back, and erasing
+     deleted it anyway. What it did reliably do was keep a copy of positions and
+     names the user believed they had deleted. A hidden copy of deleted data is
+     not a safety feature. */
 
   // ---- the engine -------------------------------------------------------
   function fyStart(){ return toTs(state.cc.fy)||toTs("2026-04-01"); }
@@ -1096,14 +1118,14 @@ a:hover{color:var(--ink)}
   }
   function fillLevels(group,keep){
     var sel=el("f-level");
-    if(!group||!RATES[group]){ sel.innerHTML=""; sel.disabled=true; return; }
+    if(!hasRate(group)){ sel.innerHTML=""; sel.disabled=true; return; }
     sel.disabled=false;
     sel.innerHTML=Object.keys(RATES[group].levels).map(function(l){return '<option value="'+esc(l)+'">'+esc(l)+"</option>";}).join("");
     if(keep&&RATES[group].levels[keep]) sel.value=keep;
   }
   function fillSteps(group,level,keep){
     var sel=el("f-step"), lbl=el("f-step-label");
-    if(!group||!level||!RATES[group]||!RATES[group].levels[level]){ sel.innerHTML=""; sel.disabled=true; lbl.textContent="Step"; return; }
+    if(!hasLevel(group,level)){ sel.innerHTML=""; sel.disabled=true; lbl.textContent="Step"; return; }
     sel.disabled=false;
     var grp=RATES[group], steps=grp.levels[level], isRange=!!grp.range&&steps.length===2;
     lbl.textContent=isRange?"In range":"Step";
@@ -1112,17 +1134,29 @@ a:hover{color:var(--ink)}
     }).join("");
     if(keep&&keep>=1&&keep<=steps.length) sel.value=keep;
   }
+  /* RATES and .levels are plain objects, so "constructor", "__proto__" and
+     "toString" are truthy on a bare lookup. An imported classification using one
+     of those names got past every guard below and threw. */
+  function hasRate(g){ return !!g&&Object.prototype.hasOwnProperty.call(RATES,g); }
+  function hasLevel(g,l){ return hasRate(g)&&Object.prototype.hasOwnProperty.call(RATES[g].levels,l); }
   function rateFor(g,l,st){
-    if(!g||!RATES[g]||!RATES[g].levels[l]) return null;
+    if(!hasLevel(g,l)) return null;
     var arr=RATES[g].levels[l];
     return arr[Math.max(0,Math.min(arr.length-1,(st||1)-1))];
   }
   function nextStepRate(g,l,st){
-    if(!g||!RATES[g]||!RATES[g].levels[l]) return null;
+    if(!hasLevel(g,l)) return null;
     var arr=RATES[g].levels[l];
     return st<arr.length?arr[st]:arr[arr.length-1];
   }
-  function isHourly(g){ return !!(g&&RATES[g]&&RATES[g].unit==="hourly"); }
+  function isHourly(g){ return hasRate(g)&&RATES[g].unit==="hourly"; }
+  /* Hourly groups publish an hourly rate. The editor multiplies it out; the
+     scenario tab did not, so adding a hypothetical hourly position costed it at
+     about $33 for the year. Same arithmetic in both places now. */
+  function scenarioRate(g,l,st){
+    var r=rateFor(g,l,st); if(r==null) return 0;
+    return isHourly(g) ? r*1950 : r;
+  }
   function paidHours(){ return num(el("f-hours").value)||1950; }
   function annualOf(g,l,st){
     if(!g) return num(el("f-salary").value);
@@ -1379,10 +1413,10 @@ a:hover{color:var(--ink)}
           else if(what==="start") m.pos.start=node.value;
           else if(what==="group"){
             m.pos.group=node.value;
-            m.pos.level=Object.keys(RATES[node.value].levels)[0];
-            m.pos.step=1; m.pos.salary=rateFor(m.pos.group,m.pos.level,1); reshape=true;
+            m.pos.level=hasRate(node.value)?Object.keys(RATES[node.value].levels)[0]:"";
+            m.pos.step=1; m.pos.salary=scenarioRate(m.pos.group,m.pos.level,1); reshape=true;
           } else if(what==="level"){
-            m.pos.level=node.value; m.pos.step=1; m.pos.salary=rateFor(m.pos.group,m.pos.level,1);
+            m.pos.level=node.value; m.pos.step=1; m.pos.salary=scenarioRate(m.pos.group,m.pos.level,1);
           }
           if(reshape){ renderScenario(); return; }
           refreshMoveEffect(m); drawScenario();
@@ -1525,12 +1559,16 @@ a:hover{color:var(--ink)}
     return JSON.stringify(out);
   }
   function xMsg(t){ el("x-msg").textContent=t; }
+  /* One definition of "the user has put work in", used by both the export box
+     and the arming on Load example. They disagreed: a manager who had entered a
+     budget and six estimate lines but no name yet lost it all on one click. */
+  function hasWork(){
+    return !!(state.positions.length || state.cc.name || state.cc.code ||
+              state.cc.salaryBudget || Object.keys(state.estimates||{}).length);
+  }
   function xFill(){
     if(!el("x-box")) return;
-    /* Nothing to move yet: an empty roster rendered as JSON is just noise on
-       someone's first screen. */
-    var empty=!state.positions.length && !state.cc.name && !state.cc.code && !state.cc.salaryBudget;
-    el("x-box").value=empty?"":xText();
+    el("x-box").value=hasWork()?xText():"";
   }
   el("x-names").addEventListener("change",function(){ xFill(); xMsg(""); });
   el("x-copy").addEventListener("click",function(){
@@ -1591,10 +1629,12 @@ a:hover{color:var(--ink)}
     if(b.dataset.armed!=="1"){ b.dataset.armed="1"; b.textContent="Click again to erase everything";
       setTimeout(function(){ b.dataset.armed="0"; b.textContent="Erase everything"; },3500); return; }
     state=blank(); save(); renderAll(); show("setup");
-    try{ localStorage.removeItem(KEY+".prev"); localStorage.removeItem("complement.v2"); }catch(e){}
+    /* Not in demo mode: erasing is the one real write demo mode would otherwise
+       make, and it would delete the visitor's own data. */
+    if(!demoMode){ try{ localStorage.removeItem("complement.v2"); localStorage.removeItem(KEY+".prev"); }catch(e){} }
   });
   el("c-demo").addEventListener("click",function(){
-    var b=el("c-demo"), has=state.positions.length||state.cc.name||state.cc.code;
+    var b=el("c-demo"), has=hasWork();
     /* Replacing a real roster is the same act as erasing one, and this button
        sits directly above Erase. It arms the same way. */
     if(has&&b.dataset.armed!=="1"){
@@ -1656,7 +1696,18 @@ a:hover{color:var(--ink)}
 
   /* The landing page links here with ?demo=1 so someone can see it working
      before typing anything. It loads into memory only — see save(). */
-  try{ if(/[?&]demo\b/.test(location.search)){ state=demo(); demoMode=true; } }catch(e){}
+  try{ if(/[?&]demo(=1)?(&|$)/.test(location.search)){ state=demo(); demoMode=true; } }catch(e){}
+  /* Demo mode saves nothing, and everything in it — Save, the editor, Restore —
+     still appears to work. Without a standing notice someone can put an hour
+     into it and lose the lot on reload. */
+  if(demoMode){
+    var bar=document.createElement("div");
+    bar.className="demobar";
+    bar.innerHTML='<span><b>Example data.</b> Nothing you change here is saved.</span>'+
+      '<a href="app.html">Start your own</a>';
+    document.body.insertBefore(bar,document.body.firstChild);
+    document.body.classList.add("hasdemobar");
+  }
 
   var seen=false;
   try{ seen=localStorage.getItem("complement.seen")==="1"; }catch(e){}
@@ -1671,7 +1722,7 @@ a:hover{color:var(--ink)}
     });
   }
 
-  save();
+  if(!loadFailed) save();
   renderAll();
 
   /* Open on Step 1. Resuming on the forecast is the usual pattern for a tool
