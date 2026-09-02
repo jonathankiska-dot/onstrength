@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-zvYEetouclDJm30WOahS8n2EVq78oKQJAD9vT+NFZKw=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-WnPmiyVEu7F61mEZQsBtMctUZjj9TVVCwo+nuLJ1zjI=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -668,7 +668,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v25";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v26";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -721,7 +721,10 @@ a:hover{color:var(--ink)}
      more trustworthy than a pasted one. */
   var MODES={filled:1,vacant:1,leaving:1,unpaid:1};
   function sText(v,max){
-    if(v==null) return "";
+    /* Only primitives. String() on a crafted object throws — an object whose
+       toString is not callable, or an array nested deeply enough to blow the
+       stack — which turned a coercion into an exception. */
+    if(typeof v!=="string"&&typeof v!=="number") return "";
     return String(v).replace(/[\u0000-\u001F\u007F]/g,"").slice(0,max||120);
   }
   function sDate(v){ return /^\d{4}-\d{2}-\d{2}$/.test(String(v||"")) ? String(v) : ""; }
@@ -733,13 +736,16 @@ a:hover{color:var(--ink)}
     return n;
   }
   function sId(v){ return /^[A-Za-z0-9_-]{1,40}$/.test(String(v||"")) ? String(v) : ""; }
+  /* Clamping silently rewrites what someone typed. For pay periods a wrong
+     value is better replaced by the right default than quietly turned into 53. */
+  function sPeriods(v){ var n=Math.round(sNum(v,0,1e9)); return (n>=1&&n<=53)?n:26; }
 
   function sanitise(p){
     var out=blank(), seen={}, n=0;
     if(!p||typeof p!=="object") return out;
     var cc=p.cc&&typeof p.cc==="object"?p.cc:{};
     out.cc={ name:sText(cc.name,80), code:sText(cc.code,20),
-      fy:sDate(cc.fy)||"2026-04-01", periods:Math.round(sNum(cc.periods,1,53))||26,
+      fy:sDate(cc.fy)||"2026-04-01", periods:sPeriods(cc.periods),
       salaryBudget:sNum(cc.salaryBudget,0,1e12),
       bandMinor:sNum(cc.bandMinor,0,100)||5, bandMajor:sNum(cc.bandMajor,0,100)||15 };
 
@@ -753,20 +759,29 @@ a:hover{color:var(--ink)}
       var id=sId(q.id);
       if(!id||seen[id]) id="p"+(++n)+"_"+Date.now().toString(36);
       seen[id]=1;
+      /* A classification the table does not carry — a hostile import, or a code
+         retired from the dataset — must not be able to wedge the editor. It
+         keeps its salary and becomes a custom rate, which is exactly what the
+         app already supports. */
       var grp=sText(q.group,24), lvl=sText(q.level,24);
+      if(grp&&!(RATES&&RATES[grp])){ grp=""; lvl=""; }
+      else if(grp&&lvl&&!RATES[grp].levels[lvl]){ lvl=""; }
       out.positions.push({
         id:id, num:sText(q.num,24), title:sText(q.title,120),
         group:grp, level:lvl, step:Math.round(sNum(q.step,0,99)),
         salary:sNum(q.salary,0,1e9), fte:sNum(q.fte,0,100),
-        hours:sNum(q.hours,0,200), next:sNum(q.next,0,1e9),
+        hours:sNum(q.hours,0,4000), next:sNum(q.next,0,1e9),
         ftedate:sDate(q.ftedate), ftenext:sNum(q.ftenext,0,100),
         incdate:sDate(q.incdate),
-        mode:MODES[q.mode]?q.mode:"filled",
+        mode:(typeof q.mode==="string"&&Object.prototype.hasOwnProperty.call(MODES,q.mode))?q.mode:"filled",
         start:sDate(q.start), end:sDate(q.end),
         ufrom:sDate(q.ufrom), uto:sDate(q.uto)
       });
-      var nick=p.nicknames&&typeof p.nicknames==="object"?p.nicknames[q.id]:null;
-      if(nick) out.nicknames[id]=sText(nick,80);
+      /* The editor refuses a name on a vacancy; an import must too, or the
+         roster carries a name it never shows and the export leaks it. */
+      var nick=(p.nicknames&&typeof p.nicknames==="object"&&
+                Object.prototype.hasOwnProperty.call(p.nicknames,q.id))?p.nicknames[q.id]:null;
+      if(nick&&out.positions[out.positions.length-1].mode!=="vacant") out.nicknames[id]=sText(nick,80);
     });
     return out;
   }
@@ -780,7 +795,21 @@ a:hover{color:var(--ink)}
       if(p&&p.cc) return sanitise(p); } }catch(e){}
     return blank();
   }
-  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} }
+  /* Demo mode is a look, not a session. The landing page links here with
+     ?demo=1, and that link can be sent to anyone — so while it is on, nothing
+     is written. Persisting it destroyed real rosters on one click. */
+  var demoMode=false;
+  function save(){
+    if(demoMode) return;
+    try{
+      /* One step of undo for whole-state replacement. There is no server and no
+         backup, so an accidental wipe was final; now it is recoverable for as
+         long as the browser keeps it. */
+      var cur=localStorage.getItem(KEY);
+      if(cur) localStorage.setItem(KEY+".prev",cur);
+      localStorage.setItem(KEY,JSON.stringify(state));
+    }catch(e){}
+  }
 
   // ---- the engine -------------------------------------------------------
   function fyStart(){ return toTs(state.cc.fy)||toTs("2026-04-01"); }
@@ -1067,7 +1096,7 @@ a:hover{color:var(--ink)}
   }
   function fillLevels(group,keep){
     var sel=el("f-level");
-    if(!group){ sel.innerHTML=""; sel.disabled=true; return; }
+    if(!group||!RATES[group]){ sel.innerHTML=""; sel.disabled=true; return; }
     sel.disabled=false;
     sel.innerHTML=Object.keys(RATES[group].levels).map(function(l){return '<option value="'+esc(l)+'">'+esc(l)+"</option>";}).join("");
     if(keep&&RATES[group].levels[keep]) sel.value=keep;
@@ -1552,7 +1581,7 @@ a:hover{color:var(--ink)}
 
   el("c-save").addEventListener("click",function(){
     state.cc={ name:el("c-name").value.trim(), code:el("c-code").value.trim(),
-      fy:el("c-fy").value||"2026-04-01", periods:Math.max(1,Math.round(num(el("c-periods").value)||26)),
+      fy:el("c-fy").value||"2026-04-01", periods:sPeriods(el("c-periods").value||26),
       salaryBudget:num(el("c-sal").value),
       bandMinor:num(el("c-minor").value)||5, bandMajor:num(el("c-major").value)||15 };
     save(); renderAll(); show("forecast");
@@ -1562,8 +1591,20 @@ a:hover{color:var(--ink)}
     if(b.dataset.armed!=="1"){ b.dataset.armed="1"; b.textContent="Click again to erase everything";
       setTimeout(function(){ b.dataset.armed="0"; b.textContent="Erase everything"; },3500); return; }
     state=blank(); save(); renderAll(); show("setup");
+    try{ localStorage.removeItem(KEY+".prev"); localStorage.removeItem("complement.v2"); }catch(e){}
   });
-  el("c-demo").addEventListener("click",function(){ state=demo(); save(); renderAll(); show("forecast"); });
+  el("c-demo").addEventListener("click",function(){
+    var b=el("c-demo"), has=state.positions.length||state.cc.name||state.cc.code;
+    /* Replacing a real roster is the same act as erasing one, and this button
+       sits directly above Erase. It arms the same way. */
+    if(has&&b.dataset.armed!=="1"){
+      b.dataset.armed="1"; b.textContent="Click again — this replaces your roster";
+      setTimeout(function(){ b.dataset.armed="0"; b.textContent="Load an example cost centre"; },3500);
+      return;
+    }
+    b.dataset.armed="0"; b.textContent="Load an example cost centre";
+    state=demo(); save(); renderAll(); show("forecast");
+  });
   el("intro-x").addEventListener("click",function(){
     el("intro").classList.add("hidden");
     try{ localStorage.setItem("complement.seen","1"); }catch(e){}
@@ -1614,8 +1655,8 @@ a:hover{color:var(--ink)}
   state=load();
 
   /* The landing page links here with ?demo=1 so someone can see it working
-     before typing anything. */
-  try{ if(/[?&]demo\b/.test(location.search)){ state=demo(); } }catch(e){}
+     before typing anything. It loads into memory only — see save(). */
+  try{ if(/[?&]demo\b/.test(location.search)){ state=demo(); demoMode=true; } }catch(e){}
 
   var seen=false;
   try{ seen=localStorage.getItem("complement.seen")==="1"; }catch(e){}

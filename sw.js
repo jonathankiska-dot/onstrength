@@ -4,7 +4,7 @@
    will keep serving the copy they already have. This is the single most common
    reason an update appears to do nothing. */
 
-const CACHE_VERSION = "onstrength-v25";
+const CACHE_VERSION = "onstrength-v26";
 
 const SHELL = [
   "./",
@@ -83,8 +83,13 @@ self.addEventListener("fetch", (event) => {
          the network. */
       fetch(url.href, { cache: "reload", credentials: "same-origin" })
         .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE_VERSION).then((c) => c.put(key, copy)).catch(() => {});
+          /* Only cache a page that actually loaded. Without this a single 500
+             from the host replaces the good offline copy, and the app breaks
+             precisely when the network is already unreliable. */
+          if (res && res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE_VERSION).then((c) => c.put(key, copy)).catch(() => {});
+          }
           return res;
         })
         .catch(() =>
