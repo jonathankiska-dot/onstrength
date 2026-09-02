@@ -165,6 +165,15 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surf
 .tab[aria-selected="true"]{color:var(--base)}
 .tab{transition:color .14s ease,background .14s ease}
 .tab svg{width:21px;height:21px;flex-shrink:0}
+/* Small grey step numbers over the icons: the tabs are a sequence, not a set of
+   equal choices, and nothing else on screen says so. */
+.ticon{position:relative;display:inline-flex;flex-shrink:0}
+.stepno{position:absolute;top:-5px;right:-7px;font-style:normal;font-size:8.5px;font-weight:700;
+  line-height:1;letter-spacing:0;color:var(--muted)}
+.tab[aria-selected="true"] .stepno{color:var(--base)}
+/* Full names where there is room for them; short ones on a phone, where five
+   tabs share 390px. */
+.t-full{display:none}
 .brand,.railfoot,.navhelp{display:none}
 .appbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
   padding-bottom:14px;border-bottom:1px solid var(--rule)}
@@ -199,7 +208,10 @@ a.kmc:hover{text-decoration:underline}
     font-size:8.5px;font-weight:500;
     letter-spacing:1.05px;text-transform:uppercase;color:var(--muted);margin-top:9px;line-height:1.5}
   .tab{flex-direction:row;justify-content:flex-start;gap:12px;padding:0 12px;font-size:14px;
-    letter-spacing:normal;min-height:44px;border-radius:7px;width:100%}
+    letter-spacing:normal;min-height:44px;border-radius:7px;width:100%;text-align:left}
+  .t-short{display:none}
+  .t-full{display:inline}
+  .stepno{font-size:9px;top:-4px;right:-6px}
   .tab[aria-selected="true"]{background:var(--base-soft)}
   .appbar{display:none}
   .navhelp{display:flex;text-decoration:none;margin-top:4px}
@@ -567,7 +579,8 @@ a:hover{color:var(--ink)}
       <span class="kmc" style="color:var(--ink-2);font-weight:700">Powered by KMC Inc.</span><br>
       Nothing you enter leaves this browser.<br>
       <a href="help.html">How to use it</a> &nbsp;·&nbsp; <a href="privacy.html">Privacy</a>
-      &nbsp;·&nbsp; <a href="mailto:jkiska@onstrength.ca?subject=Onstrength">Feedback</a>
+      &nbsp;·&nbsp; <a href="mailto:jkiska@onstrength.ca?subject=Onstrength">Feedback</a><br>
+      <span class="ver" style="font-size:10.5px;letter-spacing:.3px;opacity:.75"></span>
     </div>
   </footer>
 
@@ -578,11 +591,11 @@ a:hover{color:var(--ink)}
     <div class="brandrow"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="2" width="9" height="9" rx="2.4" fill="currentColor"/><rect x="13" y="2" width="9" height="9" rx="2.4" fill="currentColor"/><rect x="2" y="13" width="9" height="9" rx="2.4" fill="currentColor"/><rect x="13.9" y="13.9" width="7.2" height="7.2" rx="1.8" fill="none" stroke="var(--est)" stroke-width="1.8"/></svg>Onstrength</div>
     <div class="brandtag"><span>Salary planning tool</span><span>for public sector managers</span></div>
   </div>
-  <button class="tab" role="tab" data-tab="setup" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-2.9 1.2V21a2 2 0 11-4 0v-.1A1.7 1.7 0 007 19.4a1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1A1.7 1.7 0 003 15a2 2 0 010-4 1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1A1.7 1.7 0 009 4.6 2 2 0 0111 3a2 2 0 014 0 1.7 1.7 0 001.1 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V11a2 2 0 010 4z"/></svg>Setup</button>
-  <button class="tab" role="tab" data-tab="roster" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8"/><path d="M8 13h8"/><path d="M8 17h4"/></svg>Complement</button>
-  <button class="tab" role="tab" data-tab="estimates" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2.4"/><path d="M9 7h6"/><path d="M9 11.5h.01"/><path d="M12 11.5h.01"/><path d="M15 11.5h.01"/><path d="M9 15.5h.01"/><path d="M12 15.5h.01"/><path d="M15 15.5v3.5"/><path d="M9 19h3.5"/></svg>Estimates</button>
-  <button class="tab" role="tab" data-tab="forecast" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 5-8"/><path d="M3 21h18"/></svg>Forecast</button>
-  <button class="tab" role="tab" data-tab="scenario" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3-3"/><path d="M20 16H7l3 3"/></svg>What if</button>
+  <button class="tab" role="tab" data-tab="setup" aria-selected="true"><span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-2.9 1.2V21a2 2 0 11-4 0v-.1A1.7 1.7 0 007 19.4a1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1A1.7 1.7 0 003 15a2 2 0 010-4 1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1A1.7 1.7 0 009 4.6 2 2 0 0111 3a2 2 0 014 0 1.7 1.7 0 001.1 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V11a2 2 0 010 4z"/></svg><i class="stepno">1</i></span><span class="t-short">Cost centre</span><span class="t-full">Set up your cost centre</span></button>
+  <button class="tab" role="tab" data-tab="roster" aria-selected="false"><span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8"/><path d="M8 13h8"/><path d="M8 17h4"/></svg><i class="stepno">2</i></span><span class="t-short">Complement</span><span class="t-full">Build your complement</span></button>
+  <button class="tab" role="tab" data-tab="estimates" aria-selected="false"><span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2.4"/><path d="M9 7h6"/><path d="M9 11.5h.01"/><path d="M12 11.5h.01"/><path d="M15 11.5h.01"/><path d="M9 15.5h.01"/><path d="M12 15.5h.01"/><path d="M15 15.5v3.5"/><path d="M9 19h3.5"/></svg><i class="stepno">3</i></span><span class="t-short">Estimates</span><span class="t-full">Add your estimates</span></button>
+  <button class="tab" role="tab" data-tab="forecast" aria-selected="false"><span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 5-8"/><path d="M3 21h18"/></svg><i class="stepno">4</i></span><span class="t-short">Forecast</span><span class="t-full">Your forecast</span></button>
+  <button class="tab" role="tab" data-tab="scenario" aria-selected="false"><span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3-3"/><path d="M20 16H7l3 3"/></svg><i class="stepno">5</i></span><span class="t-short">What if</span><span class="t-full">Test a change</span></button>
   <a class="tab navhelp" href="help.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 114.1 2.3c-.9.7-1.7 1.1-1.7 2.2"/><path d="M12 17.2h.01"/></svg>How to use it</a>
   <div class="railfoot">
     <div class="rule"></div>
@@ -590,7 +603,8 @@ a:hover{color:var(--ink)}
       <span class="kmc" style="color:var(--ink-2);font-weight:700">Powered by KMC Inc.</span><br>
       Nothing you enter leaves this browser.<br>
       <a href="help.html">How to use it</a> &nbsp;·&nbsp; <a href="privacy.html">Privacy</a>
-      &nbsp;·&nbsp; <a href="mailto:jkiska@onstrength.ca?subject=Onstrength">Feedback</a>
+      &nbsp;·&nbsp; <a href="mailto:jkiska@onstrength.ca?subject=Onstrength">Feedback</a><br>
+      <span class="ver" style="font-size:10.5px;letter-spacing:.3px;opacity:.75"></span>
     </div>
   </div>
 </nav>
@@ -599,6 +613,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
+  var APP_VERSION = "v19";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -1247,6 +1262,31 @@ a:hover{color:var(--ink)}
   }
 
   function renderAll(){ renderForecast(); renderRoster(); renderScenario(); renderSetup(); renderEstimates(); }
+
+  /* Version stamp + update handling.
+
+     Updates were not reaching people: the app is a single HTML file behind a
+     CDN and a service worker, and both are entitled to serve yesterday's copy.
+     So: stamp the version where it can be read, register the worker here (the
+     landing page did it, but people bookmark the app), and reload exactly once
+     when a new worker takes control, so the second visit after a deploy is
+     always current. The guard on `controller` stops the very first
+     registration from bouncing the page. */
+  Array.prototype.forEach.call(document.querySelectorAll(".ver"),function(n){
+    n.textContent="Onstrength "+APP_VERSION;
+  });
+  if("serviceWorker" in navigator){
+    var hadController = !!navigator.serviceWorker.controller, reloaded=false;
+    navigator.serviceWorker.addEventListener("controllerchange",function(){
+      if(!hadController||reloaded) return;
+      reloaded=true; window.location.reload();
+    });
+    window.addEventListener("load",function(){
+      navigator.serviceWorker.register("sw.js").then(function(reg){
+        reg.update().catch(function(){});
+      }).catch(function(){});
+    });
+  }
 
   // ---- tabs -------------------------------------------------------------
   var PAGES=["setup","roster","estimates","forecast","scenario"];

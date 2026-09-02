@@ -4,7 +4,7 @@
    will keep serving the copy they already have. This is the single most common
    reason an update appears to do nothing. */
 
-const CACHE_VERSION = "onstrength-v17";
+const CACHE_VERSION = "onstrength-v19";
 
 const SHELL = [
   "./",
@@ -24,7 +24,12 @@ const SHELL = [
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_VERSION)
-      .then((cache) => cache.addAll(SHELL))
+      .then((cache) => cache.addAll(
+        /* cache:"reload" so a deploy is not precached from the browser's own
+           stale HTTP cache — the reason an update can appear to do nothing
+           even after the worker version is bumped. */
+        SHELL.map((u) => new Request(u, { cache: "reload" }))
+      ))
       .then(() => self.skipWaiting())
       .catch(() => self.skipWaiting())
   );
@@ -72,7 +77,11 @@ self.addEventListener("fetch", (event) => {
   if (req.mode === "navigate") {
     const key = url.pathname;
     event.respondWith(
-      fetch(req)
+      /* Same reason: GitHub Pages sends a max-age, so a plain fetch() here can
+         be answered by the browser's HTTP cache with the previous deploy.
+         Requesting the URL fresh is what makes "network first" actually mean
+         the network. */
+      fetch(url.href, { cache: "reload", credentials: "same-origin" })
         .then((res) => {
           const copy = res.clone();
           caches.open(CACHE_VERSION).then((c) => c.put(key, copy)).catch(() => {});
