@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-WhPYruMbczwlBId/YMppDCLCpAXgzAZQYLK3ofzpIHw=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-m2+Kb8hn+zvfoNif1ZpBOHSFbJ2+Tk2woLYCJ4sU3cg=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -674,7 +674,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v27";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v28";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -746,6 +746,7 @@ a:hover{color:var(--ink)}
      value is better replaced by the right default than quietly turned into 53. */
   function sPeriods(v){ var n=Math.round(sNum(v,0,1e9)); return (n>=1&&n<=53)?n:26; }
 
+
   function sanitise(p){
     var out=blank(), seen={}, n=0;
     if(!p||typeof p!=="object") return out;
@@ -775,10 +776,16 @@ a:hover{color:var(--ink)}
          re-rated a $121k job to $67k with nothing on screen to show it. If
          either half is unrecognised the whole classification goes and the
          salary is kept as a custom rate. */
-      if(grp&&(!hasRate(grp)||(lvl&&!hasLevel(grp,lvl)))){ grp=""; lvl=""; }
+      /* One rule for the whole classification: group, level and step either
+         resolve together against the published table or none of them is kept.
+         Anything less re-rated a position on the next save — clamping the step
+         to the top of its level moved a $121,465 job to $131,375 with nothing
+         on screen to say so. The salary always survives as a custom rate. */
+      var stp=Math.round(sNum(q.step,0,99));
+      if(grp&&(!hasLevel(grp,lvl)||stp<1||stp>RATES[grp].levels[lvl].length)){ grp=""; lvl=""; }
       out.positions.push({
         id:id, num:sText(q.num,24), title:sText(q.title,120),
-        group:grp, level:lvl, step:Math.round(sNum(q.step,0,99)),
+        group:grp, level:lvl, step:stp||1,
         salary:sNum(q.salary,0,1e9), fte:sNum(q.fte,0,100),
         hours:sNum(q.hours,0,4000), next:sNum(q.next,0,1e9),
         ftedate:sDate(q.ftedate), ftenext:sNum(q.ftenext,0,100),
@@ -1631,7 +1638,13 @@ a:hover{color:var(--ink)}
     state=blank(); save(); renderAll(); show("setup");
     /* Not in demo mode: erasing is the one real write demo mode would otherwise
        make, and it would delete the visitor's own data. */
-    if(!demoMode){ try{ localStorage.removeItem("complement.v2"); localStorage.removeItem(KEY+".prev"); }catch(e){} }
+    if(!demoMode){ try{
+      localStorage.removeItem("complement.v2");
+      localStorage.removeItem(KEY+".prev");
+      /* The set-aside copy of an unreadable record contains names. Leaving it
+         behind would repeat exactly the mistake .prev was removed for. */
+      localStorage.removeItem(KEY+".unreadable");
+    }catch(e){} }
   });
   el("c-demo").addEventListener("click",function(){
     var b=el("c-demo"), has=hasWork();
@@ -1692,6 +1705,10 @@ a:hover{color:var(--ink)}
       positions:positions, nicknames:nicknames };
   }
 
+  /* v26 briefly kept a .prev snapshot. Anyone who ran it still has a copy of a
+     roster they replaced; remove it rather than leaving it for them to find. */
+  try{ localStorage.removeItem(KEY+".prev"); }catch(e){}
+
   state=load();
 
   /* The landing page links here with ?demo=1 so someone can see it working
@@ -1706,7 +1723,6 @@ a:hover{color:var(--ink)}
     bar.innerHTML='<span><b>Example data.</b> Nothing you change here is saved.</span>'+
       '<a href="app.html">Start your own</a>';
     document.body.insertBefore(bar,document.body.firstChild);
-    document.body.classList.add("hasdemobar");
   }
 
   var seen=false;
@@ -1725,14 +1741,22 @@ a:hover{color:var(--ink)}
   if(!loadFailed) save();
   renderAll();
 
+  /* Losing a roster silently is the worst way to lose one. If storage held
+     something unreadable, say so rather than presenting a blank app. */
+  if(loadFailed){
+    var warn=document.createElement("div");
+    warn.className="demobar";
+    warn.innerHTML='<span><b>Your saved roster could not be read</b> and has been set aside '+
+      'rather than deleted. If you have a saved copy, restore it below.</span>';
+    document.body.insertBefore(warn,document.body.firstChild);
+  }
+
   /* Open on Step 1. Resuming on the forecast is the usual pattern for a tool
      like this, and it was what we did — but the tabs are numbered now, and
      opening a numbered process at step 4 reads as a fault rather than a
      convenience. The worked example is the exception: that link exists to show
      someone the answer, so it goes straight to it. */
-  var wantsDemo=false;
-  try{ wantsDemo=/[?&]demo\b/.test(location.search); }catch(e){}
-  show(wantsDemo?"forecast":"setup");
+  show(demoMode?"forecast":"setup");
 })();
 </script>
 
