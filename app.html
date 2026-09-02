@@ -159,12 +159,19 @@ input.num-in{font-variant-numeric:tabular-nums lining-nums}
 
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);
   border-top:1px solid var(--rule);display:grid;grid-template-columns:repeat(5,1fr);
-  padding:6px 0 calc(10px + env(safe-area-inset-bottom,0px))}
-.tab{background:none;border:none;min-height:60px;padding:0;display:flex;flex-direction:column;
+  padding:6px 0 0;touch-action:manipulation}
+/* The safe-area inset belongs to the buttons, not the bar. Held on the bar, it
+   left a dead strip along the bottom — 44px of it on a phone with a home
+   indicator, nearly half the bar's height — and a thumb reaching for a bottom
+   tab lands there first. Taps did nothing, which reads as the app being slow
+   rather than the target being wrong. */
+.tab{background:none;border:none;min-height:60px;
+  padding:0 0 calc(10px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:4px;color:var(--muted);font-size:9.5px;font-weight:500;
   letter-spacing:-.1px;white-space:nowrap}
 .tab[aria-selected="true"]{color:var(--base)}
-.tab{transition:color .14s ease,background .14s ease}
+.tab{transition:color .1s ease,background .1s ease;-webkit-tap-highlight-color:transparent}
+.tab:active{background:var(--sunk)}
 .tab svg{width:21px;height:21px;flex-shrink:0}
 /* The tabs are a sequence, not five equal choices, and nothing else on screen
    said so. The step sits on its own line directly above the label, where it
@@ -640,7 +647,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v22";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v23";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -1304,8 +1311,17 @@ a:hover{color:var(--ink)}
   });
   if("serviceWorker" in navigator){
     var hadController = !!navigator.serviceWorker.controller, reloaded=false;
+    /* A new worker taking over reloads the page so an update lands. That is
+       fine on an idle tab and hostile in the middle of a task — the reload
+       returns to step 1 and looks like the app losing its place. So: only
+       auto-reload if nobody has touched anything yet. Otherwise the update
+       simply waits for the next natural visit. */
+    var touched=false;
+    ["pointerdown","keydown"].forEach(function(ev){
+      window.addEventListener(ev,function(){ touched=true; },{once:true,capture:true});
+    });
     navigator.serviceWorker.addEventListener("controllerchange",function(){
-      if(!hadController||reloaded) return;
+      if(!hadController||reloaded||touched) return;
       reloaded=true; window.location.reload();
     });
     window.addEventListener("load",function(){
