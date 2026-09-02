@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-m2+Kb8hn+zvfoNif1ZpBOHSFbJ2+Tk2woLYCJ4sU3cg=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-de/BYZcJENXkB4GdHRlpmcRB4N8qqBYwenGMeCTvN8I=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -637,7 +637,7 @@ a:hover{color:var(--ink)}
       <div class="locktag"><span>Salary planning tool</span><span>for public sector managers</span></div>
     </div>
     <div class="note" style="line-height:1.7;text-align:center">
-      <span class="kmc" style="color:var(--ink-2);font-weight:700">Powered by KMC Inc.</span><br>
+      <a class="kmc" href="https://www.linkedin.com/in/john-kiska-cpa-cma-mba-34248b7b/" target="_blank" rel="noopener noreferrer" style="color:var(--ink-2);font-weight:700">Powered by KMC Inc.</a><br>
       Nothing you enter leaves this browser.<br>
       <a href="help.html">How to use it</a> &nbsp;·&nbsp; <a href="privacy.html">Privacy</a>
       &nbsp;·&nbsp; <a href="mailto:jkiska@onstrength.ca?subject=Onstrength">Feedback</a><br>
@@ -661,7 +661,7 @@ a:hover{color:var(--ink)}
   <div class="railfoot">
     <div class="rule"></div>
     <div class="note" style="line-height:1.6">
-      <span class="kmc" style="color:var(--ink-2);font-weight:700">Powered by KMC Inc.</span><br>
+      <a class="kmc" href="https://www.linkedin.com/in/john-kiska-cpa-cma-mba-34248b7b/" target="_blank" rel="noopener noreferrer" style="color:var(--ink-2);font-weight:700">Powered by KMC Inc.</a><br>
       Nothing you enter leaves this browser.<br>
       <a href="help.html">How to use it</a> &nbsp;·&nbsp; <a href="privacy.html">Privacy</a>
       &nbsp;·&nbsp; <a href="mailto:jkiska@onstrength.ca?subject=Onstrength">Feedback</a><br>
@@ -674,12 +674,11 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v28";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v29";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
      better than shipping a link that goes nowhere. */
-  var KMC_URL = "";
 
   /* Where the app lives. Appears at the foot of the note copied for Finance,
      which is the only thing here that travels to someone who has not seen it. */
@@ -1729,14 +1728,6 @@ a:hover{color:var(--ink)}
   try{ seen=localStorage.getItem("complement.seen")==="1"; }catch(e){}
   var fresh=!state.positions.length&&!state.cc.name&&!state.cc.code;
   if(fresh&&!seen) el("intro").classList.remove("hidden");
-  if(KMC_URL){
-    Array.prototype.forEach.call(document.querySelectorAll(".kmc"),function(el){
-      var a=document.createElement("a");
-      a.className="kmc"; a.href=KMC_URL; a.target="_blank"; a.rel="noopener noreferrer";
-      a.style.cssText=el.style.cssText; a.textContent=el.textContent;
-      el.parentNode.replaceChild(a,el);
-    });
-  }
 
   if(!loadFailed) save();
   renderAll();
