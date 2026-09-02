@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-R4ZaZSdsUGo/tOdYAAlDZVguDD3HLwz0oY5magAPsHo='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>How to use Onstrength</title>
 <meta name="description" content="A short guide to Onstrength: set up your cost centre, build your complement, add your estimates, and read the forecast.">
@@ -442,13 +443,19 @@ footer .kmc{font-weight:600;color:var(--ink-2);text-decoration:none}
 
         <ul>
           <li><strong>It doesn't sync.</strong> Set it up on your laptop and it isn't on your
-            phone. Setup has a <strong>Move this to another device</strong> box: copy the text
-            out on one device and paste it in on the other. Names are left out unless you tick
-            the box.</li>
+            phone. Setup has <strong>Save a copy</strong>: it produces one line of text you can
+            keep somewhere safe or move to another device, with names left out unless you tick
+            the box. <strong>Restore a copy</strong> underneath reads it back. Restore only a copy
+            you saved yourself — a roster someone sends you is a file from a stranger, and this is
+            the one place the tool accepts data it did not create.</li>
           <li><strong>Clearing your browser data clears this too.</strong> If you clear site
             data, use a private window, or your organisation wipes browser storage on a
-            schedule, your roster goes with it. For anything you'd hate to retype, copy it out
-            of Setup and keep the text somewhere.</li>
+            schedule, your roster goes with it. For anything you'd hate to retype, use
+            <strong>Save a copy</strong> and keep the text somewhere.</li>
+          <li><strong>Your device lock is the only lock.</strong> There is no password on the
+            roster, so don't use Onstrength on a shared or public machine — it stays in that
+            browser for the next person. And if your browser syncs to a personal account, the
+            roster can travel with it.</li>
         </ul>
 
         <div class="warn">
