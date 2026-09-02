@@ -157,10 +157,11 @@ input.num-in{font-variant-numeric:tabular-nums lining-nums}
   box-shadow:0 1px 2px rgba(17,26,33,.12)}
 
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);
-  border-top:1px solid var(--rule);display:grid;grid-template-columns:repeat(4,1fr);
+  border-top:1px solid var(--rule);display:grid;grid-template-columns:repeat(5,1fr);
   padding:6px 0 calc(10px + env(safe-area-inset-bottom,0px))}
 .tab{background:none;border:none;min-height:54px;padding:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:4px;color:var(--muted);font-size:10px;font-weight:500}
+  align-items:center;justify-content:center;gap:4px;color:var(--muted);font-size:9.5px;font-weight:500;
+  letter-spacing:-.1px;white-space:nowrap}
 .tab[aria-selected="true"]{color:var(--base)}
 .tab{transition:color .14s ease,background .14s ease}
 .tab svg{width:21px;height:21px;flex-shrink:0}
@@ -198,7 +199,7 @@ a.kmc:hover{text-decoration:underline}
     font-size:8.5px;font-weight:500;
     letter-spacing:1.05px;text-transform:uppercase;color:var(--muted);margin-top:9px;line-height:1.5}
   .tab{flex-direction:row;justify-content:flex-start;gap:12px;padding:0 12px;font-size:14px;
-    min-height:44px;border-radius:7px;width:100%}
+    letter-spacing:normal;min-height:44px;border-radius:7px;width:100%}
   .tab[aria-selected="true"]{background:var(--base-soft)}
   .appbar{display:none}
   .navhelp{display:flex;text-decoration:none;margin-top:4px}
@@ -209,6 +210,8 @@ a.kmc:hover{text-decoration:underline}
   .cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
   .cols.lean{grid-template-columns:1.55fr 1fr}
   .cols>*{min-width:0}
+  .est-main{order:1}
+  .est-side{order:2}
   .h-title{font-size:26px}
   .hero{font-size:52px}
   .btn-primary{width:auto;align-self:flex-start;padding:0 28px}
@@ -244,7 +247,7 @@ a:hover{color:var(--ink)}
       <button class="btn-ghost btn-sm" id="intro-x" style="align-self:flex-start">Got it</button>
     </div>
 
-    <h1 class="h-title">Setup</h1>
+    <h1 class="h-title">Set up your cost centre</h1>
 
     <div class="cols">
       <div class="card pad stack g14">
@@ -267,23 +270,33 @@ a:hover{color:var(--ink)}
       </div>
 
       <div class="stack g18">
-        <div class="card pad stack g14">
-          <div class="stack g6">
-            <div class="eyebrow">What you expect on top of base pay</div>
-            <div class="note">Your estimate for the whole year. Base salary is costed exactly from your complement; these are the judgement calls.</div>
-          </div>
-          <div class="stack g14" id="est-list"></div>
-          <div class="rule"></div>
-          <div class="row">
-            <span style="font-size:13.5px;font-weight:600">Total estimates</span>
-            <span class="num" id="est-total" style="font-weight:600;font-size:16px;color:var(--est)">$0</span>
-          </div>
-        </div>
-
         <div class="card pad stack g10">
           <div class="row"><span style="font-size:13px;font-weight:600">Pay rates</span>
             <span class="num" style="font-size:11px;color:var(--muted)" id="rates-version"></span></div>
           <div class="note" id="rates-note"></div>
+        </div>
+
+        <div class="card pad stack g10">
+          <div class="stack g6">
+            <div style="font-size:13px;font-weight:600">Move this to another device</div>
+            <div class="note">Nothing syncs, because nothing is uploaded. Copy the text out here
+              and paste it into Onstrength on your other device.</div>
+          </div>
+          <label style="display:flex;gap:9px;align-items:center;cursor:pointer">
+            <input type="checkbox" id="x-names"
+              style="width:16px;height:16px;min-height:0;padding:0;margin:0;flex:0 0 16px;
+                     accent-color:var(--base)">
+            <span class="note" style="color:var(--ink-2)">Include the names you gave positions</span>
+          </label>
+          <textarea id="x-box" rows="3" spellcheck="false" placeholder="Your roster appears here"
+            style="width:100%;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+                   background:var(--sunk);color:var(--ink-2);border:1px solid var(--rule);
+                   border-radius:9px;padding:10px;resize:vertical"></textarea>
+          <div class="row" style="gap:9px;justify-content:flex-start;flex-wrap:wrap">
+            <button class="btn-ghost btn-sm" id="x-copy">Copy it out</button>
+            <button class="btn-ghost btn-sm" id="x-paste">Load what's in the box</button>
+          </div>
+          <div class="note" id="x-msg"></div>
         </div>
 
         <div class="card pad stack g10">
@@ -298,7 +311,7 @@ a:hover{color:var(--ink)}
   <!-- COMPLEMENT -->
   <section id="p-roster" class="stack g18 hidden">
     <div class="row">
-      <h1 class="h-title">Complement</h1>
+      <h1 class="h-title">Build your complement</h1>
       <span class="num" style="font-size:11px;color:var(--muted)" id="roster-count"></span>
     </div>
     <div class="cols">
@@ -390,6 +403,45 @@ a:hover{color:var(--ink)}
     </div>
   </section>
 
+  <!-- ESTIMATES -->
+  <section id="p-estimates" class="stack g18 hidden">
+    <h1 class="h-title">Add your estimates</h1>
+
+    <div class="cols lean">
+      <!-- Room comes first in the source so it is the first thing read on a
+           phone: you cannot estimate sensibly until you know what base pay has
+           already taken. On a wide screen it sits beside the inputs instead. -->
+      <div class="est-side stack g18">
+        <div class="card pad stack g14">
+          <div class="eyebrow">Room you have to work with</div>
+          <div class="stack g10">
+            <div class="row"><span style="font-size:13.5px;color:var(--ink-2)">Salary budget</span>
+              <span class="num" style="font-size:13.5px" id="e-budget">—</span></div>
+            <div class="row"><span style="font-size:13.5px;color:var(--ink-2)">Base salary, from your complement</span>
+              <span class="num" style="font-size:13.5px" id="e-base">—</span></div>
+            <div class="rule"></div>
+            <div class="row"><span style="font-size:13.5px;font-weight:600" id="e-room-lab">Left for estimates</span>
+              <span class="num" style="font-size:17px;font-weight:600" id="e-room">—</span></div>
+          </div>
+          <div class="note" id="e-note"></div>
+        </div>
+      </div>
+
+      <div class="est-main card pad stack g14">
+        <div class="stack g6">
+          <div class="eyebrow">What you expect on top of base pay</div>
+          <div class="note">Your estimate for the whole year. Base salary is costed exactly from your complement; these are the judgement calls.</div>
+        </div>
+        <div class="stack g14" id="est-list"></div>
+        <div class="rule"></div>
+        <div class="row">
+          <span style="font-size:13.5px;font-weight:600">Total estimates</span>
+          <span class="num" id="est-total" style="font-weight:600;font-size:16px;color:var(--est)">$0</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- FORECAST -->
   <section id="p-forecast" class="stack g18 hidden">
     <div class="row">
@@ -467,7 +519,7 @@ a:hover{color:var(--ink)}
   <!-- WHAT IF -->
   <section id="p-scenario" class="stack g18 hidden">
     <div class="stack g6">
-      <h1 class="h-title">What if?</h1>
+      <h1 class="h-title">Test a change</h1>
       <div class="sub">Stack up changes you are considering and see where the year lands if they all happen.</div>
     </div>
     <div class="cols">
@@ -528,6 +580,7 @@ a:hover{color:var(--ink)}
   </div>
   <button class="tab" role="tab" data-tab="setup" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-2.9 1.2V21a2 2 0 11-4 0v-.1A1.7 1.7 0 007 19.4a1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1A1.7 1.7 0 003 15a2 2 0 010-4 1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1A1.7 1.7 0 009 4.6 2 2 0 0111 3a2 2 0 014 0 1.7 1.7 0 001.1 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V11a2 2 0 010 4z"/></svg>Setup</button>
   <button class="tab" role="tab" data-tab="roster" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8"/><path d="M8 13h8"/><path d="M8 17h4"/></svg>Complement</button>
+  <button class="tab" role="tab" data-tab="estimates" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2.4"/><path d="M9 7h6"/><path d="M9 11.5h.01"/><path d="M12 11.5h.01"/><path d="M15 11.5h.01"/><path d="M9 15.5h.01"/><path d="M12 15.5h.01"/><path d="M15 15.5v3.5"/><path d="M9 19h3.5"/></svg>Estimates</button>
   <button class="tab" role="tab" data-tab="forecast" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 5-8"/><path d="M3 21h18"/></svg>Forecast</button>
   <button class="tab" role="tab" data-tab="scenario" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3-3"/><path d="M20 16H7l3 3"/></svg>What if</button>
   <a class="tab navhelp" href="help.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 114.1 2.3c-.9.7-1.7 1.1-1.7 2.2"/><path d="M12 17.2h.01"/></svg>How to use it</a>
@@ -834,6 +887,7 @@ a:hover{color:var(--ink)}
     });
     el("k-filled").textContent=c.filled; el("k-vacant").textContent=c.vacant; el("k-other").textContent=c.other;
     el("fresh-note").textContent=state.positions.length?"":"Nothing here yet. Add your positions on the Complement tab, or load the example from Setup.";
+    estRoom();
     renderAdvice(f);
   }
 
@@ -1021,15 +1075,34 @@ a:hover{color:var(--ink)}
       });
     });
     el("est-total").textContent=money(estTotal());
+    estRoom();
+  }
+
+  /* The room panel on the Estimates tab. You cannot make a sensible estimate
+     until you know what base pay has already eaten, so we put the arithmetic
+     in front of the person filling the boxes. */
+  function estRoom(){
+    var f=forecast(), room=f.budget-f.base, over=room<0;
+    el("e-budget").textContent=f.budget?money(f.budget):"Not set";
+    el("e-base").textContent=money(f.base);
+    el("e-room-lab").textContent=over?"Base pay is over by":"Left for estimates";
+    el("e-room").textContent=f.budget?money(Math.abs(room)):"\u2014";
+    el("e-room").style.color=f.budget?(over?"var(--bad)":"var(--good)"):"var(--muted)";
+    var n;
+    if(!f.budget) n="Set a salary budget on the Setup tab and this will show how much room your estimates have.";
+    else if(!state.positions.length) n="Add your positions on the Complement tab first \u2014 base pay is most of the year, and this figure is not meaningful without it.";
+    else if(over) n="Your complement already costs more than the budget. Anything you enter here adds to the overrun.";
+    else n="Your estimates currently use "+(room?Math.round(estTotal()/room*100):0)+"% of that room.";
+    el("e-note").textContent=n;
   }
 
   function renderSetup(){
     var c=state.cc;
+    xFill();
     el("c-name").value=c.name||""; el("c-code").value=c.code||"";
     el("c-fy").value=c.fy||"2026-04-01"; el("c-periods").value=c.periods||26;
     el("c-sal").value=c.salaryBudget||"";
     el("c-minor").value=c.bandMinor||5; el("c-major").value=c.bandMajor||15;
-    renderEstimates();
     var keys=Object.keys(RATES), levels=0, steps=0;
     keys.forEach(function(g){ Object.keys(RATES[g].levels).forEach(function(l){ levels++; steps+=RATES[g].levels[l].length; }); });
     el("rates-version").textContent=RATEMETA.version;
@@ -1173,10 +1246,10 @@ a:hover{color:var(--ink)}
     el("s-py").textContent=py.toFixed(1)+" person-years";
   }
 
-  function renderAll(){ renderForecast(); renderRoster(); renderScenario(); renderSetup(); }
+  function renderAll(){ renderForecast(); renderRoster(); renderScenario(); renderSetup(); renderEstimates(); }
 
   // ---- tabs -------------------------------------------------------------
-  var PAGES=["setup","roster","forecast","scenario"];
+  var PAGES=["setup","roster","estimates","forecast","scenario"];
   function show(tab){
     PAGES.forEach(function(p){ el("p-"+p).classList.toggle("hidden",p!==tab); });
     Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){
@@ -1237,6 +1310,46 @@ a:hover{color:var(--ink)}
     if(!moves.filter(function(m){return m.on;}).length) return;
     state.positions=withMoves(moves); moves=[];
     save(); renderAll(); show("forecast");
+  });
+
+  /* Copy-out / paste-in. localStorage never leaves the device, so this is the
+     only way a roster gets from a laptop to a phone. Names are left out unless
+     asked for, because a roster pasted into a chat window is the likeliest way
+     this app ever leaks anything. */
+  function xText(){
+    var out={ v:3, cc:state.cc, estimates:state.estimates, positions:state.positions };
+    if(el("x-names").checked) out.nicknames=state.nicknames;
+    return JSON.stringify(out);
+  }
+  function xMsg(t){ el("x-msg").textContent=t; }
+  function xFill(){ if(el("x-box")) el("x-box").value=xText(); }
+  el("x-names").addEventListener("change",function(){ xFill(); xMsg(""); });
+  el("x-copy").addEventListener("click",function(){
+    var box=el("x-box"); xFill();
+    box.select(); box.setSelectionRange(0,999999);
+    var done=false;
+    try{ done=document.execCommand("copy"); }catch(e){}
+    if(!done&&navigator.clipboard){ navigator.clipboard.writeText(box.value).catch(function(){}); done=true; }
+    xMsg(done?"Copied. Paste it into the same box on your other device.":"Could not copy — select the text and copy it yourself.");
+  });
+  el("x-paste").addEventListener("click",function(){
+    var raw=el("x-box").value.trim();
+    if(!raw){ xMsg("Paste your copied text into the box first."); return; }
+    var p;
+    try{ p=JSON.parse(raw); }catch(e){ xMsg("That does not look like a roster. Copy the whole line, from { to }."); return; }
+    if(!p||!p.cc||!Array.isArray(p.positions)){ xMsg("That does not look like a roster."); return; }
+    var b=el("x-paste");
+    if(b.dataset.armed!=="1"){
+      b.dataset.armed="1"; b.textContent="Click again to replace what's here";
+      xMsg("This replaces everything currently in this browser: "+p.positions.length+" position"+
+           (p.positions.length===1?"":"s")+" would come in.");
+      setTimeout(function(){ b.dataset.armed="0"; b.textContent="Load what's in the box"; },6000);
+      return;
+    }
+    b.dataset.armed="0"; b.textContent="Load what's in the box";
+    state.cc=p.cc; state.estimates=p.estimates||{}; state.positions=p.positions;
+    state.nicknames=p.nicknames||{};
+    save(); renderAll(); xMsg("Loaded."); show("forecast");
   });
 
   el("adv-copy").addEventListener("click",function(){
