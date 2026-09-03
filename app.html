@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-3+YpuWoM7hhyWY7Bqb/Jx/lmcS78ULFL02wpMk/O0nY=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-6J2G0AYbCFVJNuVmmAFp9fOKGvpVbOUKjFdzcD1334I=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -256,6 +256,25 @@ a.kmc:hover{text-decoration:underline}
   text-align:center}
 .demobar b{font-weight:700}
 .demobar a{color:var(--est);font-weight:600}
+#tour{position:fixed;inset:0;z-index:60}
+/* The dimming is a giant shadow cast outward from the highlighted rectangle,
+   so there is exactly one element to move and no four-panel mask to keep in
+   register. */
+#tour-spot{position:absolute;border-radius:12px;box-shadow:0 0 0 9999px rgba(9,13,24,.62);
+  transition:all .45s cubic-bezier(.4,0,.2,1);pointer-events:none}
+#tour-panel{position:absolute;left:14px;right:14px;bottom:calc(84px + env(safe-area-inset-bottom,0px));
+  background:var(--surface);border:1px solid var(--rule);border-radius:var(--r-md);
+  padding:16px 18px;box-shadow:0 18px 40px -12px rgba(9,13,24,.5);display:flex;
+  flex-direction:column;gap:10px}
+#tour-cap{font-size:15px;line-height:1.5;color:var(--ink);text-wrap:balance}
+#tour-foot{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#tour-dots{display:flex;gap:6px}
+#tour-dots i{width:6px;height:6px;border-radius:50%;background:var(--rule);display:block;
+  transition:background .2s ease}
+#tour-dots i.on{background:var(--base)}
+@media (min-width:900px){
+  #tour-panel{left:auto;right:34px;bottom:34px;width:380px}
+}
 .hidden{display:none!important}
 .empty{text-align:center;color:var(--muted);font-size:13.5px;padding:30px 20px}
 a{color:var(--base)}
@@ -297,7 +316,10 @@ a:hover{color:var(--ink)}
         </div>
       </div>
       <div class="note">Everything stays in this browser. No account, nothing uploaded, and nobody else — including me — can see what you enter.</div>
-      <button class="btn-ghost btn-sm" id="intro-x" style="align-self:flex-start">Got it</button>
+      <div class="row" style="gap:9px;justify-content:flex-start;flex-wrap:wrap">
+        <button class="btn-primary btn-sm" id="intro-tour" style="width:auto;align-self:flex-start;padding:0 16px">Show me — 30 seconds</button>
+        <button class="btn-ghost btn-sm" id="intro-x">Got it</button>
+      </div>
     </div>
 
     <h1 class="h-title">Set up your cost centre</h1>
@@ -647,6 +669,24 @@ a:hover{color:var(--ink)}
 
 </div>
 
+<!-- The guided tour. It drives the real interface rather than showing pictures
+     of it, so it cannot fall out of step with the app the way a screenshot or a
+     recording does — and it costs no images, no video and no extra requests. -->
+<div id="tour" class="hidden" role="dialog" aria-modal="true" aria-labelledby="tour-cap">
+  <div id="tour-spot"></div>
+  <div id="tour-panel">
+    <div id="tour-eyebrow" class="eyebrow"></div>
+    <div id="tour-cap"></div>
+    <div id="tour-foot">
+      <div id="tour-dots" aria-hidden="true"></div>
+      <div class="row" style="gap:8px;justify-content:flex-end">
+        <button class="btn-quiet" id="tour-skip" style="font-size:13px">Skip</button>
+        <button class="btn-primary btn-sm" id="tour-next" style="width:auto;padding:0 18px">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <nav class="tabs" role="tablist">
   <a class="brand" href="index.html">
     <div class="brandrow"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="2" width="9" height="9" rx="2.4" fill="currentColor"/><rect x="13" y="2" width="9" height="9" rx="2.4" fill="currentColor"/><rect x="2" y="13" width="9" height="9" rx="2.4" fill="currentColor"/><rect x="13.9" y="13.9" width="7.2" height="7.2" rx="1.8" fill="none" stroke="var(--est)" stroke-width="1.8"/></svg>Onstrength</div>
@@ -674,7 +714,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v30";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v31";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -1487,6 +1527,103 @@ a:hover{color:var(--ink)}
     });
   }
 
+  /* ---- guided tour -----------------------------------------------------
+
+     Someone told us the screens are clear but working out what to do with them
+     takes effort. Written instructions do not fix that, because the people who
+     need them are the ones who do not read them. So the app shows itself.
+
+     It runs on the example roster with saving suspended, and puts the real
+     state back when it ends, so a tour started by someone with a real cost
+     centre cannot cost them anything. */
+  var TOUR = [
+    { tab:"setup",     sel:"#c-sal",
+      eyebrow:"Step 1 · Set up your cost centre",
+      cap:"Start with what you were given. Your budget, and when your fiscal year begins — everything else is measured against this." },
+    { tab:"roster",    sel:"#roster-list",
+      eyebrow:"Step 2 · Build your complement",
+      cap:"Add every position you are responsible for, filled or vacant. Pick the group, level and step; the published rate fills itself in." },
+    { tab:"estimates", sel:"#e-room",
+      eyebrow:"Step 3 · Add your estimates",
+      cap:"Now the judgement calls — overtime, acting pay, premiums. Base salary is already costed, so you can see how much room they have." },
+    { tab:"forecast",  sel:"#var-num",
+      eyebrow:"Step 4 · Your forecast",
+      cap:"Where the year lands, and what to do about it. This is the screen you will live on." },
+    { tab:"scenario",  sel:"#move-add",
+      eyebrow:"Step 5 · Test a change",
+      cap:"Try a change before you make it — hold a vacancy, move a start date — without touching your real complement." }
+  ];
+
+  var tourAt = -1, tourTimer = null, tourSaved = null, tourWasDemo = false;
+  var slowly = false;
+  try{ slowly = window.matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){}
+
+  function tourStart(){
+    tourSaved = JSON.parse(JSON.stringify(state));
+    tourWasDemo = demoMode;
+    demoMode = true;                    // nothing is written while the tour runs
+    state = demo();
+    renderAll();
+    el("intro").classList.add("hidden");
+    el("tour").classList.remove("hidden");
+    tourGo(0);
+  }
+
+  function tourEnd(){
+    clearTimeout(tourTimer);
+    el("tour").classList.add("hidden");
+    state = tourSaved || blank();
+    demoMode = tourWasDemo;
+    tourSaved = null; tourAt = -1;
+    renderAll();
+    show("setup");
+    try{ localStorage.setItem("complement.seen","1"); }catch(e){}
+  }
+
+  function tourGo(i){
+    clearTimeout(tourTimer);
+    if(i >= TOUR.length) return tourEnd();
+    tourAt = i;
+    var stepDef = TOUR[i];
+    show(stepDef.tab);
+    el("tour-eyebrow").textContent = stepDef.eyebrow;
+    el("tour-cap").textContent = stepDef.cap;
+    el("tour-next").textContent = (i === TOUR.length - 1) ? "Start using it" : "Next";
+    el("tour-dots").innerHTML = TOUR.map(function(_,k){
+      return '<i class="'+(k<=i?"on":"")+'"></i>';
+    }).join("");
+
+    var target = document.querySelector(stepDef.sel);
+    if(target){
+      target.scrollIntoView({ block:"center", behavior: slowly ? "auto" : "smooth" });
+      setTimeout(function(){ tourSpot(target); }, slowly ? 0 : 320);
+    }
+    /* Reduced motion means no timed advance: the reader moves at their own
+       pace rather than being carried. */
+    if(!slowly) tourTimer = setTimeout(function(){ tourGo(i+1); }, 6000);
+  }
+
+  function tourSpot(target){
+    var r = target.getBoundingClientRect(), pad = 8, spot = el("tour-spot");
+    spot.style.top    = Math.max(4, r.top - pad) + "px";
+    spot.style.left   = Math.max(4, r.left - pad) + "px";
+    spot.style.width  = Math.min(window.innerWidth - 8, r.width + pad*2) + "px";
+    spot.style.height = (r.height + pad*2) + "px";
+  }
+
+  el("intro-tour").addEventListener("click", tourStart);
+  el("tour-skip").addEventListener("click", tourEnd);
+  el("tour-next").addEventListener("click", function(){ tourGo(tourAt + 1); });
+  window.addEventListener("keydown", function(e){
+    if(el("tour").classList.contains("hidden")) return;
+    if(e.key === "Escape") tourEnd();
+    if(e.key === "ArrowRight" || e.key === "Enter") tourGo(tourAt + 1);
+  });
+  window.addEventListener("resize", function(){
+    if(el("tour").classList.contains("hidden") || tourAt < 0) return;
+    var t = document.querySelector(TOUR[tourAt].sel); if(t) tourSpot(t);
+  });
+
   // ---- tabs -------------------------------------------------------------
   var PAGES=["setup","roster","estimates","forecast","scenario"];
   function show(tab){
@@ -1749,6 +1886,14 @@ a:hover{color:var(--ink)}
      convenience. The worked example is the exception: that link exists to show
      someone the answer, so it goes straight to it. */
   show(demoMode?"forecast":"setup");
+
+  /* app.html?tour=1 starts the walkthrough on demand. The intro card only
+     appears on a first visit, so without this the tour would be unreachable
+     for anyone who had already dismissed it — and it gives the guide, and a
+     link you can send someone, a way in. */
+  try{
+    if(/[?&]tour(=1)?(&|$)/.test(location.search)) setTimeout(tourStart,350);
+  }catch(e){}
 })();
 </script>
 
