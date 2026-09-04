@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-i6xnzzy5a6ow9vmzdMDkxx0nGNH0NCvQ0UyxZUCY9Mk=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-oEpjzOVJg9ssl5vuN0dZIWwMi7sJklluw2tA61rCHL0=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -394,6 +394,18 @@ a:hover{color:var(--ink)}
           </div>
         </div>
 
+        <!-- A forecast is an annual document. Without this, April means typing
+             the whole complement in again, which is where most people stop. -->
+        <div class="card pad stack g14" id="roll-card">
+          <div class="stack g6">
+            <div style="font-size:13px;font-weight:600">Roll forward to next year</div>
+            <div class="note" id="roll-lead"></div>
+          </div>
+          <div class="stack g6" id="roll-what"></div>
+          <button class="btn-ghost btn-sm" id="roll-go" style="align-self:flex-start;width:auto;padding:0 16px">Roll forward</button>
+          <div class="note" id="roll-msg"></div>
+        </div>
+
         <div class="card pad stack g10">
           <div style="font-size:13px;font-weight:600">Start over</div>
           <button class="btn-ghost btn-sm" id="c-demo" style="align-self:flex-start">Load an example cost centre</button>
@@ -412,7 +424,41 @@ a:hover{color:var(--ink)}
     <div class="cols">
       <div class="stack g14">
         <div class="card stack" id="roster-list"></div>
-        <button class="btn-ghost" id="add-position">Add a position</button>
+        <div class="row" style="gap:9px;flex-wrap:wrap">
+          <button class="btn-ghost" id="add-position" style="flex:1 1 170px">Add a position</button>
+          <button class="btn-ghost" id="add-many" style="flex:1 1 170px">Add several at once</button>
+        </div>
+      </div>
+
+      <!-- Most complements are mostly one classification. Typing twenty of them
+           one at a time is the work that stops people finishing, so this lays
+           them all down at once and leaves the tailoring for afterwards. -->
+      <div class="card pad stack g14 hidden lift" id="bulk">
+        <div class="row"><span style="font-size:15px;font-weight:700">Add several at once</span>
+          <button class="btn-quiet" id="bulk-close">Close</button></div>
+        <div class="rule"></div>
+        <div class="note">Lay down a block of positions at one classification, then open each and
+          change what is different — the step, who is in it, when it falls vacant.</div>
+
+        <div class="two">
+          <label class="f"><span>How many</span><input class="num-in" id="b-count" inputmode="numeric" value="10"></label>
+          <label class="f"><span>Title</span><input id="b-title" placeholder="Financial Analyst"></label>
+        </div>
+        <label class="f"><span>Classification group</span><select id="b-group"></select></label>
+        <div class="two">
+          <label class="f"><span>Level</span><select id="b-level"></select></label>
+          <label class="f"><span id="b-step-label">Step</span><select id="b-step"></select></label>
+        </div>
+        <label class="f"><span>Position numbers from
+            <span style="color:var(--muted);font-weight:400">— optional, counts up</span></span>
+          <input class="num-in" id="b-num" inputmode="numeric" placeholder="3121"></label>
+
+        <div class="row" style="background:var(--sunk);border-radius:7px;padding:14px 16px">
+          <span style="font-size:12.5px;color:var(--ink-2)" id="b-what">—</span>
+          <span class="num" style="font-weight:600;font-size:16px" id="b-preview">$0</span>
+        </div>
+        <button class="btn-primary full" id="b-save">Add them</button>
+        <div class="note" id="b-msg"></div>
       </div>
 
       <div class="card pad stack g14 hidden lift" id="editor">
@@ -493,6 +539,9 @@ a:hover{color:var(--ink)}
           <span class="num" style="font-weight:600;font-size:16px" id="f-preview">$0</span>
         </div>
         <button class="btn-primary full" id="f-save">Save position</button>
+        <!-- Serial entry: keeps everything on screen, gives it a new number,
+             and drops the name, which is the only field that never repeats. -->
+        <button class="btn-ghost btn-sm" id="f-again">Save and add another like this</button>
         <button class="btn-quiet hidden" id="f-delete" style="color:var(--bad)">Delete this position</button>
       </div>
     </div>
@@ -545,6 +594,14 @@ a:hover{color:var(--ink)}
         <h1 class="h-title">Where you'll land</h1>
       </div>
       <div class="num" style="font-size:11px;color:var(--muted);text-align:right" id="fy-label"></div>
+    </div>
+
+    <!-- Shown only once the year on screen is over. That is the moment the tool
+         looks stale to someone coming back in April, and the moment the roll
+         forward is worth knowing about. -->
+    <div class="card pad row hidden" id="stale" style="gap:12px;flex-wrap:wrap;border-left:4px solid var(--est)">
+      <span class="note" id="stale-txt" style="flex:1 1 240px"></span>
+      <button class="btn-quiet" id="stale-go">Roll it forward</button>
     </div>
 
     <div class="card pad stack g18 lift heroCard" id="hero-card">
@@ -714,7 +771,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v32";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v34";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -1075,6 +1132,13 @@ a:hover{color:var(--ink)}
     var fs=new Date(fyStart()), fe=new Date(fyEnd()-DAY);
     el("fy-label").textContent="FY "+String(fs.getUTCFullYear()).slice(2)+"–"+String(fe.getUTCFullYear()).slice(2)+" · "+nPeriods()+" PP";
 
+    /* Someone opening this in April is looking at a finished year and has no
+       reason to guess that a roll forward exists three tabs away. */
+    var ended=Date.now()>fyEnd()&&state.positions.length>0;
+    el("stale").classList.toggle("hidden",!ended);
+    if(ended) el("stale-txt").textContent="This forecast covers a year that ended on "+fmtDate(fyEnd()-DAY)+
+      ". Carry the complement you have already built into the new year rather than typing it again.";
+
     var over=f.variance<0;
     el("var-label").textContent=over?"Projected overrun":"Projected surplus";
     var hero=el("var-num");
@@ -1157,20 +1221,22 @@ a:hover{color:var(--ink)}
   }
 
   // ---- rate picker ------------------------------------------------------
-  function fillGroups(){
-    el("f-group").innerHTML=Object.keys(RATES).sort().map(function(g){
+  /* Two pickers use these now — the position editor and the bulk add — so they
+     take the elements they are filling rather than assuming the editor's. */
+  function fillGroups(id,withOther){
+    el(id).innerHTML=Object.keys(RATES).sort().map(function(g){
       return '<option value="'+esc(g)+'">'+esc(g)+" — "+esc(RATES[g].name)+"</option>";
-    }).join("")+'<option value="">Other — type a salary</option>';
+    }).join("")+(withOther?'<option value="">Other — type a salary</option>':"");
   }
-  function fillLevels(group,keep){
-    var sel=el("f-level");
+  function fillLevels(id,group,keep){
+    var sel=el(id);
     if(!hasRate(group)){ sel.innerHTML=""; sel.disabled=true; return; }
     sel.disabled=false;
     sel.innerHTML=Object.keys(RATES[group].levels).map(function(l){return '<option value="'+esc(l)+'">'+esc(l)+"</option>";}).join("");
     if(keep&&RATES[group].levels[keep]) sel.value=keep;
   }
-  function fillSteps(group,level,keep){
-    var sel=el("f-step"), lbl=el("f-step-label");
+  function fillSteps(id,labelId,group,level,keep){
+    var sel=el(id), lbl=el(labelId);
     if(!hasLevel(group,level)){ sel.innerHTML=""; sel.disabled=true; lbl.textContent="Step"; return; }
     sel.disabled=false;
     var grp=RATES[group], steps=grp.levels[level], isRange=!!grp.range&&steps.length===2;
@@ -1269,6 +1335,7 @@ a:hover{color:var(--ink)}
   function previewCost(){ el("f-preview").textContent=money(costOf(draft(),null)); }
 
   function openEditor(id){
+    closeBulk();
     editing=id||null;
     var p=id?state.positions.filter(function(x){return x.id===id;})[0]:null;
     el("editor-title").textContent=p?"Edit position":"New position";
@@ -1277,8 +1344,8 @@ a:hover{color:var(--ink)}
     el("f-nick").value=p?nickOf(p.id):"";
     var g=p?(p.group||""):"EC";
     el("f-group").value=g;
-    fillLevels(g,p?p.level:null);
-    fillSteps(g,el("f-level").value,p?p.step:null);
+    fillLevels("f-level",g,p?p.level:null);
+    fillSteps("f-step","f-step-label",g,el("f-level").value,p?p.step:null);
     el("f-salary").value=p&&!p.group?p.salary||"":"";
     el("f-hours").value=p&&p.hours?p.hours:"";
     el("f-fte").value=p?((p.fte==null||p.fte==="")?100:p.fte):100;
@@ -1300,6 +1367,30 @@ a:hover{color:var(--ink)}
     if(window.innerWidth<900) el("editor").scrollIntoView({behavior:"smooth",block:"start"});
   }
   function closeEditor(){ el("editor").classList.add("hidden"); editing=null; }
+
+  /* ---- adding several at once -------------------------------------------
+
+     A finance director with twenty FIs should not have to open twenty empty
+     forms to find that out. This lays down the block at one classification —
+     the part that is the same for all of them — and the editor then handles
+     the part that is not. It is the same shape of position the editor writes,
+     so nothing downstream has to know these arrived together. */
+  function bulkCount(){ return Math.max(1,Math.min(200,Math.round(num(el("b-count").value)||0)))||1; }
+  function bulkSync(){
+    var g=el("b-group").value, l=el("b-level").value, st=parseInt(el("b-step").value,10)||1;
+    var n=bulkCount(), each=scenarioRate(g,l,st);
+    el("b-what").textContent=n+" × "+(l||g)+(hasLevel(g,l)&&RATES[g].levels[l].length>1?" step "+st:"")+
+      " at "+money(each)+" each";
+    el("b-preview").textContent=money(each*n);
+  }
+  function openBulk(){
+    closeEditor();
+    el("bulk").classList.remove("hidden");
+    el("b-msg").textContent="";
+    bulkSync();
+    if(el("bulk").scrollIntoView) el("bulk").scrollIntoView({block:"nearest"});
+  }
+  function closeBulk(){ el("bulk").classList.add("hidden"); }
 
   // ---- estimates --------------------------------------------------------
   function renderEstimates(){
@@ -1353,6 +1444,138 @@ a:hover{color:var(--ink)}
     el("rates-note").textContent=keys.length+" Government of Canada classification groups, "+levels+" levels, "+steps+
       " steps. Each group follows its own collective agreement, so effective dates differ. Check a figure against the agreement before relying on it, and pick Other for anything the tables do not cover."+
       "\n\nTwenty-three groups (GL, GS, HP, HS) publish an hourly rate. Those are costed at 1,950 paid hours a year — 37.5 hours a week — unless you change the figure on the position. If your group works a 40-hour week, use 2,080: the difference is about 6.7% a year.";
+    renderRoll();
+  }
+
+  /* ---- roll forward ------------------------------------------------------
+
+     A salary forecast is an annual document. In April the manager who built
+     one last year has to build it again, and doing that by hand means
+     retyping the whole complement — which is the point at which most people
+     stop using a tool like this.
+
+     So this does the mechanical part of a new year. The window moves on by a
+     calendar year. Increments that have fallen due are applied and the next
+     one is dated a year later, until the position reaches the top of its
+     range. Changes carrying a date now in the past — a move to part time, a
+     vacancy filled, leave that has ended — stop being future events and
+     become the position's ordinary state. Anyone whose end date has passed
+     leaves the position behind as a vacancy with no start date, so it costs
+     nothing until the manager decides what happens to it.
+
+     What it will not do is guess at what it cannot know: next year's salary
+     budget, an economic increase not yet in the tables, or whether a vacated
+     position still exists. Those carry over untouched and are said out loud,
+     rather than quietly invented. */
+
+  function own(o,k){ return Object.prototype.hasOwnProperty.call(o,k); }
+  function clone(o){ var c={}; for(var k in o) if(own(o,k)) c[k]=o[k]; return c; }
+  function plusYear(iso){
+    var d=new Date(toTs(iso));
+    return toIso(Date.UTC(d.getUTCFullYear()+1,d.getUTCMonth(),d.getUTCDate()));
+  }
+  function fyLabel(startTs,periods){
+    var a=new Date(startTs), b=new Date(startTs+Math.max(1,periods||26)*14*DAY-DAY);
+    return "FY "+String(a.getUTCFullYear()).slice(2)+"–"+String(b.getUTCFullYear()).slice(2);
+  }
+
+  /* Builds the next year without touching the current one. Nothing here writes
+     to state, so the same call serves the preview and the commit. */
+  function rollPlan(){
+    var d=new Date(fyStart());
+    var ny=Date.UTC(d.getUTCFullYear()+1,d.getUTCMonth(),d.getUTCDate());
+    var cc=clone(state.cc); cc.fy=toIso(ny);
+    var st={inc:0,top:0,fte:0,filled:0,vacated:0,leave:0}, nicks={};
+
+    var ps=state.positions.map(function(p){
+      var q=clone(p), guard=0;
+
+      /* A roster left for two years owes two increments, so this loops. The
+         guard is there because a date arithmetic bug should cost a wrong
+         figure, not a hung tab. */
+      while(q.incdate&&toTs(q.incdate)<ny&&guard++<12){
+        var arr=hasLevel(q.group,q.level)?RATES[q.group].levels[q.level]:null;
+        var was=num(q.salary);
+        if(num(q.next)>0) q.salary=num(q.next);
+        if(arr&&q.step<arr.length) q.step=q.step+1;
+        if(arr&&q.step<arr.length){
+          var nx=nextStepRate(q.group,q.level,q.step)||0;
+          q.next=isHourly(q.group)?nx*(num(q.hours)||1950):nx;
+          q.incdate=plusYear(q.incdate);
+        } else {
+          /* Top of the range, or a custom rate with no table to advance:
+             there is no further step to schedule. */
+          if(arr) st.top++;
+          q.incdate=""; q.next=0;
+        }
+        if(num(q.salary)!==was) st.inc++;
+      }
+
+      if(q.ftedate&&toTs(q.ftedate)<ny){
+        if(num(q.ftenext)>0){ q.fte=num(q.ftenext); st.fte++; }
+        q.ftedate=""; q.ftenext=0;
+      }
+
+      if(q.mode==="vacant"){
+        /* A vacancy with no start date is one nobody has committed to filling.
+           Rolling it forward must not commit on their behalf. */
+        var s0=toTs(q.start);
+        if(s0&&s0<ny){ q.mode="filled"; q.start=""; st.filled++; }
+      } else if(q.mode==="leaving"){
+        var e0=toTs(q.end);
+        if(e0&&e0<ny){ q.mode="vacant"; q.end=""; q.start=""; st.vacated++; }
+      } else if(q.mode==="unpaid"){
+        var u1=toTs(q.uto);
+        if(u1&&u1<=ny){ q.mode="filled"; q.ufrom=""; q.uto=""; st.leave++; }
+      }
+
+      /* The editor refuses a name on a vacancy, so a position that has just
+         been vacated must lose the departing person's name here too. */
+      var n=nickOf(p.id);
+      if(n&&q.mode!=="vacant") nicks[q.id]=n;
+      return q;
+    });
+
+    return { cc:cc, positions:ps, nicknames:nicks, stats:st, ny:ny };
+  }
+
+  /* Costing the plan needs next year's window, and the engine reads that from
+     state. Swapped in and out synchronously, with nothing in between that can
+     save, so no partial year can ever be written. */
+  function rollCost(plan){
+    var old=state, f;
+    state={ cc:plan.cc, estimates:old.estimates, positions:plan.positions, nicknames:old.nicknames };
+    try{ f=forecastOn(plan.positions); } finally { state=old; }
+    return f;
+  }
+
+  function renderRoll(){
+    if(!el("roll-card")) return;
+    var go=el("roll-go"), what=el("roll-what");
+    if(!state.positions.length){
+      el("roll-lead").textContent="Next April this carries your complement into the new year — "+
+        "increments applied, dated changes folded in — instead of making you type it all again. "+
+        "Build your complement first.";
+      what.textContent=""; go.classList.add("hidden"); return;
+    }
+    go.classList.remove("hidden");
+    var plan=rollPlan(), s=plan.stats, n=plan.positions.length;
+    el("roll-lead").textContent="Moves the year to "+fmtDate(plan.ny)+" and applies twelve months of "+
+      "change. Save a copy above first — this replaces the year on screen and there is no undo.";
+    go.textContent="Roll forward to "+fyLabel(plan.ny,plan.cc.periods);
+
+    var lines=[n+" position"+(n===1?"":"s")+" carried forward"];
+    if(s.inc) lines.push(s.inc+" increment"+(s.inc===1?"":"s")+" applied");
+    if(s.top) lines.push(s.top+" position"+(s.top===1?" reaches":"s reach")+" the top of the range — no further step");
+    if(s.fte) lines.push(s.fte+" part-time change"+(s.fte===1?"":"s")+" now in effect for the whole year");
+    if(s.filled) lines.push(s.filled+" vacanc"+(s.filled===1?"y":"ies")+" now filled for the whole year");
+    if(s.leave) lines.push(s.leave+" period"+(s.leave===1?"":"s")+" of leave ended");
+    if(s.vacated) lines.push(s.vacated+" departure"+(s.vacated===1?" leaves a vacancy":"s leave vacancies")+
+      " with no start date — costing nothing until you decide");
+    var cur=forecast(), nxt=rollCost(plan), d=nxt.base-cur.base;
+    lines.push("Base salary becomes "+money(nxt.base)+(Math.abs(d)<1?", unchanged":", "+signed(d)+" against this year"));
+    lines.push("Your salary budget and your six estimates carry over unchanged — neither can be known yet");
+    what.innerHTML=lines.map(function(t){ return '<div class="note">· '+esc(t)+"</div>"; }).join("");
   }
 
   // ---- scenario ---------------------------------------------------------
@@ -1638,16 +1861,24 @@ a:hover{color:var(--ink)}
   });
 
   // ---- wiring -----------------------------------------------------------
-  fillGroups();
+  fillGroups("f-group",true);
+  /* The bulk picker opens on EC, the largest group in the public service, so
+     the panel is never empty and never needs "Other" — a block of positions
+     at a salary you typed is a spreadsheet, not a complement. */
+  fillGroups("b-group",false);
+  if(hasRate("EC")) el("b-group").value="EC";
+  fillLevels("b-level",el("b-group").value,null);
+  fillSteps("b-step","b-step-label",el("b-group").value,el("b-level").value,null);
+  bulkSync();
   el("add-position").addEventListener("click",function(){ openEditor(null); });
   el("editor-close").addEventListener("click",closeEditor);
   Array.prototype.forEach.call(el("f-mode").children,function(b){
     b.addEventListener("click",function(){ setMode(b.getAttribute("data-mode")); });
   });
   el("f-group").addEventListener("change",function(){
-    var g=el("f-group").value; fillLevels(g,null); fillSteps(g,el("f-level").value,null); syncRate();
+    var g=el("f-group").value; fillLevels("f-level",g,null); fillSteps("f-step","f-step-label",g,el("f-level").value,null); syncRate();
   });
-  el("f-level").addEventListener("change",function(){ fillSteps(el("f-group").value,el("f-level").value,null); syncRate(); });
+  el("f-level").addEventListener("change",function(){ fillSteps("f-step","f-step-label",el("f-group").value,el("f-level").value,null); syncRate(); });
   el("f-step").addEventListener("change",syncRate);
   el("f-inc").addEventListener("change",function(){ el("w-inc").classList.toggle("hidden",!el("f-inc").checked); syncRate(); });
   el("f-ftechg").addEventListener("change",function(){ el("w-ftechg").classList.toggle("hidden",!el("f-ftechg").checked); syncRate(); });
@@ -1659,14 +1890,73 @@ a:hover{color:var(--ink)}
   ["f-salary","f-start","f-end","f-ufrom","f-uto","f-incdate","f-ftedate","f-ftenext"].forEach(function(id){
     el(id).addEventListener("input",previewCost);
   });
-  el("f-save").addEventListener("click",function(){
+  function savePosition(){
     var p=draft();
-    if(!p.title&&!p.num){ el("f-title").focus(); return; }
+    if(!p.title&&!p.num){ el("f-title").focus(); return null; }
     var i=-1; state.positions.forEach(function(x,k){ if(x.id===p.id) i=k; });
     if(i>=0) state.positions[i]=p; else state.positions.push(p);
     var nick=el("f-nick").value.trim();
     if(nick&&p.mode!=="vacant") state.nicknames[p.id]=nick; else delete state.nicknames[p.id];
-    save(); closeEditor(); renderAll();
+    save();
+    return p;
+  }
+  el("f-save").addEventListener("click",function(){
+    if(savePosition()){ closeEditor(); renderAll(); }
+  });
+  /* Keeps the form exactly as it is and turns it into a new position. The name
+     and the position number are the only two fields that never repeat, so they
+     are the only two that are cleared — and the number carries on counting if
+     it was a number. */
+  el("f-again").addEventListener("click",function(){
+    var p=savePosition(); if(!p) return;
+    renderAll();
+    editing=null;
+    el("editor-title").textContent="New position";
+    el("f-delete").classList.add("hidden");
+    el("f-nick").value="";
+    el("f-num").value=/^\d+$/.test(p.num)?String(parseInt(p.num,10)+1):"";
+    el("f-nick").focus();
+    previewCost();
+  });
+
+  el("add-many").addEventListener("click",openBulk);
+  el("bulk-close").addEventListener("click",closeBulk);
+  el("b-group").addEventListener("change",function(){
+    var g=el("b-group").value;
+    fillLevels("b-level",g,null);
+    fillSteps("b-step","b-step-label",g,el("b-level").value,null);
+    bulkSync();
+  });
+  el("b-level").addEventListener("change",function(){
+    fillSteps("b-step","b-step-label",el("b-group").value,el("b-level").value,null); bulkSync();
+  });
+  el("b-step").addEventListener("change",bulkSync);
+  el("b-count").addEventListener("input",bulkSync);
+  el("b-save").addEventListener("click",function(){
+    var g=el("b-group").value, l=el("b-level").value, st=parseInt(el("b-step").value,10)||1;
+    if(!hasLevel(g,l)){ el("b-msg").textContent="Pick a group and a level first."; return; }
+    var n=bulkCount(), room=2000-state.positions.length;
+    if(room<=0){ el("b-msg").textContent="This roster is already at 2,000 positions, which is the limit."; return; }
+    var short=n>room; if(short) n=room;
+    var hourly=isHourly(g), rate=rateFor(g,l,st)||0;
+    var title=el("b-title").value.trim()||l;
+    var from=el("b-num").value.trim(), numbered=/^\d{1,12}$/.test(from), base=numbered?parseInt(from,10):0;
+    var stamp=Date.now().toString(36);
+    for(var i=0;i<n;i++){
+      state.positions.push({
+        id:"b"+stamp+"_"+i+"_"+Math.floor(Math.random()*100000),
+        num:numbered?String(base+i):"", title:title, group:g, level:l, step:st,
+        salary:hourly?rate*1950:rate, hours:hourly?1950:0, fte:100,
+        ftedate:"", ftenext:0, incdate:"", next:0,
+        mode:"filled", start:"", end:"", ufrom:"", uto:"" });
+    }
+    if(numbered) el("b-num").value=String(base+n);
+    save(); renderAll();
+    /* Left open on purpose: a complement is rarely one classification all the
+       way down, and the next block is usually the next thing wanted. */
+    el("b-msg").textContent=n+" "+l+" position"+(n===1?"":"s")+" added"+
+      (short?" — that filled the roster to its 2,000 limit":"")+
+      ". Add another block, or close this and start tailoring them.";
   });
   el("f-delete").addEventListener("click",function(){
     state.positions=state.positions.filter(function(x){return x.id!==editing;});
@@ -1768,6 +2058,37 @@ a:hover{color:var(--ink)}
       bandMinor:num(el("c-minor").value)||5, bandMajor:num(el("c-major").value)||15 };
     save(); renderAll(); show("forecast");
   });
+  /* Rewriting a whole roster is the same weight of act as erasing one, so it
+     arms the same way. Eight seconds rather than six: there is more to read. */
+  el("roll-go").addEventListener("click",function(){
+    if(!state.positions.length) return;
+    var b=el("roll-go");
+    if(b.dataset.armed!=="1"){
+      b.dataset.armed="1"; b.textContent="Roll forward, replacing this year";
+      el("roll-msg").textContent="This replaces the roster on screen with next year's. If you have "+
+        "not saved a copy of this year, do that first — there is no undo.";
+      setTimeout(function(){
+        if(el("roll-go").dataset.armed==="1"){
+          el("roll-go").dataset.armed="0"; el("roll-msg").textContent=""; renderRoll();
+        }
+      },8000);
+      return;
+    }
+    b.dataset.armed="0";
+    var plan=rollPlan(), label=fyLabel(plan.ny,plan.cc.periods);
+    /* Through the sanitiser like everything else, so a rolled roster is held
+       to the same shape as one that was typed or pasted. */
+    state=sanitise({ cc:plan.cc, estimates:state.estimates,
+                     positions:plan.positions, nicknames:plan.nicknames });
+    save(); renderAll(); show("forecast");
+    el("roll-msg").textContent="Rolled forward to "+label+". Check your salary budget — it is still last year's.";
+  });
+  el("stale-go").addEventListener("click",function(){
+    show("setup");
+    var c=el("roll-card");
+    if(c&&c.scrollIntoView) c.scrollIntoView({block:"center"});
+  });
+
   el("c-clear").addEventListener("click",function(){
     var b=el("c-clear");
     if(b.dataset.armed!=="1"){ b.dataset.armed="1"; b.textContent="Click again to erase everything";
