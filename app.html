@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-oEpjzOVJg9ssl5vuN0dZIWwMi7sJklluw2tA61rCHL0=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-+vh7ZVK7LA05vcdMzfMcE1oq1e/Wy+sIgJ+onPjrHjM=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -579,9 +579,17 @@ a:hover{color:var(--ink)}
         <div class="stack g14" id="est-list"></div>
         <div class="rule"></div>
         <div class="row">
-          <span style="font-size:13.5px;font-weight:600">Total estimates</span>
+          <span class="row" style="gap:9px;justify-content:flex-start">
+            <span style="font-size:13.5px;font-weight:600">Total estimates</span>
+            <!-- Estimates save on every keystroke, so a Save button here would
+                 do nothing. But every other step ends with a button, and the
+                 absence read as "did that stick?" — so say it stuck, and give
+                 the step the ending it was missing. -->
+            <span class="note" id="est-saved" style="opacity:0;transition:opacity .5s ease">Saved</span>
+          </span>
           <span class="num" id="est-total" style="font-weight:600;font-size:16px;color:var(--est)">$0</span>
         </div>
+        <button class="btn-primary full" id="est-done">See your forecast</button>
       </div>
     </div>
   </section>
@@ -771,7 +779,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v34";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v35";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -1393,6 +1401,16 @@ a:hover{color:var(--ink)}
   function closeBulk(){ el("bulk").classList.add("hidden"); }
 
   // ---- estimates --------------------------------------------------------
+  /* Shows for a moment and fades. Long enough to be noticed while typing,
+     short enough not to sit there nagging. In demo mode nothing is written,
+     so it would be a lie — the badge stays down. */
+  var savedTimer=null;
+  function flashSaved(){
+    var n=el("est-saved"); if(!n||demoMode) return;
+    n.style.opacity="1";
+    clearTimeout(savedTimer);
+    savedTimer=setTimeout(function(){ n.style.opacity="0"; },1400);
+  }
   function renderEstimates(){
     el("est-list").innerHTML=EST_LINES.map(function(L){
       return '<div class="row" style="gap:12px;align-items:flex-end">'+
@@ -1406,7 +1424,7 @@ a:hover{color:var(--ink)}
       inp.addEventListener("input",function(){
         var id=inp.getAttribute("data-est"), v=inp.value.trim();
         if(v==="") delete state.estimates[id]; else state.estimates[id]=num(v);
-        save(); el("est-total").textContent=money(estTotal()); renderForecast();
+        save(); el("est-total").textContent=money(estTotal()); renderForecast(); flashSaved();
       });
     });
     el("est-total").textContent=money(estTotal());
@@ -1918,6 +1936,8 @@ a:hover{color:var(--ink)}
     el("f-nick").focus();
     previewCost();
   });
+
+  el("est-done").addEventListener("click",function(){ show("forecast"); });
 
   el("add-many").addEventListener("click",openBulk);
   el("bulk-close").addEventListener("click",closeBulk);
