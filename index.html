@@ -16,10 +16,20 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Onstrength — salary planning for public sector managers">
 <meta property="og:description" content="Work out where your salary budget lands, from your complement, by pay period. Nothing you enter leaves your browser.">
-<meta property="og:image" content="icons/icon-512.png">
+<!-- The share card, and it has to be an absolute URL: scrapers do not resolve
+     a relative og:image, so the old icons/icon-512.png meant LinkedIn found no
+     picture at all and fell back to a bare link. It also has to be landscape —
+     a square app icon gets the small-thumbnail layout, which reads as an
+     afterthought in a feed. 1200x630 is the size that gets the large card. -->
+<meta property="og:image" content="https://onstrength.ca/share.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Onstrength — where will your salary budget land? Try it at onstrength.ca">
+<meta property="og:site_name" content="Onstrength">
 <meta property="og:url" content="https://onstrength.ca/">
 <link rel="canonical" href="https://onstrength.ca/">
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="summary_large_image">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
