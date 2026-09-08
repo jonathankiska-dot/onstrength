@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-05ChD9WMChBOOZ25/8SQz7rlAMu0lJgrG7wANY7zERU=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-PIYwfRD0bSC3DqOA8u/bh4I94u6GD47DOtnCy9PtYw8=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -340,6 +340,10 @@ a:hover{color:var(--ink)}
           <label class="f"><span>Watch at (%)</span><input class="num-in" id="c-minor" inputmode="decimal" placeholder="5"></label>
           <label class="f"><span>Act at (%)</span><input class="num-in" id="c-major" inputmode="decimal" placeholder="15"></label>
         </div>
+        <!-- Two bare number boxes that silently decide what the forecast tells
+             you. This is the case for explaining at the point of the decision:
+             it reads back the thresholds in the words the forecast will use. -->
+        <div class="note" id="band-note"></div>
         <button class="btn-primary full" id="c-save">Save</button>
         <div class="note">Benefits and bonuses are not costed since they are charged centrally and never reach your budget.</div>
       </div>
@@ -796,7 +800,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v43";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v44";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -1580,6 +1584,16 @@ a:hover{color:var(--ink)}
     el("e-note").textContent=n;
   }
 
+  /* Reads the thresholds back as the sentence the forecast will actually say,
+     so the two numbers stop being arbitrary the moment you look at them. */
+  function bandNote(){
+    var lo=num(el("c-minor").value)||5, hi=num(el("c-major").value)||15;
+    if(hi<=lo) hi=lo+1;
+    el("band-note").textContent="How far off budget your forecast has to be before it says so: "+
+      "on track within "+lo+"%, worth watching past "+lo+"%, worth acting on past "+hi+"%. "+
+      "Over or under, either way.";
+  }
+
   function renderSetup(){
     var c=state.cc;
     xFill();
@@ -1587,6 +1601,7 @@ a:hover{color:var(--ink)}
     el("c-fy").value=c.fy||"2026-04-01"; el("c-periods").value=c.periods||26;
     el("c-sal").value=grouped(c.salaryBudget);
     el("c-minor").value=c.bandMinor||5; el("c-major").value=c.bandMajor||15;
+    bandNote();
     var keys=Object.keys(RATES), levels=0, steps=0;
     keys.forEach(function(g){ Object.keys(RATES[g].levels).forEach(function(l){ levels++; steps+=RATES[g].levels[l].length; }); });
     /* This used to carry ninety words on effective dates, hourly annualisation
@@ -2096,6 +2111,7 @@ a:hover{color:var(--ink)}
   });
 
   ["c-sal","f-salary","f-inrange"].forEach(function(id){ moneyField(el(id)); });
+  ["c-minor","c-major"].forEach(function(id){ el(id).addEventListener("input",bandNote); });
 
   el("est-done").addEventListener("click",function(){ show("forecast"); });
   el("mend-x").addEventListener("click",function(){ hoursMended=null; renderRoster(); });
