@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-nEnHWwbuhDjFyOIRfc4bTK0bsv/NucGD21/jUPpq5go=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-pqHLlmHHFeTqf32v/yWOeryzpCKuUt5dIPkvOa1zw0w=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -358,9 +358,8 @@ a:hover{color:var(--ink)}
         <div class="card pad stack g14">
           <div class="stack g6">
             <div style="font-size:13px;font-weight:600">Save a copy</div>
-            <div class="note">Clearing your browser data deletes your roster, and nothing syncs,
-              because nothing is uploaded. Keep a copy somewhere safe — it is also how you move a
-              roster to another device.</div>
+            <div class="note">Nothing is uploaded, so this is your only backup — and the way to
+              move a roster to another device.</div>
           </div>
           <label style="display:flex;gap:9px;align-items:center;cursor:pointer">
             <input type="checkbox" id="x-names"
@@ -381,8 +380,7 @@ a:hover{color:var(--ink)}
           <div class="stack g10">
             <div class="stack g6">
               <div style="font-size:12.5px;font-weight:600;color:var(--ink-2)">Restore a copy</div>
-              <div class="note" style="color:var(--est)">Paste only a copy you saved yourself. A
-                roster sent to you by someone else can carry more than a roster.</div>
+              <div class="note" style="color:var(--est)">Paste only a copy you saved yourself.</div>
             </div>
             <textarea id="r-box" rows="2" spellcheck="false" aria-label="Paste a saved copy"
               placeholder="Paste your saved copy here"
@@ -798,7 +796,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v41";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v42";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -1591,10 +1589,13 @@ a:hover{color:var(--ink)}
     el("c-minor").value=c.bandMinor||5; el("c-major").value=c.bandMajor||15;
     var keys=Object.keys(RATES), levels=0, steps=0;
     keys.forEach(function(g){ Object.keys(RATES[g].levels).forEach(function(l){ levels++; steps+=RATES[g].levels[l].length; }); });
+    /* This used to carry ninety words on effective dates, hourly annualisation
+       and the 52.176-week year. All of it true, none of it needed by someone
+       who has just arrived on step 1 and typed nothing yet. It lives in the
+       guide, where it is read by the person who went looking for it. */
     el("rates-version").textContent=RATEMETA.version;
-    el("rates-note").textContent=keys.length+" Government of Canada classification groups, "+levels+" levels, "+steps+
-      " steps. Each group follows its own collective agreement, so effective dates differ. Check a figure against the agreement before relying on it, and pick Other for anything the tables do not cover."+
-      "\n\nTwenty-three groups (GL, GS, HP, HS) publish an hourly rate rather than a salary, so each is annualised at the paid hours its own agreement makes. GL, GS and HP work a 40-hour week and HS 37.5, and all of them count 52.176 weeks in a year — 365.25 days over seven — which gives 2,087.04 paid hours and 1,956.6 respectively. Those are the defaults; change the figure on any position that works different hours.";
+    el("rates-note").textContent=keys.length+" classification groups, "+levels+" levels, "+steps+
+      " published steps. Each group follows its own agreement, so check a figure before relying on it.";
     renderRoll();
   }
 
@@ -1715,9 +1716,14 @@ a:hover{color:var(--ink)}
     }
     go.classList.remove("hidden");
     var plan=rollPlan(), s=plan.stats, n=plan.positions.length;
-    el("roll-lead").textContent="Moves the year to "+fmtDate(plan.ny)+" and applies twelve months of "+
-      "change. Save a copy above first — this replaces the year on screen and there is no undo.";
+    el("roll-lead").textContent="Applies twelve months of change and moves the year to "+fmtDate(plan.ny)+".";
     go.textContent="Roll forward to "+fyLabel(plan.ny,plan.cc.periods);
+    /* The full account of what will change is a page of text that only matters
+       in the two seconds before you commit. It appears when the button is
+       armed, not before. */
+    var armed=go.dataset.armed==="1";
+    el("roll-what").classList.toggle("hidden",!armed);
+    if(!armed) return;
 
     var lines=[n+" position"+(n===1?"":"s")+" carried forward"];
     if(s.inc) lines.push(s.inc+" increment"+(s.inc===1?"":"s")+" applied");
@@ -2234,7 +2240,9 @@ a:hover{color:var(--ink)}
     if(!state.positions.length) return;
     var b=el("roll-go");
     if(b.dataset.armed!=="1"){
-      b.dataset.armed="1"; b.textContent="Roll forward, replacing this year";
+      b.dataset.armed="1";
+      renderRoll();                       // now that it is armed, show what it will do
+      b.textContent="Roll forward, replacing this year";
       el("roll-msg").textContent="This replaces the roster on screen with next year's. If you have "+
         "not saved a copy of this year, do that first — there is no undo.";
       setTimeout(function(){
