@@ -147,6 +147,12 @@ section{padding:46px 0}
 .honest strong{color:var(--ink)}
 .honest ul{margin:0;padding-left:20px}
 .honest p{color:var(--ink-2)}
+/* The invitation is an offer rather than another fact, so it gets its own
+   ground and a rule down the side — findable by a reader who is not federal
+   without reading the paragraph above it first. */
+.offer{background:var(--base-soft);border-left:3px solid var(--base);
+  border-radius:0 12px 12px 0;padding:14px 16px;margin-top:16px}
+.offer p{color:var(--ink-2)}
 
 /* ---- install ---- */
 #install .card{padding:24px 22px}
@@ -229,42 +235,36 @@ footer a.kmc:hover{text-decoration:underline}
         <div class="eyebrow" style="margin-bottom:12px">Built on the Government of Canada tables</div>
         <p style="margin:0 0 12px;font-size:14.5px;line-height:1.6">107 classification groups,
           720 levels, 3,454 published steps — every federal salary costed from the tables that
-          set it. It plans the year rather than reconciling it: no actuals, no benefits, and not
-          a system of record.</p>
-        <p style="margin:0;font-size:14.5px;line-height:1.6"><strong>Somewhere else?</strong>
-          A hospital, a school board, a city — in Canada or beyond. The arithmetic is the same
-          and only the pay grid changes.
-          <a href="mailto:jkiska@onstrength.ca?subject=Onstrength%20for%20another%20organisation">Get in touch</a>.</p>
+          set it, pay period by pay period. A step increment, a move to 80%, a departure in
+          November: each one cuts the year, and each slice is costed at the rate and hours in
+          force. Nothing is averaged.</p>
+        <p style="margin:0 0 12px;font-size:14.5px;line-height:1.6">It plans the year rather
+          than reconciling it: no actuals, no benefits, and not a system of record.</p>
+        <!-- Its own colour and its own block: this is an offer, not another
+             fact about the tables, and a reader who is not federal should be
+             able to find it without reading the paragraph above first. -->
+        <div class="offer">
+          <span class="eyebrow" style="color:var(--base);display:block;margin-bottom:6px">Hospitals · School boards · Municipalities</span>
+          <p style="margin:0;font-size:14.5px;line-height:1.6">Same arithmetic, a different pay
+            grid — in Canada or beyond.
+            <a href="mailto:jkiska@onstrength.ca?subject=Onstrength%20for%20another%20organisation"
+               style="font-weight:600">Get in touch</a> and I will build it on yours.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <section>
-    <h2 class="sec-h">Why the numbers hold up</h2>
-    <p class="sec-s">Precision should follow materiality. The 90% that can be computed exactly is computed exactly; the rest is your judgement, labelled as such.</p>
-    <div class="grid3">
-      <div class="card">
-        <div class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
-        <h3>Costed by pay period</h3>
-        <p>107 classification groups, 720 levels, 3,454 published steps. A fiscal year is 26 periods of 14 days, and every position is costed that way — prorated by the day when someone starts on the 12th.</p>
-      </div>
-      <div class="card">
-        <div class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
-        <h3>Sliced at every change</h3>
-        <p>A step increment, a move to 80%, a period of unpaid leave, a departure in November — each one cuts the year, and each slice is costed at the rate and hours in force. Nothing is averaged.</p>
-      </div>
-      <div class="card">
-        <div class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
-        <h3>Nothing leaves your device</h3>
-        <p>No account, no server, no upload. Your roster lives in your own browser storage. Names are optional and stay local — which is why this link can be shared freely.</p>
-      </div>
-    </div>
-
-  </section>
-
+  <!-- "Why the numbers hold up" stood here with three cards. The first
+       repeated the classification counts now stated beside the equation, the
+       third repeated the privacy line already in the hero and the footer, and
+       the second — the slicing, which is the actual argument — has moved into
+       that box where it sits next to the claim it supports. Three cards, one
+       surviving idea, and a section heading fewer. -->
   <section id="install">
     <h2 class="sec-h">Put it on your phone</h2>
-    <p class="sec-s" id="ins-sub">Optional. It works perfectly as a link — this just gives it an icon and makes it work with no signal.</p>
+    <p class="sec-s" id="ins-sub">Optional. It works perfectly as a link — this just gives it an
+      icon and makes it work with no signal. Installed or not, your roster stays in that browser
+      on that device: no account, no server, nothing uploaded.</p>
 
     <div class="card" id="ins-standalone" style="display:none">
       <h3 style="color:var(--good)">You're running the installed app.</h3>
