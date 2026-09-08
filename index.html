@@ -146,6 +146,7 @@ section{padding:46px 0}
 .honest li:last-child{margin-bottom:0}
 .honest strong{color:var(--ink)}
 .honest ul{margin:0;padding-left:20px}
+.honest p{color:var(--ink-2)}
 
 /* ---- install ---- */
 #install .card{padding:24px 22px}
@@ -218,13 +219,22 @@ footer a.kmc:hover{text-decoration:underline}
         <div class="eqrow"><b>− Six estimates</b><span>Overtime, premiums, acting, bilingual,<br>retention, everything else</span></div>
         <div class="eqtot"><span>= Where the year lands</span><span style="font-weight:500;font-size:12.5px;color:var(--muted);letter-spacing:.2px">Surplus, or pressure</span></div>
       </div>
+      <!-- This slot used to hold three lines of what the tool does not do. It
+           was an honest instinct in the wrong place: a first-time reader met
+           three negatives before deciding whether to try anything, and the
+           scope is already stated in the guide and the footer. One line covers
+           it, and the space goes to the question a reader outside the federal
+           government is actually asking. -->
       <div class="honest">
-        <div class="eyebrow" style="margin-bottom:12px">What it deliberately doesn't do</div>
-        <ul>
-          <li><strong>It doesn't track actuals.</strong> This plans the year; it doesn't reconcile it. That's a later job.</li>
-          <li><strong>It doesn't count benefits or bonuses.</strong> They're charged centrally and never reach your budget.</li>
-          <li><strong>It isn't a system of record.</strong> Check anything that matters against the ledger.</li>
-        </ul>
+        <div class="eyebrow" style="margin-bottom:12px">Built on the Government of Canada tables</div>
+        <p style="margin:0 0 12px;font-size:14.5px;line-height:1.6">107 classification groups,
+          720 levels, 3,454 published steps — every federal salary costed from the tables that
+          set it. It plans the year rather than reconciling it: no actuals, no benefits, and not
+          a system of record.</p>
+        <p style="margin:0;font-size:14.5px;line-height:1.6"><strong>Somewhere else?</strong>
+          A hospital, a school board, a city — in Canada or beyond. The arithmetic is the same
+          and only the pay grid changes.
+          <a href="mailto:jkiska@onstrength.ca?subject=Onstrength%20for%20another%20organisation">Get in touch</a>.</p>
       </div>
     </div>
   </section>
@@ -250,14 +260,6 @@ footer a.kmc:hover{text-decoration:underline}
       </div>
     </div>
 
-    <!-- Placed here rather than in the footer because this is the paragraph
-         where a reader outside the federal government works out that the tables
-         are not theirs. Answering that thought where it occurs is worth more
-         than a line nobody scrolls to. Its own subject line, so those replies
-         are separable from ordinary feedback. -->
-    <p class="sec-s" style="margin:22px 0 0">These are the Government of Canada tables. Somewhere else —
-      a hospital, a school board, a city? The arithmetic is the same and only the pay grid changes.
-      <a href="mailto:jkiska@onstrength.ca?subject=Onstrength%20for%20another%20organisation">Get in touch</a>.</p>
   </section>
 
   <section id="install">
@@ -304,7 +306,7 @@ footer a.kmc:hover{text-decoration:underline}
     <p style="margin:14px 0 0;font-size:14px">
       <a class="kmc" href="https://www.linkedin.com/in/john-kiska-cpa-cma-mba-34248b7b/" target="_blank" rel="noopener noreferrer">Powered by KMC Inc.</a><br>
       <span class="note">A planning tool, not a system of record.<br>
-      Rate figures come from a published aggregator — verify against the collective agreement
+      Rate figures come from published sources — verify against the collective agreement
       before anyone relies on a number.</span><br>
       <a href="help.html" style="font-size:13.5px">How to use it</a>
       &nbsp;·&nbsp;
