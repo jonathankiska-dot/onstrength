@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-hE1IrS/2TQs65ygjBD5jS1iTMvxVV27oZ0Z0hPQT11Q=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-YXeT+bfYVRK+QbRVvAuqMRZTwB/AvzAJ0mUpH6XAeU0=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -280,6 +280,29 @@ a.kmc:hover{text-decoration:underline}
 a{color:var(--base)}
 a:hover{color:var(--ink)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---- print -------------------------------------------------------------
+   The app is a five-tab thing where four tabs are hidden at any moment, so
+   printing what is on screen would print a quarter of the answer. Instead a
+   plain document is built on demand into #printout, and print shows that and
+   nothing else. */
+#printout{display:none}
+@media print{
+  @page{margin:16mm}
+  body>*{display:none!important}
+  #printout{display:block!important;color:#000;font-size:10.5pt;line-height:1.45}
+  #printout h1{font-size:17pt;margin:0 0 2mm;letter-spacing:-.4pt}
+  #printout .p-sub{font-size:9.5pt;color:#444;margin:0 0 6mm}
+  #printout h2{font-size:11.5pt;margin:7mm 0 2mm;padding-bottom:1.5mm;border-bottom:1pt solid #000}
+  #printout table{width:100%;border-collapse:collapse;font-size:9.5pt}
+  #printout th{text-align:left;font-weight:600;border-bottom:.5pt solid #666;padding:1.5mm 2mm 1.5mm 0}
+  #printout td{padding:1.4mm 2mm 1.4mm 0;border-bottom:.5pt solid #ddd;vertical-align:top}
+  #printout .r{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+  #printout .tot td{font-weight:700;border-top:1pt solid #000;border-bottom:none}
+  #printout .p-foot{margin-top:8mm;padding-top:2mm;border-top:.5pt solid #999;
+    font-size:8.5pt;color:#444}
+  #printout tr{break-inside:avoid}
+}
 </style>
 
 <div class="wrap stack g18" id="app">
@@ -542,13 +565,16 @@ a:hover{color:var(--ink)}
         <div class="stack g6">
           <span style="font-size:12.5px;color:var(--ink-2);font-weight:500">Status this year</span>
           <div class="seg" id="f-mode">
-            <button type="button" data-mode="filled" aria-pressed="true">Filled all year</button>
+            <button type="button" data-mode="filled" aria-pressed="true">Filled</button>
             <button type="button" data-mode="vacant" aria-pressed="false">Vacant</button>
             <button type="button" data-mode="leaving" aria-pressed="false">Leaving</button>
             <button type="button" data-mode="unpaid" aria-pressed="false">Unpaid leave</button>
           </div>
         </div>
-        <label class="f hidden" id="w-start"><span>Expected start date</span><input type="date" id="f-start"></label>
+        <div class="stack g6 hidden" id="w-start">
+          <label class="f"><span id="f-start-label">Start date</span><input type="date" id="f-start"></label>
+          <div class="note" id="f-start-note"></div>
+        </div>
         <label class="f hidden" id="w-end"><span>Last day</span><input type="date" id="f-end"></label>
         <div class="two hidden" id="w-unpaid">
           <label class="f"><span>Unpaid from</span><input type="date" id="f-ufrom"></label>
@@ -693,9 +719,28 @@ a:hover{color:var(--ink)}
           <div class="card stack g6" style="padding:15px"><div class="num" style="font-size:22px;font-weight:600" id="k-other">0</div><div class="sub" style="font-size:10.5px">Leave / out</div></div>
         </div>
         <div class="note" id="fresh-note"></div>
+
+        <!-- Asked for by the first person to build a real roster: they wanted
+             to hand it round a team meeting and there was no way out of the
+             browser. Print rather than a file format, because a PDF is what
+             actually gets shared, and a spreadsheet for the people who will
+             want to do their own arithmetic to it. -->
+        <div class="card pad stack g10">
+          <div style="font-size:13px;font-weight:600">Take it with you</div>
+          <div class="note">The forecast and the whole complement, as a document you can hand
+            round or keep with the file.</div>
+          <div class="row" style="gap:9px;justify-content:flex-start;flex-wrap:wrap">
+            <button class="btn-ghost btn-sm" id="x-print" style="width:auto;padding:0 16px">Print or save as PDF</button>
+            <button class="btn-ghost btn-sm" id="x-csv" style="width:auto;padding:0 16px">Spreadsheet (CSV)</button>
+          </div>
+          <div class="note" id="out-msg"></div>
+        </div>
       </div>
     </div>
   </section>
+
+  <!-- Built on demand, never shown on screen, and the only thing that prints. -->
+  <div id="printout" aria-hidden="true"></div>
 
   <!-- WHAT IF -->
   <section id="p-scenario" class="stack g18 hidden">
@@ -800,7 +845,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v49";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v50";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -1023,7 +1068,18 @@ a:hover{color:var(--ink)}
 
   function paidSpans(p,startOverride){
     var s=fyStart(), e=fyEnd(), from=s, to=e;
+    /* Two different things used to share one mode. Somebody hired and starting
+       in June is not a vacancy — the manager knows exactly who it is — but the
+       only way to say "not paid from 1 April" was to mark the position vacant,
+       which silently threw the name away. So a filled position takes a start
+       date too, and the difference between the two modes goes back to being
+       what it should be: a vacancy is a position nobody is in yet.
+
+       An empty date means opposite things in each case, and both are right: a
+       vacancy with no start date is never filled and costs nothing; a filled
+       position with no start date was there when the year began. */
     if(p.mode==="vacant"){ var st=toTs(startOverride||p.start); if(!st) return []; from=Math.max(s,st); }
+    else if(p.mode==="filled"){ var fs=toTs(startOverride||p.start); if(fs) from=Math.max(s,fs); }
     else if(p.mode==="leaving"){ var en=toTs(p.end); if(en) to=Math.min(e,en+DAY); }
     if(to<=from) return [];
     if(p.mode==="unpaid"){
@@ -1272,6 +1328,8 @@ a:hover{color:var(--ink)}
     if(p.mode==="vacant") return '<span class="chip chip-vac">Vacant'+(p.start?" · "+shortDate(toTs(p.start)):" · no date")+"</span>";
     if(p.mode==="leaving") return '<span class="chip chip-out">Out'+(p.end?" · "+shortDate(toTs(p.end)):"")+"</span>";
     if(p.mode==="unpaid") return '<span class="chip chip-leave">Unpaid leave</span>';
+    if(p.mode==="filled"&&p.start&&toTs(p.start)>fyStart())
+      return '<span class="chip chip-vac">Starts '+shortDate(toTs(p.start))+"</span>";
     return "";
   }
   function nickOf(id){ return (state.nicknames&&state.nicknames[id])||""; }
@@ -1444,7 +1502,11 @@ a:hover{color:var(--ink)}
   function modeOf(){ var b=el("f-mode").querySelector('[aria-pressed="true"]'); return b?b.getAttribute("data-mode"):"filled"; }
   function setMode(m){
     Array.prototype.forEach.call(el("f-mode").children,function(b){ b.setAttribute("aria-pressed",b.getAttribute("data-mode")===m?"true":"false"); });
-    el("w-start").classList.toggle("hidden",m!=="vacant");
+    el("w-start").classList.toggle("hidden",m!=="vacant"&&m!=="filled");
+    el("f-start-label").textContent=m==="vacant"?"Expected start date":"Start date";
+    el("f-start-note").textContent=m==="vacant"
+      ? "Costs nothing until this date. Leave it blank if nobody is lined up."
+      : "Only if they start after the year begins. Blank means they were here on day one.";
     el("w-end").classList.toggle("hidden",m!=="leaving");
     el("w-unpaid").classList.toggle("hidden",m!=="unpaid");
     el("f-nick").disabled=(m==="vacant");
@@ -1657,7 +1719,7 @@ a:hover{color:var(--ink)}
     var d=new Date(fyStart());
     var ny=Date.UTC(d.getUTCFullYear()+1,d.getUTCMonth(),d.getUTCDate());
     var cc=clone(state.cc); cc.fy=toIso(ny);
-    var st={inc:0,top:0,fte:0,filled:0,vacated:0,leave:0}, nicks={};
+    var st={inc:0,top:0,fte:0,filled:0,vacated:0,leave:0,started:0}, nicks={};
 
     var ps=state.positions.map(function(p){
       var q=clone(p), guard=0;
@@ -1697,6 +1759,10 @@ a:hover{color:var(--ink)}
            Rolling it forward must not commit on their behalf. */
         var s0=toTs(q.start);
         if(s0&&s0<ny){ q.mode="filled"; q.start=""; st.filled++; }
+      } else if(q.mode==="filled"){
+        /* Somebody who started in June is simply there next year. */
+        var f0=toTs(q.start);
+        if(f0&&f0<ny){ q.start=""; st.started++; }
       } else if(q.mode==="leaving"){
         var e0=toTs(q.end);
         if(e0&&e0<ny){ q.mode="vacant"; q.end=""; q.start=""; st.vacated++; }
@@ -1750,6 +1816,7 @@ a:hover{color:var(--ink)}
     if(s.top) lines.push(s.top+" position"+(s.top===1?" reaches":"s reach")+" the top of the range — no further step");
     if(s.fte) lines.push(s.fte+" part-time change"+(s.fte===1?"":"s")+" now in effect for the whole year");
     if(s.filled) lines.push(s.filled+" vacanc"+(s.filled===1?"y":"ies")+" now filled for the whole year");
+    if(s.started) lines.push(s.started+" mid-year start"+(s.started===1?"":"s")+" now counted for the whole year");
     if(s.leave) lines.push(s.leave+" period"+(s.leave===1?"":"s")+" of leave ended");
     if(s.vacated) lines.push(s.vacated+" departure"+(s.vacated===1?" leaves a vacancy":"s leave vacancies")+
       " with no start date — costing nothing until you decide");
@@ -2112,6 +2179,128 @@ a:hover{color:var(--ink)}
 
   ["c-sal","f-salary","f-inrange"].forEach(function(id){ moneyField(el(id)); });
   ["c-minor","c-major"].forEach(function(id){ el(id).addEventListener("input",bandNote); });
+
+
+  /* ---- taking it out of the browser -------------------------------------
+
+     The first person to build a real roster wanted to hand it round a team
+     meeting and found there was no way out. Two routes, because they are
+     different jobs: a printed document is what actually gets shared, and a
+     spreadsheet is for the person who will want to do their own arithmetic
+     to it.
+
+     Both are built from state at the moment they are asked for, so neither
+     can go stale, and neither leaves the browser except by the user's own
+     hand. */
+
+  function statusOf(p){
+    if(p.mode==="vacant") return p.start?("Vacant until "+fmtDate(toTs(p.start))):"Vacant, no start date";
+    if(p.mode==="leaving") return p.end?("Leaves "+fmtDate(toTs(p.end))):"Leaving";
+    if(p.mode==="unpaid") return (p.ufrom&&p.uto)
+      ? ("Unpaid "+shortDate(toTs(p.ufrom))+" to "+shortDate(toTs(p.uto))) : "Unpaid leave";
+    if(p.start&&toTs(p.start)>fyStart()) return "Starts "+fmtDate(toTs(p.start));
+    return "Filled";
+  }
+  function classOf(p){
+    if(!p.level) return "Custom rate";
+    return p.level+(p.step?" step "+p.step:"");
+  }
+  function ccTitle(){
+    var c=state.cc;
+    return (c.code?("CC "+c.code):"")+(c.code&&c.name?" · ":"")+(c.name||"")||"Cost centre";
+  }
+  function fyText(){
+    return fmtDate(fyStart())+" to "+fmtDate(fyEnd()-DAY)+" · "+nPeriods()+" pay periods";
+  }
+
+  function buildPrintout(){
+    var f=forecast(), rows=state.positions, over=f.variance<0;
+    var h='<h1>'+esc(ccTitle())+"</h1>"+
+      '<div class="p-sub">'+esc(fyText())+" · prepared "+fmtDate(Date.now())+"</div>";
+
+    h+="<h2>Where the year lands</h2><table><tbody>"+
+       '<tr><td>Salary budget</td><td class="r">'+money(f.budget)+"</td></tr>"+
+       '<tr><td>Base salary, from the complement</td><td class="r">−'+money(f.base).replace("$","$")+"</td></tr>";
+    EST_LINES.forEach(function(L){
+      var v=num((state.estimates||{})[L.id]);
+      if(v) h+="<tr><td>"+esc(L.name)+'</td><td class="r">−'+money(v)+"</td></tr>";
+    });
+    h+='<tr class="tot"><td>'+(over?"Projected overrun":"Projected surplus")+
+       '</td><td class="r">'+signed(f.variance)+"</td></tr></tbody></table>";
+
+    h+="<h2>Complement — "+rows.length+" position"+(rows.length===1?"":"s")+", "+
+       fteYearsTotal().toFixed(1)+" person-years</h2>";
+    h+="<table><thead><tr><th>Position</th><th>Title</th><th>Who</th><th>Classification</th>"+
+       '<th class="r">FTE</th><th>Status</th><th class="r">Cost this year</th></tr></thead><tbody>';
+    rows.forEach(function(p){
+      var fte=(p.fte==null||p.fte==="")?100:num(p.fte);
+      h+="<tr><td>"+esc(p.num||"—")+"</td><td>"+esc(p.title||"—")+"</td><td>"+
+         esc(p.mode==="vacant"?"—":(nickOf(p.id)||"—"))+"</td><td>"+esc(classOf(p))+
+         '</td><td class="r">'+fte+'%</td><td>'+esc(statusOf(p))+
+         '</td><td class="r">'+money(costOf(p,null))+"</td></tr>";
+    });
+    h+='<tr class="tot"><td colspan="6">Base salary</td><td class="r">'+money(f.base)+"</td></tr>";
+    h+="</tbody></table>";
+
+    h+='<div class="p-foot">Onstrength '+APP_VERSION+" · "+APP_URL+
+       ". Planning figures costed from the published pay tables in effect "+
+       esc(RATEMETA.retrieved||"")+". Not a system of record — check anything that matters "+
+       "against the ledger and the collective agreement.</div>";
+    el("printout").innerHTML=h;
+  }
+  function fteYearsTotal(){ var t=0; state.positions.forEach(function(p){ t+=fteYears(p,null); }); return t; }
+
+  el("x-print").addEventListener("click",function(){
+    if(!state.positions.length&&!state.cc.name){ el("out-msg").textContent="Nothing to print yet."; return; }
+    buildPrintout(); el("out-msg").textContent="";
+    window.print();
+  });
+
+  /* CSV rather than a real spreadsheet file: it opens in Excel, it needs no
+     library, and it cannot carry a formula that does something surprising. */
+  function csvCell(v){
+    var t=String(v==null?"":v);
+    return /[",\n]/.test(t) ? '"'+t.replace(/"/g,'""')+'"' : t;
+  }
+  function buildCsv(){
+    var f=forecast(), out=[];
+    out.push(["Onstrength — "+ccTitle()]);
+    out.push([fyText()]);
+    out.push(["Prepared",fmtDate(Date.now())]);
+    out.push([]);
+    out.push(["Salary budget",f.budget]);
+    out.push(["Base salary",f.base]);
+    EST_LINES.forEach(function(L){
+      var v=num((state.estimates||{})[L.id]); if(v) out.push([L.name,v]);
+    });
+    out.push([f.variance<0?"Projected overrun":"Projected surplus",f.variance]);
+    out.push([]);
+    out.push(["Position","Title","Who","Group","Level","Step","Annual rate",
+              "FTE %","Paid hours","Status","Cost this year"]);
+    state.positions.forEach(function(p){
+      out.push([p.num||"",p.title||"",p.mode==="vacant"?"":nickOf(p.id),
+                p.group||"",p.level||"",p.step||"",num(p.salary),
+                (p.fte==null||p.fte==="")?100:num(p.fte),num(p.hours)||"",
+                statusOf(p),Math.round(costOf(p,null))]);
+    });
+    /* A leading BOM, so Excel opens accented names as accented names. */
+    return "\ufeff"+out.map(function(r){ return r.map(csvCell).join(","); }).join("\r\n");
+  }
+  el("x-csv").addEventListener("click",function(){
+    if(!state.positions.length){ el("out-msg").textContent="Add some positions first."; return; }
+    var name="onstrength-"+(state.cc.code||"complement")+"-"+toIso(Date.now())+".csv";
+    try{
+      var blob=new Blob([buildCsv()],{type:"text/csv;charset=utf-8"});
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement("a");
+      a.href=url; a.download=name;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); },2000);
+      el("out-msg").textContent="Saved as "+name+".";
+    }catch(e){
+      el("out-msg").textContent="Could not download here — use Print and save as PDF instead.";
+    }
+  });
 
   el("est-done").addEventListener("click",function(){ show("forecast"); });
   el("mend-x").addEventListener("click",function(){ hoursMended=null; renderRoster(); });
