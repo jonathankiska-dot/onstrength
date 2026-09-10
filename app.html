@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-ssEUbnZxC6LqW7JV2SlPeLek2yv6bzQ10X6yOxrtigI=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-b2e6M3Lp/CbPLkwwvlZxT9YQiTzQ95toje1VNIBkWyo=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -281,6 +281,41 @@ a{color:var(--base)}
 a:hover{color:var(--ink)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
+/* ---- the step grid ----------------------------------------------------
+   Setting twenty steps used to mean opening twenty editors. This is one row
+   each, buttons rather than a dropdown so it is a single tap, and the
+   published rate lands beside it as you go — which is both the speed and the
+   reassurance that nothing here is estimated. */
+.sg{display:grid;grid-template-columns:1fr auto auto auto;gap:14px;align-items:center;
+  padding:10px 16px;border-bottom:1px solid var(--rule-2)}
+.sg:last-child{border-bottom:none}
+.sg.todo{background:var(--est-soft)}
+.sg-who{min-width:0}
+.sg-who b{display:block;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sg-who span{font-size:11.5px;color:var(--muted)}
+.sg-lvl{font-size:11.5px;font-weight:700;letter-spacing:.4px;color:var(--ink-2);
+  background:var(--sunk);border:1px solid var(--rule);border-radius:6px;padding:3px 7px;white-space:nowrap}
+.sg-steps{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.sg-steps button{width:30px;height:34px;min-height:0;border-radius:7px;border:1px solid var(--rule);
+  background:var(--surface);color:var(--ink-2);font:600 13px/1 inherit;padding:0;
+  font-variant-numeric:tabular-nums;cursor:pointer}
+.sg-steps button[aria-pressed="true"]{background:var(--base);border-color:var(--base);color:var(--on-base)}
+.sg-steps button.q{width:34px;color:var(--muted)}
+.sg-steps button.q[aria-pressed="true"]{background:var(--est);border-color:var(--est);color:#fff}
+.sg-money{font-size:13.5px;font-weight:600;text-align:right;min-width:84px;
+  font-variant-numeric:tabular-nums}
+.sg-money.est{color:var(--est);font-weight:500}
+.sg-sal{width:106px;height:34px;min-height:0;border-radius:7px;border:1px solid var(--base);
+  padding:0 9px;text-align:right;font:600 13px/1 inherit;font-variant-numeric:tabular-nums;
+  background:var(--surface);color:var(--ink)}
+.prog{height:6px;border-radius:999px;background:var(--rule);overflow:hidden;margin-top:9px}
+.prog i{display:block;height:100%;background:var(--base);transition:width .2s ease}
+@media (max-width:620px){
+  .sg{grid-template-columns:1fr auto;grid-template-areas:"who lvl" "steps money";row-gap:9px}
+  .sg-who{grid-area:who} .sg-lvl{grid-area:lvl;justify-self:end}
+  .sg-steps{grid-area:steps;justify-content:flex-start} .sg-money{grid-area:money}
+}
+
 /* ---- print -------------------------------------------------------------
    The app is a five-tab thing where four tabs are hidden at any moment, so
    printing what is on screen would print a quarter of the answer. Instead a
@@ -458,7 +493,36 @@ a:hover{color:var(--ink)}
       <button class="btn-quiet" id="mend-x">Got it</button>
     </div>
 
-    <div class="cols">
+    <!-- Appears only while something is unset, and takes itself away when the
+         last one is done. -->
+    <div class="card pad row hidden" id="unset-bar" style="gap:12px;flex-wrap:wrap;border-left:4px solid var(--est)">
+      <span class="note" id="unset-txt" style="flex:1 1 260px"></span>
+      <button class="btn-quiet" id="unset-go">Set the steps</button>
+    </div>
+
+    <!-- Replaces the roster list in place rather than opening a page of its
+         own, so Later simply puts the list back and nothing feels like a
+         detour. -->
+    <div class="card stack hidden" id="stepgrid">
+      <div class="pad stack g6">
+        <div class="row">
+          <span class="eyebrow" id="sg-count"></span>
+          <span class="num" style="font-size:12px;color:var(--muted)" id="sg-total"></span>
+        </div>
+        <div class="prog"><i id="sg-bar" style="width:0"></i></div>
+      </div>
+      <div class="rule"></div>
+      <div id="sg-rows"></div>
+      <div class="pad row" style="gap:12px;flex-wrap:wrap;background:var(--sunk);border-top:1px solid var(--rule)">
+        <span class="note" id="sg-note" style="flex:1 1 280px"></span>
+        <span class="row" style="gap:9px">
+          <button class="btn-ghost btn-sm" id="sg-later" style="width:auto;padding:0 16px">Later</button>
+          <button class="btn-primary btn-sm" id="sg-done" style="width:auto;padding:0 18px">Done</button>
+        </span>
+      </div>
+    </div>
+
+    <div class="cols" id="roster-cols">
       <div class="stack g14">
         <div class="card stack" id="roster-list"></div>
         <div class="row" style="gap:9px;flex-wrap:wrap">
@@ -503,6 +567,10 @@ a:hover{color:var(--ink)}
         </div>
         <button class="btn-primary full" id="b-save">Add them</button>
         <div class="note" id="b-msg"></div>
+        <!-- Offered here because this is the moment the report is most likely
+             to still be open on the desk. -->
+        <button class="btn-ghost btn-sm hidden" id="b-steps-now"
+          style="align-self:flex-start;width:auto;padding:0 16px">Set their steps</button>
       </div>
 
       <div class="card pad stack g14 hidden lift" id="editor">
@@ -668,6 +736,13 @@ a:hover{color:var(--ink)}
     <div class="card pad row hidden" id="stale" style="gap:12px;flex-wrap:wrap;border-left:4px solid var(--est)">
       <span class="note" id="stale-txt" style="flex:1 1 240px"></span>
       <button class="btn-quiet" id="stale-go">Roll it forward</button>
+    </div>
+
+    <!-- The forecast is where you notice the number is not yet trustworthy,
+         so it is also the way back in. -->
+    <div class="card pad row hidden" id="est-bar" style="gap:12px;flex-wrap:wrap;border-left:4px solid var(--est)">
+      <span class="note" id="est-bar-txt" style="flex:1 1 260px"></span>
+      <button class="btn-quiet" id="est-bar-go">Set the steps</button>
     </div>
 
     <div class="card pad stack g18 lift heroCard" id="hero-card">
@@ -856,7 +931,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v51";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v52";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -990,12 +1065,17 @@ a:hover{color:var(--ink)}
       /* A range group is classified by level alone — there is no step to check,
          and the salary is the position's own. Everything else still has to
          resolve against the table as a whole or lose its classification. */
+      /* Step 0 on a stepped group is not a missing value, it is a stated one:
+         nobody has looked it up yet. It costs at the middle of the level, says
+         so on screen, and the forecast reports what the uncertainty is worth.
+         A guessed step that looks settled is the thing to avoid — a manager
+         will not take estimated salaries to a director, and shouldn't. */
       if(grp&&!hasLevel(grp,lvl)){ grp=""; lvl=""; }
       else if(grp&&isRange(grp)) stp=0;
-      else if(grp&&(stp<1||stp>RATES[grp].levels[lvl].length)){ grp=""; lvl=""; }
+      else if(grp&&stp>RATES[grp].levels[lvl].length){ grp=""; lvl=""; }
       out.positions.push({
         id:id, num:sText(q.num,24), title:sText(q.title,120),
-        group:grp, level:lvl, step:(grp&&isRange(grp))?0:(stp||1),
+        group:grp, level:lvl, step:stp,
         salary:sNum(q.salary,0,1e9), fte:sNum(q.fte,0,100),
         hours:sNum(q.hours,0,4000), next:sNum(q.next,0,1e9),
         ftedate:sDate(q.ftedate), ftenext:sNum(q.ftenext,0,100),
@@ -1281,6 +1361,19 @@ a:hover{color:var(--ink)}
 
     /* Someone opening this in April is looking at a finished year and has no
        reason to guess that a roll forward exists three tabs away. */
+    var sp=unsetSpread();
+    el("est-bar").classList.toggle("hidden",!sp);
+    if(sp) el("est-bar-txt").textContent=sp.n+" position"+(sp.n===1?" is":"s are")+
+      " costed at the middle of "+(sp.n===1?"its":"their")+" level. Depending where "+
+      (sp.n===1?"it sits":"they sit")+", base salary is between "+money(f.base-(f.base-sp.lo>0?0:0)+0)+
+      "";
+    if(sp){
+      var lo=f.base-((sp.hi+sp.lo)/2)+sp.lo, hi=f.base-((sp.hi+sp.lo)/2)+sp.hi;
+      el("est-bar-txt").textContent=sp.n+" position"+(sp.n===1?" is":"s are")+
+        " costed at the middle of "+(sp.n===1?"its":"their")+" level, so base salary is somewhere between "+
+        money(lo)+" and "+money(hi)+" — a spread of "+money(hi-lo)+".";
+    }
+
     var ended=Date.now()>fyEnd()&&state.positions.length>0;
     el("stale").classList.toggle("hidden",!ended);
     if(ended) el("stale-txt").textContent="This forecast covers a year that ended on "+fmtDate(fyEnd()-DAY)+
@@ -1346,6 +1439,14 @@ a:hover{color:var(--ink)}
   function nickOf(id){ return (state.nicknames&&state.nicknames[id])||""; }
 
   function renderRoster(){
+    var todo=unsetCount();
+    el("unset-bar").classList.toggle("hidden",!todo||gridOpen);
+    if(todo) el("unset-txt").textContent=todo+" position"+(todo===1?" has":"s have")+
+      " no step. Costed at the middle of the level until you set "+(todo===1?"it":"them")+".";
+    el("stepgrid").classList.toggle("hidden",!gridOpen);
+    el("roster-cols").classList.toggle("hidden",gridOpen);
+    if(gridOpen){ renderGrid(); return; }
+
     var mend=el("mend");
     mend.classList.toggle("hidden",!hoursMended);
     if(hoursMended) el("mend-txt").textContent=
@@ -1400,10 +1501,11 @@ a:hover{color:var(--ink)}
        salary box takes its place. */
     var grp=RATES[group], steps=grp.levels[level], banded=!!grp.range&&steps.length===2;
     lbl.textContent=banded?"In range":"Step";
-    sel.innerHTML=steps.map(function(v,i){
-      return '<option value="'+(i+1)+'">'+(banded?(i===0?"Minimum":"Maximum"):("Step "+(i+1)+" of "+steps.length))+"</option>";
-    }).join("");
-    if(keep&&keep>=1&&keep<=steps.length) sel.value=keep;
+    sel.innerHTML=(banded?"":'<option value="0">Not sure yet</option>')+
+      steps.map(function(v,i){
+        return '<option value="'+(i+1)+'">'+(banded?(i===0?"Minimum":"Maximum"):("Step "+(i+1)+" of "+steps.length))+"</option>";
+      }).join("");
+    sel.value=(keep&&keep>=1&&keep<=steps.length)?keep:(banded?1:0);
   }
   /* RATES and .levels are plain objects, so "constructor", "__proto__" and
      "toString" are truthy on a bare lookup. An imported classification using one
@@ -1413,6 +1515,9 @@ a:hover{color:var(--ink)}
   function rateFor(g,l,st){
     if(!hasLevel(g,l)) return null;
     var arr=RATES[g].levels[l];
+    /* Step 0 on a stepped group means "not set yet" — cost it at the middle
+       and let the screen say so, rather than quietly picking one end. */
+    if(!st&&!isRange(g)) st=midStep(g,l);
     return arr[Math.max(0,Math.min(arr.length-1,(st||1)-1))];
   }
   function nextStepRate(g,l,st){
@@ -1436,6 +1541,33 @@ a:hover{color:var(--ink)}
     return h>0?h:1950;
   }
   function groupWeek(g){ return hasRate(g)?num(RATES[g].week)||0:0; }
+  /* The middle step, not the arithmetic midpoint of the band: a real published
+     rate somebody could actually be on is easier to defend than a number that
+     is nobody's salary. Six steps rounds down to the third. */
+  /* Step 0 is a value, not an absence: "nobody has looked it up yet". Reading
+     it with ||1 quietly turned every unset step into step 1, which is exactly
+     the invented-precision this whole change exists to remove. */
+  function stepValue(id){
+    var n=parseInt(el(id).value,10);
+    return isFinite(n)&&n>0?n:0;
+  }
+  function midStep(g,l){
+    if(!hasLevel(g,l)||isRange(g)) return 0;
+    return Math.ceil(RATES[g].levels[l].length/2);
+  }
+  /* What not knowing is worth, per position: the floor and ceiling of the
+     level. Summed across the roster it becomes the spread on the forecast. */
+  function levelSpread(g,l){
+    if(!hasLevel(g,l)) return null;
+    var a=RATES[g].levels[l];
+    var f=isHourly(g)?groupHours(g):1;
+    return { min:a[0]*f, max:a[a.length-1]*f };
+  }
+  /* A stepped position whose step nobody has set. Range groups are excluded —
+     step 0 means something else entirely there. */
+  function stepUnset(p){ return !!p.group&&!isRange(p.group)&&hasLevel(p.group,p.level)&&!num(p.step); }
+  function unsetCount(){ var n=0; state.positions.forEach(function(p){ if(stepUnset(p)) n++; }); return n; }
+
   function rangeOf(g,l){
     if(!isRange(g)||!hasLevel(g,l)) return null;
     var a=RATES[g].levels[l];
@@ -1456,7 +1588,7 @@ a:hover{color:var(--ink)}
     return isHourly(g)?r*paidHours():r;
   }
   function syncRate(){
-    var g=el("f-group").value, l=el("f-level").value, st=parseInt(el("f-step").value,10)||1;
+    var g=el("f-group").value, l=el("f-level").value, st=stepValue("f-step");
     var custom=!g, grp=custom?null:RATES[g], hourly=isHourly(g), banded=isRange(g);
     el("rate-box").classList.toggle("hidden",custom);
     el("w-custom").classList.toggle("hidden",!custom);
@@ -1491,8 +1623,14 @@ a:hover{color:var(--ink)}
           groupHours(g).toLocaleString("en-CA")+" paid hours a year. ":"")+
           "Change the figure below if this position works different hours.":"")+
         (grp.note?" "+grp.note:"");
-      var nx=nextStepRate(g,l,st);
+      var nx=nextStepRate(g,l,st||midStep(g,l));
       el("f-next").value=nx?(hourly?"$"+nx.toFixed(2)+"/hr":money(nx)):"";
+      /* An unset step is costed at the middle and says so, rather than
+         quietly looking like a settled figure. */
+      var sp=st?null:levelSpread(g,l);
+      el("f-range-warn").classList.toggle("hidden",!sp);
+      if(sp) el("f-range-warn").textContent="Step not set — costed at the middle of "+l+
+        ", which is somewhere between "+money(sp.min)+" and "+money(sp.max)+". Set it when you know it.";
     }
     var annual=annualOf(g,l,st);
     var fte=hourly?100:(num(el("f-fte").value)||100);
@@ -1526,7 +1664,7 @@ a:hover{color:var(--ink)}
     previewCost();
   }
   function draft(){
-    var g=el("f-group").value, l=el("f-level").value, st=parseInt(el("f-step").value,10)||1;
+    var g=el("f-group").value, l=el("f-level").value, st=stepValue("f-step");
     var hourly=isHourly(g), banded=isRange(g), salary=annualOf(g,l,st);
     var inc=el("f-inc").checked&&!banded, fchg=el("f-ftechg").checked, nextAnnual=0;
     if(inc){ if(g){ var nr=nextStepRate(g,l,st)||0; nextAnnual=hourly?nr*paidHours():nr; } else nextAnnual=salary; }
@@ -1587,13 +1725,15 @@ a:hover{color:var(--ink)}
      so nothing downstream has to know these arrived together. */
   function bulkCount(){ return Math.max(1,Math.min(200,Math.round(num(el("b-count").value)||0)))||1; }
   function bulkSync(){
-    var g=el("b-group").value, l=el("b-level").value, st=parseInt(el("b-step").value,10)||1;
+    var g=el("b-group").value, l=el("b-level").value, st=stepValue("b-step");
     /* Nothing sensible to pick for a range group: the block goes down at the
        minimum and each position gets its real salary when it is opened. */
     el("b-step").disabled=isRange(g);
-    var n=bulkCount(), banded=isRange(g), each=scenarioRate(g,l,banded?1:st);
+    var n=bulkCount(), banded=isRange(g), unsure=!banded&&!st;
+    var each=scenarioRate(g,l,banded?1:(st||midStep(g,l)));
     el("b-what").textContent=n+" × "+(l||g)+
       (banded ? " at the range minimum"
+              : unsure ? " with the step not set yet"
               : (hasLevel(g,l)&&RATES[g].levels[l].length>1?" step "+st:""))+
       " at "+money(each)+" each";
     el("b-preview").textContent=money(each*n);
@@ -2319,9 +2459,111 @@ a:hover{color:var(--ink)}
   el("x-csv").addEventListener("click",doCsv);
   el("x-csv2").addEventListener("click",doCsv);
 
+
+  /* ---- the step grid -----------------------------------------------------
+
+     Twenty steps used to be twenty editors. This is one row each: buttons
+     rather than a dropdown, because a select costs an open and a close and
+     this costs a tap. The published rate lands beside each row as it is set,
+     which is the reassurance as much as the speed — you are watching real
+     rates arrive, not estimates.
+
+     A midpoint is scaffolding, never an answer. Nobody takes estimated
+     salaries to a director, so an unset position stays visibly unset and the
+     forecast says what the uncertainty is worth rather than hiding it. */
+
+  var gridOpen=false;
+
+  function openGrid(){ gridOpen=true; renderRoster(); 
+    var g=el("stepgrid"); if(g.scrollIntoView) g.scrollIntoView({block:"nearest"}); }
+  function closeGrid(){ gridOpen=false; renderRoster(); }
+
+  function renderGrid(){
+    var rows=state.positions.filter(function(p){
+      return p.group&&hasLevel(p.group,p.level);
+    });
+    var todo=rows.filter(stepUnset).length, done=rows.length-todo;
+    el("sg-count").textContent=done+" of "+rows.length+" set";
+    el("sg-bar").style.width=(rows.length?Math.round(done/rows.length*100):0)+"%";
+    var f=forecast();
+    el("sg-total").innerHTML="Base salary so far <b style=\"color:var(--ink)\">"+money(f.base)+"</b>";
+    el("sg-note").textContent=todo
+      ? (todo+" position"+(todo===1?" is":"s are")+" still at the middle of the level. Those are estimates until they are set.")
+      : "Every position is on a published rate.";
+
+    el("sg-rows").innerHTML=rows.map(function(p){
+      var unset=stepUnset(p), banded=isRange(p.group);
+      var nick=p.mode==="vacant"?"":nickOf(p.id);
+      var ctrl;
+      if(banded){
+        ctrl='<input class="sg-sal" data-sal="'+esc(p.id)+'" inputmode="decimal" placeholder="Salary" value="'+
+             (num(p.salary)?esc(grouped(p.salary)):"")+'">';
+      } else {
+        var n=RATES[p.group].levels[p.level].length, b="";
+        for(var i=1;i<=n;i++)
+          b+='<button data-step="'+i+'" data-id="'+esc(p.id)+'" aria-pressed="'+(num(p.step)===i)+'">'+i+"</button>";
+        b+='<button class="q" data-step="0" data-id="'+esc(p.id)+'" aria-pressed="'+unset+'" title="Not sure yet">?</button>';
+        ctrl=b;
+      }
+      return '<div class="sg'+(unset||(banded&&!num(p.salary))?" todo":"")+'">'+
+        '<span class="sg-who"><b>'+esc(p.title||"Untitled")+"</b><span>"+
+          esc(p.num||"—")+(nick?" · "+esc(nick):"")+"</span></span>"+
+        '<span class="sg-lvl">'+esc(p.level)+"</span>"+
+        '<span class="sg-steps">'+ctrl+"</span>"+
+        '<span class="sg-money'+(unset?" est":"")+'">'+money(costOf(p,null))+"</span></div>";
+    }).join("")||'<div class="empty">No classified positions yet.</div>';
+
+    Array.prototype.forEach.call(el("sg-rows").querySelectorAll("[data-step]"),function(btn){
+      btn.addEventListener("click",function(){
+        var p=state.positions.filter(function(x){return x.id===btn.getAttribute("data-id");})[0];
+        if(!p) return;
+        var st=parseInt(btn.getAttribute("data-step"),10);
+        p.step=st;
+        var r=rateFor(p.group,p.level,st)||0;
+        p.salary=isHourly(p.group)?r*(num(p.hours)||groupHours(p.group)):r;
+        if(p.incdate){
+          var nx=nextStepRate(p.group,p.level,st||midStep(p.group,p.level))||0;
+          p.next=isHourly(p.group)?nx*(num(p.hours)||groupHours(p.group)):nx;
+        }
+        save(); renderGrid(); renderForecast(); renderScenario();
+      });
+    });
+    Array.prototype.forEach.call(el("sg-rows").querySelectorAll("[data-sal]"),function(inp){
+      moneyField(inp);
+      inp.addEventListener("input",function(){
+        var p=state.positions.filter(function(x){return x.id===inp.getAttribute("data-sal");})[0];
+        if(!p) return;
+        p.salary=num(inp.value); save(); renderForecast();
+        var row=inp.closest(".sg");
+        if(row){ row.classList.toggle("todo",!num(p.salary));
+          row.querySelector(".sg-money").textContent=money(costOf(p,null)); }
+      });
+    });
+  }
+
+  el("unset-go").addEventListener("click",openGrid);
+  el("sg-later").addEventListener("click",closeGrid);
+  el("sg-done").addEventListener("click",closeGrid);
+
+  /* What not knowing is worth, in money, so a manager can decide whether it is
+     worth the trip to look the steps up. */
+  function unsetSpread(){
+    var lo=0, hi=0, n=0;
+    state.positions.forEach(function(p){
+      if(!stepUnset(p)) return;
+      var sp=levelSpread(p.group,p.level); if(!sp) return;
+      var a={}, b={};
+      for(var k in p) if(Object.prototype.hasOwnProperty.call(p,k)){ a[k]=p[k]; b[k]=p[k]; }
+      a.salary=sp.min; b.salary=sp.max;
+      lo+=costOf(a,null); hi+=costOf(b,null); n++;
+    });
+    return n?{n:n,lo:lo,hi:hi}:null;
+  }
+
   el("est-done").addEventListener("click",function(){ show("forecast"); });
   el("mend-x").addEventListener("click",function(){ hoursMended=null; renderRoster(); });
 
+  el("b-steps-now").addEventListener("click",function(){ closeBulk(); openGrid(); });
   el("add-many").addEventListener("click",openBulk);
   el("bulk-close").addEventListener("click",closeBulk);
   el("b-group").addEventListener("change",function(){
@@ -2336,12 +2578,13 @@ a:hover{color:var(--ink)}
   el("b-step").addEventListener("change",bulkSync);
   el("b-count").addEventListener("input",bulkSync);
   el("b-save").addEventListener("click",function(){
-    var g=el("b-group").value, l=el("b-level").value, st=parseInt(el("b-step").value,10)||1;
+    var g=el("b-group").value, l=el("b-level").value, st=stepValue("b-step");
     if(!hasLevel(g,l)){ el("b-msg").textContent="Pick a group and a level first."; return; }
     var n=bulkCount(), room=2000-state.positions.length;
     if(room<=0){ el("b-msg").textContent="This roster is already at 2,000 positions, which is the limit."; return; }
     var short=n>room; if(short) n=room;
     var banded=isRange(g), hourly=isHourly(g), rate=rateFor(g,l,banded?1:st)||0;
+    var unsure=!banded&&!st;
     var title=el("b-title").value.trim()||l;
     var from=el("b-num").value.trim(), numbered=/^\d{1,12}$/.test(from), base=numbered?parseInt(from,10):0;
     var stamp=Date.now().toString(36);
@@ -2359,7 +2602,9 @@ a:hover{color:var(--ink)}
        way down, and the next block is usually the next thing wanted. */
     el("b-msg").textContent=n+" "+l+" position"+(n===1?"":"s")+" added"+
       (short?" — that filled the roster to its 2,000 limit":"")+
-      ". Add another block, or close this and start tailoring them.";
+      (unsure?". Set their steps now while your report is open, or add another block."
+             :". Add another block, or close this and start tailoring them.");
+    el("b-steps-now").classList.toggle("hidden",!unsure);
   });
   el("f-delete").addEventListener("click",function(){
     state.positions=state.positions.filter(function(x){return x.id!==editing;});
@@ -2488,6 +2733,7 @@ a:hover{color:var(--ink)}
     save(); renderAll(); show("forecast");
     el("roll-msg").textContent="Rolled forward to "+label+". Check your salary budget — it is still last year's.";
   });
+  el("est-bar-go").addEventListener("click",function(){ show("roster"); openGrid(); });
   el("stale-go").addEventListener("click",function(){
     show("setup");
     var c=el("roll-card");
