@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-YXeT+bfYVRK+QbRVvAuqMRZTwB/AvzAJ0mUpH6XAeU0=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-ssEUbnZxC6LqW7JV2SlPeLek2yv6bzQ10X6yOxrtigI=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -289,7 +289,11 @@ a:hover{color:var(--ink)}
 #printout{display:none}
 @media print{
   @page{margin:16mm}
-  body>*{display:none!important}
+  /* #printout is moved to be a direct child of body before printing, because
+     this file is a fragment the build wraps — left where it was authored it
+     sat inside the app's wrapper, and hiding body's children took its parent
+     down with it. The dialogue opened on a blank page. */
+  body>*:not(#printout){display:none!important}
   #printout{display:block!important;color:#000;font-size:10.5pt;line-height:1.45}
   #printout h1{font-size:17pt;margin:0 0 2mm;letter-spacing:-.4pt}
   #printout .p-sub{font-size:9.5pt;color:#444;margin:0 0 6mm}
@@ -460,6 +464,13 @@ a:hover{color:var(--ink)}
         <div class="row" style="gap:9px;flex-wrap:wrap">
           <button class="btn-ghost" id="add-position" style="flex:1 1 170px">Add a position</button>
           <button class="btn-ghost" id="add-many" style="flex:1 1 170px">Add several at once</button>
+        </div>
+        <!-- The same two controls as the forecast page. Wanting a copy of the
+             complement while you are looking at the complement is not an odd
+             thing to want. -->
+        <div class="row" style="gap:9px;flex-wrap:wrap;justify-content:flex-start">
+          <button class="btn-quiet" id="x-print2" style="font-size:13px">Print or save as PDF</button>
+          <button class="btn-quiet" id="x-csv2" style="font-size:13px">Spreadsheet (CSV)</button>
         </div>
       </div>
 
@@ -845,7 +856,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v50";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v51";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -2246,15 +2257,19 @@ a:hover{color:var(--ink)}
        ". Planning figures costed from the published pay tables in effect "+
        esc(RATEMETA.retrieved||"")+". Not a system of record — check anything that matters "+
        "against the ledger and the collective agreement.</div>";
-    el("printout").innerHTML=h;
+    var node=el("printout");
+    if(node.parentNode!==document.body) document.body.appendChild(node);
+    node.innerHTML=h;
   }
   function fteYearsTotal(){ var t=0; state.positions.forEach(function(p){ t+=fteYears(p,null); }); return t; }
 
-  el("x-print").addEventListener("click",function(){
+  function doPrint(){
     if(!state.positions.length&&!state.cc.name){ el("out-msg").textContent="Nothing to print yet."; return; }
     buildPrintout(); el("out-msg").textContent="";
     window.print();
-  });
+  }
+  el("x-print").addEventListener("click",doPrint);
+  el("x-print2").addEventListener("click",doPrint);
 
   /* CSV rather than a real spreadsheet file: it opens in Excel, it needs no
      library, and it cannot carry a formula that does something surprising. */
@@ -2286,7 +2301,7 @@ a:hover{color:var(--ink)}
     /* A leading BOM, so Excel opens accented names as accented names. */
     return "\ufeff"+out.map(function(r){ return r.map(csvCell).join(","); }).join("\r\n");
   }
-  el("x-csv").addEventListener("click",function(){
+  function doCsv(){
     if(!state.positions.length){ el("out-msg").textContent="Add some positions first."; return; }
     var name="onstrength-"+(state.cc.code||"complement")+"-"+toIso(Date.now())+".csv";
     try{
@@ -2300,7 +2315,9 @@ a:hover{color:var(--ink)}
     }catch(e){
       el("out-msg").textContent="Could not download here — use Print and save as PDF instead.";
     }
-  });
+  }
+  el("x-csv").addEventListener("click",doCsv);
+  el("x-csv2").addEventListener("click",doCsv);
 
   el("est-done").addEventListener("click",function(){ show("forecast"); });
   el("mend-x").addEventListener("click",function(){ hoursMended=null; renderRoster(); });
