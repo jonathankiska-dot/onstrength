@@ -147,15 +147,31 @@ section{padding:46px 0}
 .honest strong{color:var(--ink)}
 .honest ul{margin:0;padding-left:20px}
 .honest p{color:var(--ink-2)}
-/* The invitation is an offer rather than another fact, so it gets its own
-   ground and a rule down the side — findable by a reader who is not federal
-   without reading the paragraph above it first. */
-.offer{background:var(--base-soft);border-left:3px solid var(--base);
-  border-radius:0 12px 12px 0;padding:14px 16px;margin-top:16px}
-/* Four sectors is a long line on a phone, so let it wrap and give the wrapped
-   line room to breathe rather than tightening the tracking. */
-.offer .eyebrow{line-height:1.7}
-.offer p{color:var(--ink-2)}
+/* ---- the offer ----
+   Its own ground and its own band, because it is an offer rather than another
+   fact about the federal tables. The sectors are set as the heading: someone
+   scrolling should see their own employer, not a paragraph about the GoC. */
+.offer-band{background:var(--base-soft);border:1px solid var(--base);
+  border-radius:var(--r-md);padding:34px 26px;text-align:center}
+.offer-eyebrow{display:block;font-size:11px;font-weight:700;letter-spacing:1.3px;
+  text-transform:uppercase;color:var(--base);margin-bottom:12px}
+.offer-h{margin:0 0 14px;font-size:25px;line-height:1.32;font-weight:800;
+  letter-spacing:-.6px;color:var(--ink)}
+.offer-p{margin:0 auto 20px;max-width:52ch;font-size:15.5px;line-height:1.6;color:var(--ink-2)}
+.offer-cta{display:inline-flex;align-items:center;justify-content:center;
+  min-height:48px;padding:0 30px;border-radius:12px;background:var(--base);color:#fff;
+  font-weight:600;font-size:15px;text-decoration:none}
+.offer-cta:hover{filter:brightness(1.08)}
+.offer-fine{margin:16px auto 0;max-width:46ch;font-size:13px;line-height:1.55;color:var(--muted)}
+/* The break is cosmetic on a wide screen; on a phone it goes and the separator
+   it was standing in for has to come back, or two sectors run together. */
+.offer-sep{display:none}
+@media (max-width:640px){
+  .offer-band{padding:26px 18px}
+  .offer-h{font-size:20px;letter-spacing:-.3px}
+  .offer-br{display:none}
+  .offer-sep{display:inline}
+}
 
 /* ---- install ---- */
 #install .card{padding:24px 22px}
@@ -243,17 +259,27 @@ footer a.kmc:hover{text-decoration:underline}
           force. Nothing is averaged.</p>
         <p style="margin:0 0 12px;font-size:14.5px;line-height:1.6">It plans the year rather
           than reconciling it: no actuals, no benefits, and not a system of record.</p>
-        <!-- Its own colour and its own block: this is an offer, not another
-             fact about the tables, and a reader who is not federal should be
-             able to find it without reading the paragraph above first. -->
-        <div class="offer">
-          <span class="eyebrow" style="color:var(--base);display:block;margin-bottom:6px">Provincial governments · Municipalities · School boards · Hospitals</span>
-          <p style="margin:0;font-size:14.5px;line-height:1.6">Same arithmetic, a different pay
-            grid — in Canada or beyond.
-            <a href="mailto:jkiska@onstrength.ca?subject=Onstrength%20for%20another%20organisation"
-               style="font-weight:600">Get in touch</a> and I will build it on yours.</p>
-        </div>
       </div>
+    </div>
+  </section>
+
+  <!-- The invitation used to sit as a tinted box at the foot of the column
+       above, where it read as a footnote to the federal tables. A reader who
+       is not federal was being asked to work out that the tool was for them.
+       It is now a band of its own: the sectors are the heading, so someone
+       scrolling sees their own employer rather than a paragraph about the GoC. -->
+  <section id="yours">
+    <div class="offer-band">
+      <span class="offer-eyebrow">Not federal?</span>
+      <h2 class="offer-h">Provincial&nbsp;governments · Municipalities<span
+        class="offer-sep"> · </span><br class="offer-br">School&nbsp;boards · Hospitals ·
+        Agencies</h2>
+      <p class="offer-p">The arithmetic is the same everywhere — it is the pay grid that
+        changes. Send me yours and I will build you your own.</p>
+      <a class="offer-cta"
+         href="mailto:jkiska@onstrength.ca?subject=Onstrength%20for%20another%20organisation">Get in touch</a>
+      <p class="offer-fine">In Canada or beyond. No obligation, and I will tell you honestly
+        whether it is worth doing for your organisation.</p>
     </div>
   </section>
 
