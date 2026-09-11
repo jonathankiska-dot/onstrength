@@ -173,6 +173,29 @@ section{padding:46px 0}
   .offer-sep{display:inline}
 }
 
+/* ---- the fold ----
+   An optional step does not get a section heading on the page someone lands on.
+   It gets a line they can open. */
+.fold{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r-md);
+  padding:4px 20px}
+.fold summary{cursor:pointer;list-style:none;padding:16px 0;font-weight:600;font-size:15.5px;
+  display:flex;align-items:center;gap:8px}
+.fold summary::-webkit-details-marker{display:none}
+.fold summary::after{content:"";width:8px;height:8px;margin-left:auto;flex:none;
+  border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);
+  transform:rotate(45deg) translateY(-2px);transition:transform .15s ease}
+.fold[open] summary::after{transform:rotate(-135deg) translateY(-2px)}
+.fold summary:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ring);border-radius:8px}
+.fold-sub{font-weight:400;color:var(--muted);font-size:14px}
+.fold-body{padding-bottom:20px}
+.fold-body .card{margin-top:14px}
+
+/* ---- the equation, standing on its own ---- */
+.eq-sec{padding-top:10px}
+.eq-sec .eq{max-width:560px;margin:0 auto}
+.eq-note{max-width:560px;margin:16px auto 0;text-align:center;font-size:13.5px;
+  line-height:1.6;color:var(--muted)}
+
 /* ---- install ---- */
 #install .card{padding:24px 22px}
 .steps{margin:16px 0 0;padding-left:22px}
@@ -216,10 +239,8 @@ footer a.kmc:hover{text-decoration:underline}
     <div>
       <div class="tagline">Clear. Current. Yours.</div>
       <h1>Know where your salary budget lands.</h1>
-      <p class="lede">Forecasting salaries by hand means rebuilding a spreadsheet every month
-        and chasing figures from a finance advisor who has their own deadlines — so the answer
-        turns up late, in someone else's format, and rarely when the decision is in front of
-        you. Onstrength gives you the same forecast on demand: enter your budget, build your
+      <p class="lede">Rebuild the spreadsheet. Chase the finance advisor. Get the answer a
+        week after you needed it. Onstrength gives you the same forecast on demand: enter your budget, build your
         complement from the published pay tables, add what you expect to spend on top, and see
         where the year ends up.</p>
       <!-- Two doors, the same size, because they are equally reasonable
@@ -234,33 +255,22 @@ footer a.kmc:hover{text-decoration:underline}
     </div>
   </div>
 
-  <section>
-    <h2 class="sec-h">The whole idea, in four lines</h2>
-    <p class="sec-s">One equation, and the only part you estimate is the part nobody can compute.</p>
-    <div class="two">
+  <!-- The heading above this said "The whole idea, in four lines" over a
+       sentence explaining that it was one equation. The equation is visibly
+       one equation and visibly four lines; saying so twice before showing it
+       was the page clearing its throat. -->
+  <section class="eq-sec">
       <div class="eq">
         <div class="eqrow"><b>Your salary budget</b><span>What you were given</span></div>
         <div class="eqrow"><b>− Base salary</b><span>Costed from your complement</span></div>
         <div class="eqrow"><b>− Six estimates</b><span>Overtime, premiums, acting, bilingual,<br>retention, everything else</span></div>
         <div class="eqtot"><span>= Where the year lands</span><span style="font-weight:500;font-size:12.5px;color:var(--muted);letter-spacing:.2px">Surplus, or pressure</span></div>
       </div>
-      <!-- This slot used to hold three lines of what the tool does not do. It
-           was an honest instinct in the wrong place: a first-time reader met
-           three negatives before deciding whether to try anything, and the
-           scope is already stated in the guide and the footer. One line covers
-           it, and the space goes to the question a reader outside the federal
-           government is actually asking. -->
-      <div class="honest">
-        <div class="eyebrow" style="margin-bottom:12px">Built on the Government of Canada tables</div>
-        <p style="margin:0 0 12px;font-size:14.5px;line-height:1.6">107 classification groups,
-          720 levels, 3,454 published steps — every federal salary costed from the tables that
-          set it, pay period by pay period. A step increment, a move to 80%, a departure in
-          November: each one cuts the year, and each slice is costed at the rate and hours in
-          force. Nothing is averaged.</p>
-        <p style="margin:0 0 12px;font-size:14.5px;line-height:1.6">It plans the year rather
-          than reconciling it: no actuals, no benefits, and not a system of record.</p>
-      </div>
-    </div>
+      <!-- A paragraph of counts stood beside this. It was the page arguing
+           with a doubt the reader did not have yet. One line, and the detail
+           waits in the guide for anyone who wants it. -->
+      <p class="eq-note">Costed from the published Government of Canada pay tables, pay period
+        by pay period. It plans the year; it does not reconcile it.</p>
   </section>
 
   <!-- The invitation used to sit as a tinted box at the foot of the column
@@ -289,11 +299,18 @@ footer a.kmc:hover{text-decoration:underline}
        the second — the slicing, which is the actual argument — has moved into
        that box where it sits next to the claim it supports. Three cards, one
        surviving idea, and a section heading fewer. -->
+  <!-- This was a full section with a heading, a standfirst and four cards —
+       262 words, more of the opening page than anything else on it, for an
+       optional step nobody takes before they have tried the tool. It is the
+       same content, folded away: one quiet line for the reader who wants it,
+       and nothing in the way of the reader who does not. -->
   <section id="install">
-    <h2 class="sec-h">Put it on your phone</h2>
-    <p class="sec-s" id="ins-sub">Optional. It works perfectly as a link — this just gives it an
-      icon and makes it work with no signal. Installed or not, your roster stays in that browser
-      on that device: no account, no server, nothing uploaded.</p>
+    <details class="fold">
+      <summary>Put it on your phone <span class="fold-sub">— optional, 30 seconds</span></summary>
+      <div class="fold-body">
+    <p class="sec-s" id="ins-sub" style="margin-top:14px">It works perfectly as a link — this
+      just gives it an icon and makes it work with no signal. Either way your roster stays in
+      that browser on that device: no account, no server, nothing uploaded.</p>
 
     <div class="card" id="ins-standalone" style="display:none">
       <h3 style="color:var(--good)">You're running the installed app.</h3>
@@ -328,6 +345,8 @@ footer a.kmc:hover{text-decoration:underline}
       <p>Open your browser's menu and look for <b>Install app</b> or <b>Add to Home screen</b>.
         Not every browser offers it — and if yours doesn't, nothing is lost. The link works the same either way.</p>
     </div>
+      </div>
+    </details>
   </section>
 
   <footer>
