@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-b2e6M3Lp/CbPLkwwvlZxT9YQiTzQ95toje1VNIBkWyo=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-aQww1GEUfHhtlB8albRgOZB9JPmuIr+Ux7HpLSddFLg=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -534,7 +534,7 @@ a:hover{color:var(--ink)}
              thing to want. -->
         <div class="row" style="gap:9px;flex-wrap:wrap;justify-content:flex-start">
           <button class="btn-quiet" id="x-print2" style="font-size:13px">Print or save as PDF</button>
-          <button class="btn-quiet" id="x-csv2" style="font-size:13px">Spreadsheet (CSV)</button>
+          <button class="btn-quiet" id="x-csv2" style="font-size:13px">Spreadsheet (Excel)</button>
         </div>
       </div>
 
@@ -817,7 +817,7 @@ a:hover{color:var(--ink)}
             round or keep with the file.</div>
           <div class="row" style="gap:9px;justify-content:flex-start;flex-wrap:wrap">
             <button class="btn-ghost btn-sm" id="x-print" style="width:auto;padding:0 16px">Print or save as PDF</button>
-            <button class="btn-ghost btn-sm" id="x-csv" style="width:auto;padding:0 16px">Spreadsheet (CSV)</button>
+            <button class="btn-ghost btn-sm" id="x-csv" style="width:auto;padding:0 16px">Spreadsheet (Excel)</button>
           </div>
           <div class="note" id="out-msg"></div>
         </div>
@@ -931,7 +931,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v52";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v55";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -1361,18 +1361,11 @@ a:hover{color:var(--ink)}
 
     /* Someone opening this in April is looking at a finished year and has no
        reason to guess that a roll forward exists three tabs away. */
-    var sp=unsetSpread();
+    var sp=unsetBand(f.base);
     el("est-bar").classList.toggle("hidden",!sp);
     if(sp) el("est-bar-txt").textContent=sp.n+" position"+(sp.n===1?" is":"s are")+
-      " costed at the middle of "+(sp.n===1?"its":"their")+" level. Depending where "+
-      (sp.n===1?"it sits":"they sit")+", base salary is between "+money(f.base-(f.base-sp.lo>0?0:0)+0)+
-      "";
-    if(sp){
-      var lo=f.base-((sp.hi+sp.lo)/2)+sp.lo, hi=f.base-((sp.hi+sp.lo)/2)+sp.hi;
-      el("est-bar-txt").textContent=sp.n+" position"+(sp.n===1?" is":"s are")+
-        " costed at the middle of "+(sp.n===1?"its":"their")+" level, so base salary is somewhere between "+
-        money(lo)+" and "+money(hi)+" — a spread of "+money(hi-lo)+".";
-    }
+      " costed at the middle of "+(sp.n===1?"its":"their")+" level, so base salary is somewhere between "+
+      money(sp.low)+" and "+money(sp.high)+" — a spread of "+money(sp.high-sp.low)+".";
 
     var ended=Date.now()>fyEnd()&&state.positions.length>0;
     el("stale").classList.toggle("hidden",!ended);
@@ -2411,53 +2404,235 @@ a:hover{color:var(--ink)}
   el("x-print").addEventListener("click",doPrint);
   el("x-print2").addEventListener("click",doPrint);
 
-  /* CSV rather than a real spreadsheet file: it opens in Excel, it needs no
-     library, and it cannot carry a formula that does something surprising. */
-  function csvCell(v){
-    var t=String(v==null?"":v);
-    return /[",\n]/.test(t) ? '"'+t.replace(/"/g,'""')+'"' : t;
+  /* ---- getting it out ----------------------------------------------------
+
+     This was a CSV, and two users between them showed why that is not good
+     enough. One opened it and found it unformatted — a wall of digits with no
+     column widths and no thousands separators, which is not something you send
+     a director. The other opened it on an iPhone and could not open it at all:
+     Safari has no download, it navigates to the file, and iOS then offers
+     "Open in…" to whatever app claims the type. Nothing on a stock phone claims
+     a CSV, so the button was a dead end on the device people actually carry.
+
+     So: a real .xlsx, which is a zip of XML and therefore about a hundred lines
+     and no library, handed over through the share sheet where the browser has
+     one. Sharing is the verb anyway — nobody wanted a file, they wanted to send
+     the thing to their team. */
+
+  var crc32=(function(){
+    var t=new Int32Array(256);
+    for(var n=0;n<256;n++){ var c=n;
+      for(var k=0;k<8;k++) c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);
+      t[n]=c; }
+    return function(u){ var c=-1;
+      for(var i=0;i<u.length;i++) c=t[(c^u[i])&0xFF]^(c>>>8);
+      return (c^-1)>>>0; };
+  })();
+  function xbytes(s){ return new TextEncoder().encode(s); }
+
+  /* Stored, not deflated. A complement is a few kilobytes of text; the
+     compression would save nothing worth a second implementation. */
+  function zipUp(files){
+    var body=[], dir=[], at=0, d=new Date();
+    var tm=(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1);
+    var dt=((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate();
+    files.forEach(function(f){
+      var nm=xbytes(f.name), dat=f.data, crc=crc32(dat);
+      var h=new Uint8Array(30+nm.length), v=new DataView(h.buffer);
+      v.setUint32(0,0x04034b50,true); v.setUint16(4,20,true);
+      v.setUint16(8,0,true); v.setUint16(10,tm,true); v.setUint16(12,dt,true);
+      v.setUint32(14,crc,true); v.setUint32(18,dat.length,true);
+      v.setUint32(22,dat.length,true); v.setUint16(26,nm.length,true);
+      h.set(nm,30); body.push(h,dat);
+      var c=new Uint8Array(46+nm.length), w=new DataView(c.buffer);
+      w.setUint32(0,0x02014b50,true); w.setUint16(4,20,true); w.setUint16(6,20,true);
+      w.setUint16(12,tm,true); w.setUint16(14,dt,true);
+      w.setUint32(16,crc,true); w.setUint32(20,dat.length,true);
+      w.setUint32(24,dat.length,true); w.setUint16(28,nm.length,true);
+      w.setUint32(42,at,true); c.set(nm,46); dir.push(c);
+      at+=h.length+dat.length;
+    });
+    var dlen=dir.reduce(function(a,b){ return a+b.length; },0);
+    var e=new Uint8Array(22), x=new DataView(e.buffer);
+    x.setUint32(0,0x06054b50,true);
+    x.setUint16(8,files.length,true); x.setUint16(10,files.length,true);
+    x.setUint32(12,dlen,true); x.setUint32(16,at,true);
+    return new Blob(body.concat(dir,[e]),
+      {type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
   }
-  function buildCsv(){
-    var f=forecast(), out=[];
-    out.push(["Onstrength — "+ccTitle()]);
-    out.push([fyText()]);
-    out.push(["Prepared",fmtDate(Date.now())]);
-    out.push([]);
-    out.push(["Salary budget",f.budget]);
-    out.push(["Base salary",f.base]);
+
+  function xmlEsc(s){
+    return String(s).replace(/[&<>"]/g,function(c){
+      return c==="&"?"&amp;":c==="<"?"&lt;":c===">"?"&gt;":"&quot;"; });
+  }
+  function colRef(i){
+    var s=""; i++;
+    while(i>0){ var m=(i-1)%26; s=String.fromCharCode(65+m)+s; i=(i-m-1)/26; }
+    return s;
+  }
+  /* Style slots, in the order they are declared in XL_STYLES below:
+     0 plain · 1 bold · 2 money · 3 title · 4 bold money · 5 header · 6 hours */
+  function xT(v,s){ return {k:"s",v:v,s:s||0}; }
+  /* Whole dollars in the cell, not just in the format: a cell that reads
+     588990.7604395603 in the formula bar looks like a mistake to anyone who
+     clicks it, and the rows are rounded, so the total would not tie out. */
+  function xN(v,s){ return {k:"n",v:(s===0||s===6)?v:Math.round(v),s:s==null?2:s}; }
+
+  function sheetRows(){
+    var f=forecast(), R=[];
+    R.push([xT("Onstrength — "+ccTitle(),3)]);
+    R.push([xT(fyText())]);
+    R.push([xT("Prepared "+fmtDate(Date.now()))]);
+    R.push([]);
+    R.push([xT("Salary budget",1),xN(f.budget,4)]);
+    R.push([xT("Base salary",1),xN(f.base,4)]);
     EST_LINES.forEach(function(L){
-      var v=num((state.estimates||{})[L.id]); if(v) out.push([L.name,v]);
+      var v=num((state.estimates||{})[L.id]);
+      if(v) R.push([xT(L.name),xN(v)]);
     });
-    out.push([f.variance<0?"Projected overrun":"Projected surplus",f.variance]);
-    out.push([]);
-    out.push(["Position","Title","Who","Group","Level","Step","Annual rate",
-              "FTE %","Paid hours","Status","Cost this year"]);
+    R.push([xT(f.variance<0?"Projected overrun":"Projected surplus",1),xN(f.variance,4)]);
+    var sp=unsetBand(f.base);
+    if(sp) R.push([xT(sp.n+(sp.n===1?" position has":" positions have")+
+      " no step yet and "+(sp.n===1?"is":"are")+" costed at the middle of the level,"+
+      " so base salary is somewhere between "+money(sp.low)+" and "+money(sp.high)+".",1)]);
+    R.push([]);
+    var head=["Position","Title","Who","Group","Level","Step","Annual rate",
+              "FTE %","Paid hours","Status","Cost this year"];
+    R.push(head.map(function(h){ return xT(h,5); }));
+    var headAt=R.length, total=0;
     state.positions.forEach(function(p){
-      out.push([p.num||"",p.title||"",p.mode==="vacant"?"":nickOf(p.id),
-                p.group||"",p.level||"",p.step||"",num(p.salary),
-                (p.fte==null||p.fte==="")?100:num(p.fte),num(p.hours)||"",
-                statusOf(p),Math.round(costOf(p,null))]);
+      var c=Math.round(costOf(p,null)); total+=c;
+      R.push([xT(p.num||""),xT(p.title||""),xT(p.mode==="vacant"?"":nickOf(p.id)),
+              xT(p.group||""),xT(p.level||""),
+              stepUnset(p)?xT("not set"):(num(p.step)?xN(num(p.step),0):xT("")),
+              xN(num(p.salary)),xN((p.fte==null||p.fte==="")?100:num(p.fte),0),
+              num(p.hours)?xN(num(p.hours),6):xT(""),xT(statusOf(p)),xN(c)]);
     });
-    /* A leading BOM, so Excel opens accented names as accented names. */
-    return "\ufeff"+out.map(function(r){ return r.map(csvCell).join(","); }).join("\r\n");
+    R.push([]);
+    var t=[]; t[0]=xT("Total",1); t[10]=xN(total,4); R.push(t);
+    return {rows:R,headAt:headAt,last:headAt+state.positions.length};
   }
-  function doCsv(){
+
+  function sheetXml(){
+    var s=sheetRows(), out=[];
+    s.rows.forEach(function(r,i){
+      var cells=[];
+      for(var j=0;j<r.length;j++){
+        var c=r[j]; if(!c) continue;
+        var ref=colRef(j)+(i+1);
+        if(c.k==="n") cells.push('<c r="'+ref+'" s="'+c.s+'"><v>'+c.v+'</v></c>');
+        else if(c.v!=="") cells.push('<c r="'+ref+'" s="'+c.s+'" t="inlineStr"><is><t xml:space="preserve">'+
+          xmlEsc(c.v)+'</t></is></c>');
+      }
+      if(cells.length) out.push('<row r="'+(i+1)+'">'+cells.join("")+'</row>');
+    });
+    var widths=[12,32,16,9,12,8,13,8,11,22,14];
+    var cols=widths.map(function(w,i){
+      return '<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>'; }).join("");
+    var freeze='<sheetViews><sheetView showGridLines="0" workbookViewId="0">'+
+      '<pane ySplit="'+s.headAt+'" topLeftCell="A'+(s.headAt+1)+
+      '" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>';
+    var filt=state.positions.length
+      ? '<autoFilter ref="A'+s.headAt+':K'+s.last+'"/>' : "";
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+      '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+
+      freeze+'<cols>'+cols+'</cols><sheetData>'+out.join("")+'</sheetData>'+filt+'</worksheet>';
+  }
+
+  var XL_STYLES='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+
+    '<numFmts count="2"><numFmt numFmtId="164" formatCode="#,##0"/>'+
+    '<numFmt numFmtId="165" formatCode="#,##0.0"/></numFmts>'+
+    '<fonts count="3">'+
+      '<font><sz val="11"/><name val="Calibri"/></font>'+
+      '<font><b/><sz val="11"/><name val="Calibri"/></font>'+
+      '<font><b/><sz val="14"/><name val="Calibri"/></font></fonts>'+
+    '<fills count="3"><fill><patternFill patternType="none"/></fill>'+
+      '<fill><patternFill patternType="gray125"/></fill>'+
+      '<fill><patternFill patternType="solid"><fgColor rgb="FFE3F0F6"/>'+
+      '<bgColor indexed="64"/></patternFill></fill></fills>'+
+    '<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border>'+
+      '<border><left/><right/><top/><bottom style="thin">'+
+      '<color rgb="FFBFC7D9"/></bottom><diagonal/></border></borders>'+
+    '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'+
+    '<cellXfs count="7">'+
+      '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'+
+      '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>'+
+      '<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>'+
+      '<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/>'+
+      '<xf numFmtId="164" fontId="1" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1"/>'+
+      '<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/>'+
+      '<xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>'+
+    '</cellXfs>'+
+    '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>'+
+    '</styleSheet>';
+
+  var NS_R="http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+  function buildXlsx(){
+    return zipUp([
+      {name:"[Content_Types].xml",data:xbytes('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+
+        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'+
+        '<Default Extension="xml" ContentType="application/xml"/>'+
+        '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'+
+        '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'+
+        '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'+
+        '</Types>')},
+      {name:"_rels/.rels",data:xbytes('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+        '<Relationship Id="rId1" Type="'+NS_R+'/officeDocument" Target="xl/workbook.xml"/>'+
+        '</Relationships>')},
+      {name:"xl/workbook.xml",data:xbytes('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+        '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="'+NS_R+'">'+
+        '<sheets><sheet name="Complement" sheetId="1" r:id="rId1"/></sheets></workbook>')},
+      {name:"xl/_rels/workbook.xml.rels",data:xbytes('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+        '<Relationship Id="rId1" Type="'+NS_R+'/worksheet" Target="worksheets/sheet1.xml"/>'+
+        '<Relationship Id="rId2" Type="'+NS_R+'/styles" Target="styles.xml"/>'+
+        '</Relationships>')},
+      {name:"xl/styles.xml",data:xbytes(XL_STYLES)},
+      {name:"xl/worksheets/sheet1.xml",data:xbytes(sheetXml())}
+    ]);
+  }
+
+  /* Hand it over the way the device does it. A phone has a share sheet, which
+     is where "send it to my team" actually lives; a desktop gets a download. */
+  function saveBlob(blob,name){
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement("a");
+    a.href=url; a.download=name; a.rel="noopener";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); },4000);
+    el("out-msg").textContent="Saved as "+name+".";
+  }
+  function deliver(blob,name){
+    var file=null;
+    try{ file=new File([blob],name,{type:blob.type}); }catch(e){}
+    if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      el("out-msg").textContent="";
+      navigator.share({files:[file],title:ccTitle()}).then(function(){
+        el("out-msg").textContent="Sent.";
+      })["catch"](function(err){
+        if(err&&(err.name==="AbortError"||err.name==="NotAllowedError")){
+          el("out-msg").textContent=""; return;
+        }
+        saveBlob(blob,name);
+      });
+      return;
+    }
+    saveBlob(blob,name);
+  }
+  function doSheet(){
     if(!state.positions.length){ el("out-msg").textContent="Add some positions first."; return; }
-    var name="onstrength-"+(state.cc.code||"complement")+"-"+toIso(Date.now())+".csv";
+    var name="onstrength-"+(state.cc.code||"complement")+"-"+toIso(Date.now())+".xlsx";
     try{
-      var blob=new Blob([buildCsv()],{type:"text/csv;charset=utf-8"});
-      var url=URL.createObjectURL(blob);
-      var a=document.createElement("a");
-      a.href=url; a.download=name;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      setTimeout(function(){ URL.revokeObjectURL(url); },2000);
-      el("out-msg").textContent="Saved as "+name+".";
+      deliver(buildXlsx(),name);
     }catch(e){
-      el("out-msg").textContent="Could not download here — use Print and save as PDF instead.";
+      el("out-msg").textContent="Could not build the spreadsheet here — use Print and save as PDF instead.";
     }
   }
-  el("x-csv").addEventListener("click",doCsv);
-  el("x-csv2").addEventListener("click",doCsv);
+  el("x-csv").addEventListener("click",doSheet);
+  el("x-csv2").addEventListener("click",doSheet);
 
 
   /* ---- the step grid -----------------------------------------------------
@@ -2558,6 +2733,13 @@ a:hover{color:var(--ink)}
       lo+=costOf(a,null); hi+=costOf(b,null); n++;
     });
     return n?{n:n,lo:lo,hi:hi}:null;
+  }
+  /* The same band, wherever it is quoted: the forecast bar, the spreadsheet
+     and the printout must not each do this arithmetic their own way. */
+  function unsetBand(base){
+    var sp=unsetSpread(); if(!sp) return null;
+    var mid=(sp.hi+sp.lo)/2;
+    return { n:sp.n, low:base-mid+sp.lo, high:base-mid+sp.hi };
   }
 
   el("est-done").addEventListener("click",function(){ show("forecast"); });
