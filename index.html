@@ -118,6 +118,16 @@ h1{margin:0;font-size:32px;line-height:1.12;letter-spacing:-1.3px;font-weight:80
 a:focus-visible,button:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ring)}
 .reassure{font-size:13px;color:var(--muted);margin-top:14px}
 
+/* The small door. Set apart by a rule and quieter than the two buttons: it is
+   for the reader whose question is smaller than the tool, and it must not
+   compete with Open. */
+.small-door{margin-top:20px;padding-top:18px;border-top:1px solid var(--rule)}
+.door{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:0 18px;
+  border-radius:11px;border:1px dashed var(--base);background:var(--base-soft);
+  color:var(--base);font-size:14px;font-weight:600;text-decoration:none}
+.door:hover{filter:brightness(1.04);color:var(--base)}
+.door svg{width:16px;height:16px;flex-shrink:0}
+
 /* ---- sections ---- */
 section{padding:46px 0}
 .sec-h{font-size:23px;font-weight:800;letter-spacing:-.7px;margin:0 0 6px}
@@ -242,6 +252,12 @@ footer a.kmc:hover{text-decoration:underline}
       <p class="reassure">Free. No account. Nothing you enter leaves your browser — and it
         works on a phone, offline once opened.
         <a href="help.html" style="font-weight:600">Read the guide</a> instead, if you prefer.</p>
+      <!-- Not a third equal choice. It is the door for someone whose question is
+           smaller than the tool — one job, one number — and the whole reason it
+           exists is that they arrive inside having watched it work. -->
+      <div class="small-door">
+        <a class="door" href="cost/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Just costing one job? Twenty seconds &rarr;</a>
+      </div>
       <p class="reassure" id="ins-line" style="display:none;margin-top:10px">
         <button class="chip" id="ins-btn" type="button">Install it on this device</button></p>
     </div>
