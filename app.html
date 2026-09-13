@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-5qPDltcfmO4J3hljcW1801iVwYRoiH+M9c4BddJ+5Gc=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-ilwDb9AvbQm+d3aeZBbs2QrNLkzVQ0fSpCedL41nV8U=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -350,9 +350,6 @@ a:hover{color:var(--ink)}
   font-variant-numeric:tabular-nums}
 .qa.second .qbig{font-size:25px;color:var(--ink-2);letter-spacing:-1px}
 .rulel{height:1px;background:var(--rule)}
-.hols{display:flex;flex-wrap:wrap;gap:7px}
-.hols span{font-size:11.5px;background:var(--est-soft);color:var(--est);border-radius:7px;
-  padding:5px 9px;font-weight:600;white-space:nowrap}
 .qfoot{padding:16px 20px;background:var(--sunk);border-top:1px solid var(--rule);
   border-radius:0 0 var(--r-md) var(--r-md);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 
@@ -976,7 +973,6 @@ a:hover{color:var(--ink)}
       <div class="pad stack g10">
         <div class="eyebrow" id="q-cover-lab">What that covers</div>
         <div class="cal-lines" id="q-cover"></div>
-        <div class="hols" id="q-hols"></div>
       </div>
       <div class="qfoot">
         <button class="btn-primary" id="q-add" style="width:auto;padding:0 20px">Add this to a complement</button>
@@ -1147,7 +1143,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v62";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v63";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -2485,7 +2481,6 @@ a:hover{color:var(--ink)}
      and $43,970 by the day, which looks close enough to be trusted and is
      wrong in the direction that flatters the budget. */
 
-  function qProv(){ return provOf(); }
   function qPosition(){
     var g=el("q-group").value, l=el("q-level").value;
     if(!hasLevel(g,l)) return null;
@@ -2557,7 +2552,6 @@ a:hover{color:var(--ink)}
     /* Eleven pay periods with a date on the first one is a number a manager can
        check; "$43,970" is one they can only believe. And "when does this start
        hitting my budget" is the next question every single time. */
-    var prov=qProv();
     var pps=PAYDAYS.filter(function(x){ return x.to>=from && x.from<e0; });
     var periodsLeft=Math.ceil(days/14);
     var rows=[["Pay periods remaining", periodsLeft+" of "+nPeriods()]];
@@ -2573,12 +2567,11 @@ a:hover{color:var(--ink)}
       return '<div class="cal-line"><b>'+esc(r[0])+'</b><span>'+esc(r[1])+'</span></div>';
     }).join("");
 
-    var hl=holsFor(prov).filter(function(h){ return h.ts>=from && h.ts<e0; });
+    /* Statutory holidays were listed here too. They belong in the calendar and
+       only there: they do not change what the position costs — salary is paid
+       through them — so on this screen they were decoration beside a number. */
     el("q-cover-lab").textContent="What that covers — "+periodsLeft+
-      " pay period"+(periodsLeft===1?"":"s")+", "+hl.length+" statutory holiday"+(hl.length===1?"":"s");
-    el("q-hols").innerHTML=hl.map(function(h){
-      return '<span>'+esc(h.name)+" · "+esc(shortDate(h.ts))+(h.pub?"":" (expected)")+'</span>';
-    }).join("");
+      " pay period"+(periodsLeft===1?"":"s");
   }
 
   /* ---- the pay calendar --------------------------------------------------
