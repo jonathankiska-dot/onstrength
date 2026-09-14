@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-IZ8BnBbNjboxllThiK7TVqr3+D2k4lJNWKUwhg5sw0g=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-DF4/cyOLZBSNZlyXeQqhR12O4QfjayZSzniCoBvLEck=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -333,6 +333,31 @@ a:hover{color:var(--ink)}
   .sg{grid-template-columns:1fr auto;grid-template-areas:"who lvl" "steps money";row-gap:9px}
   .sg-who{grid-area:who} .sg-lvl{grid-area:lvl;justify-self:end}
   .sg-steps{grid-area:steps;justify-content:flex-start} .sg-money{grid-area:money}
+}
+
+/* ---- how far through the five steps you are ----------------------------
+   Green for done, a soft pulse on the one to do next. The pulse is deliberately
+   low amplitude and lives on the step number rather than the whole tab: five
+   tabs share 390px on a phone, and anything louder reads as an alert. It stops
+   of its own accord — there is no "next" once everything is green. */
+.tab.done .stepno{color:var(--good)}
+.tab.done .stepno::after{content:" \2713";font-weight:700}
+.tab[aria-selected="true"].done .stepno{color:var(--good)}
+
+.tab.next .stepno{color:var(--base);animation:stepnudge 2.4s ease-in-out infinite}
+.tab.next svg{color:var(--base)}
+@keyframes stepnudge{
+  0%,100%{opacity:.45}
+  50%{opacity:1}
+}
+/* A dot beside the next step, so the cue survives for anyone who cannot see
+   the animation or has asked for less of it. */
+.tab.next .tlab{position:relative}
+.tab.next .tlab::after{
+  content:"";position:absolute;top:-1px;right:-9px;width:5px;height:5px;
+  border-radius:50%;background:var(--base)}
+@media (prefers-reduced-motion:reduce){
+  .tab.next .stepno{animation:none;opacity:1}
 }
 
 /* ---- cost a position ---------------------------------------------------
@@ -1196,7 +1221,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v68";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v69";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -1311,6 +1336,13 @@ a:hover{color:var(--ink)}
          drops the Civic Holiday. Nothing else in the app depends on it. */
       prov:(cc.prov==="QC"?"QC":"") };
 
+    /* Which of the five steps the user has actually been to. Some steps are
+       legitimately finished by looking — a manager with no overtime has nothing
+       to type on the estimates tab — so "been there" is the only honest test
+       of done for those. */
+    var sn=p.seen&&typeof p.seen==="object"?p.seen:{};
+    ["estimates","forecast","scenario"].forEach(function(k){ if(sn[k]) out.seen[k]=true; });
+
     var est=p.estimates&&typeof p.estimates==="object"?p.estimates:{};
     EST_LINES.forEach(function(L){
       if(est[L.id]!=null) out.estimates[L.id]=sNum(est[L.id],0,1e12);
@@ -1370,7 +1402,7 @@ a:hover{color:var(--ink)}
 
   function blank(){
     return { cc:{ name:"", code:"", fy:"2026-04-01", periods:26, salaryBudget:0, bandMinor:5, bandMajor:15, prov:"" },
-      estimates:{}, positions:[], nicknames:{} };
+      estimates:{}, positions:[], nicknames:{}, seen:{} };
   }
   /* If reading storage fails, the startup save() must not then commit the
      blank over the top — that turns any parse or sanitise error into a wipe.
@@ -2391,6 +2423,7 @@ a:hover{color:var(--ink)}
     /* The pill and the chip are chrome, not a page, so they are repainted with
        everything else rather than only when the calendar is open. */
     paintChips();
+    paintSteps();
   }
 
   /* Version stamp + update handling.
@@ -2831,6 +2864,44 @@ a:hover{color:var(--ink)}
     openEditor(p.id);
   });
 
+  /* ---- the five steps, and how far through them you are -------------------
+
+     The tabs already say this is a sequence — they are numbered. All that was
+     missing was whether each one had been done. So the nav becomes the
+     checklist: a step goes green when it is finished, and the next one is
+     marked until you get to it. No extra card, no extra screen.
+
+     It settles down and stays settled. Once all five are green nothing is
+     marked, nothing pulses, and a returning manager sees the plain nav they
+     had before — because at that point there is nothing left to guide them
+     toward, and a hint that never stops is just a flicker. */
+  function stepDone(){
+    var cc=state.cc||{}, sn=state.seen||{};
+    return {
+      setup:     !!((cc.code||cc.name) && num(cc.salaryBudget)>0),
+      roster:    state.positions.length>0,
+      estimates: !!sn.estimates,
+      /* Saving the cost centre lands you on the forecast, so "been there" alone
+         would tick step 4 before there was a complement to forecast. Reading an
+         empty year is not reading your year. */
+      forecast:  !!sn.forecast && state.positions.length>0,
+      scenario:  !!sn.scenario && state.positions.length>0
+    };
+  }
+  function paintSteps(){
+    var d=stepDone(), order=["setup","roster","estimates","forecast","scenario"];
+    var next=null;
+    for(var i=0;i<order.length;i++){ if(!d[order[i]]){ next=order[i]; break; } }
+    Array.prototype.forEach.call(document.querySelectorAll('.tab[data-tab]'),function(b){
+      var k=b.getAttribute("data-tab");
+      if(order.indexOf(k)<0) return;
+      b.classList.toggle("done",!!d[k]);
+      /* Only mark the next step when the user is somewhere else. Pointing at
+         the page they are already looking at is noise. */
+      b.classList.toggle("next", k===next && b.getAttribute("aria-selected")!=="true");
+    });
+  }
+
   // ---- tabs -------------------------------------------------------------
   var PAGES=["setup","roster","estimates","forecast","scenario","paycal","cost"];
   function show(tab){
@@ -2841,6 +2912,11 @@ a:hover{color:var(--ink)}
     window.scrollTo(0,0);
     if(tab==="paycal") renderCal();
     if(tab==="cost") renderCost();
+    if(tab==="estimates"||tab==="forecast"||tab==="scenario"){
+      if(!state.seen) state.seen={};
+      if(!state.seen[tab]){ state.seen[tab]=true; save(); }
+    }
+    paintSteps();
   }
   Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){
     b.addEventListener("click",function(){ show(b.getAttribute("data-tab")); });
