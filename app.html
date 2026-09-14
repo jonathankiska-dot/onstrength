@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-XtuGJsgq0tjQmyAaQTTsDLP/He9kEQq8RVFnCly8K/I=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-sUVoLaLMzYR5gSc0QsSsSMA0H9DQ8yfl8aBHnEwxK5I=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -1239,7 +1239,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v73";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v74";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -3617,11 +3617,15 @@ a:hover{color:var(--ink)}
          time somebody edited their budget. */
       prov:provOf() };
     save(); renderAll();
-    /* Finishing step 1 used to land on step 4, past an empty forecast — a
-       first-time manager was shown the answer before being asked to build the
-       complement it depends on. Go to whatever is actually unfinished, which
-       for somebody just tidying their budget is still the forecast. */
-    show(nextStep()||"forecast");
+    /* Save is pressed on a numbered step, so the next screen is the next
+       number. Two earlier rules were both wrong: landing on step 4 showed a
+       first-time manager the answer before asking for the complement it
+       depends on, and landing on the first *unfinished* step meant anyone who
+       already had a roster pressed Save on 1 and arrived at 3 — a skipped
+       number, and a step ticked green for nothing but arriving. Step 1 not
+       finished, stay and show it; the sequence still running, go to step 2;
+       everything done, the sequence is no longer the point and the forecast is. */
+    show(!stepDone().setup ? "setup" : nextStep() ? "roster" : "forecast");
   });
   /* Rewriting a whole roster is the same weight of act as erasing one, so it
      arms the same way. Eight seconds rather than six: there is more to read. */
