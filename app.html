@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-vmTGDrP4rtOo6Z3Mlfn5hoBTYxUh37QxpEO1irsohoY=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-XtuGJsgq0tjQmyAaQTTsDLP/He9kEQq8RVFnCly8K/I=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -563,7 +563,16 @@ a:hover{color:var(--ink)}
           <label class="f"><span>Fiscal year starts</span><input type="date" id="c-fy"></label>
           <label class="f"><span>Pay periods</span><input class="num-in" id="c-periods" inputmode="numeric"></label>
         </div>
-        <label class="f"><span>Salary budget</span><input class="num-in" id="c-sal" inputmode="decimal" placeholder="1780000"></label>
+        <div class="two">
+          <label class="f"><span>Salary budget</span><input class="num-in" id="c-sal" inputmode="decimal" placeholder="1780000"></label>
+          <!-- Optional, and the only thing in the app that asks the manager
+               something the app cannot work out. Without it "is your complement
+               built?" is unanswerable — one position might be the whole team —
+               so the tool can only say "there is at least one". With it, the
+               question has a real answer and the forecast can admit when it is
+               costing a fraction of a branch. -->
+          <label class="f"><span>Positions on your establishment</span><input class="num-in" id="c-estab" inputmode="numeric" placeholder="Optional"></label>
+        </div>
         <div class="two">
           <label class="f"><span>Watch at (%)</span><input class="num-in" id="c-minor" inputmode="decimal" placeholder="5"></label>
           <label class="f"><span>Act at (%)</span><input class="num-in" id="c-major" inputmode="decimal" placeholder="15"></label>
@@ -915,6 +924,15 @@ a:hover{color:var(--ink)}
       <button class="btn-quiet" id="est-bar-go">Set the steps</button>
     </div>
 
+    <!-- A forecast of three positions looks exactly like a forecast of
+         nineteen, which is how a manager ends up reassured by a surplus that
+         is really sixteen uncosted salaries. The app cannot know how big the
+         team is, so it only says this once it has been told. -->
+    <div class="card pad row hidden" id="short-bar" style="gap:12px;flex-wrap:wrap;border-left:4px solid var(--est)">
+      <span class="note" id="short-txt" style="flex:1 1 260px"></span>
+      <button class="btn-quiet" id="short-go">Add the rest</button>
+    </div>
+
     <div class="card pad stack g18 lift heroCard" id="hero-card">
       <div class="stack g6">
         <div class="eyebrow" id="var-label">Projected surplus</div>
@@ -1221,7 +1239,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v71";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v73";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -1331,6 +1349,8 @@ a:hover{color:var(--ink)}
     out.cc={ name:sText(cc.name,80), code:sText(cc.code,20),
       fy:sDate(cc.fy)||"2026-04-01", periods:sPeriods(cc.periods),
       salaryBudget:sNum(cc.salaryBudget,0,1e12),
+      /* How many positions the branch is supposed to have. 0 means not told. */
+      estab:sNum(cc.estab,0,10000),
       bandMinor:sNum(cc.bandMinor,0,100)||5, bandMajor:sNum(cc.bandMajor,0,100)||15,
       /* Which province, for the holidays only — Quebec keeps Saint-Jean and
          drops the Civic Holiday. Nothing else in the app depends on it. */
@@ -1401,7 +1421,7 @@ a:hover{color:var(--ink)}
   }
 
   function blank(){
-    return { cc:{ name:"", code:"", fy:"2026-04-01", periods:26, salaryBudget:0, bandMinor:5, bandMajor:15, prov:"" },
+    return { cc:{ name:"", code:"", fy:"2026-04-01", periods:26, salaryBudget:0, estab:0, bandMinor:5, bandMajor:15, prov:"" },
       estimates:{}, positions:[], nicknames:{}, seen:{} };
   }
   /* If reading storage fails, the startup save() must not then commit the
@@ -1677,6 +1697,13 @@ a:hover{color:var(--ink)}
       " costed at the middle of "+(sp.n===1?"its":"their")+" level, so base salary is somewhere between "+
       money(sp.low)+" and "+money(sp.high)+" — a spread of "+money(sp.high-sp.low)+".";
 
+    /* Only ever shown against a number the manager typed in themselves. */
+    var est=estabOf(), np=state.positions.length, gap=est-np;
+    el("short-bar").classList.toggle("hidden",!(est&&np&&gap>0));
+    if(est&&np&&gap>0) el("short-txt").textContent=
+      "This forecast covers "+np+" of the "+est+" position"+(est===1?"":"s")+" on your establishment. "+
+      "The other "+gap+(gap===1?" is":" are")+" not in the number below.";
+
     var ended=Date.now()>fyEnd()&&state.positions.length>0;
     el("stale").classList.toggle("hidden",!ended);
     if(ended) el("stale-txt").textContent="This forecast covers a year that ended on "+fmtDate(fyEnd()-DAY)+
@@ -1757,7 +1784,9 @@ a:hover{color:var(--ink)}
       "Their agreements set their own standard week over 52.176 weeks a year, so "+
       (hoursMended.n===1?"it has":"they have")+" been recosted, "+signed(hoursMended.delta)+
       " in total. The figure is still yours to change on any position.";
-    el("roster-count").textContent=state.positions.length+" positions · "+establishedFte().toFixed(1)+" FTE";
+    var est=estabOf(), np=state.positions.length;
+    el("roster-count").textContent=(est? np+" of "+est+" positions" : np+" positions")+
+      " · "+establishedFte().toFixed(1)+" FTE";
     var host=el("roster-list");
     if(!state.positions.length){ host.innerHTML='<div class="empty">No positions yet.</div>'; return; }
     host.innerHTML=state.positions.map(function(p){
@@ -2116,6 +2145,7 @@ a:hover{color:var(--ink)}
     el("c-name").value=c.name||""; el("c-code").value=c.code||"";
     el("c-fy").value=c.fy||"2026-04-01"; el("c-periods").value=c.periods||26;
     el("c-sal").value=grouped(c.salaryBudget);
+    el("c-estab").value=num(c.estab)||"";
     el("c-minor").value=c.bandMinor||5; el("c-major").value=c.bandMajor||15;
     bandNote();
     var keys=Object.keys(RATES), levels=0, steps=0;
@@ -2682,6 +2712,7 @@ a:hover{color:var(--ink)}
   }).sort(function(a,b){ return a.ts-b.ts; });
 
   function provOf(){ return (state.cc&&state.cc.prov)||""; }
+  function estabOf(){ return Math.round(num(state.cc&&state.cc.estab))||0; }
   function holsFor(prov){
     return HOLIDAYS.filter(function(h){
       if(h.scope==="QC") return prov==="QC";
@@ -2879,8 +2910,11 @@ a:hover{color:var(--ink)}
     var cc=state.cc||{}, sn=state.seen||{};
     return {
       setup:     !!((cc.code||cc.name) && num(cc.salaryBudget)>0),
-      roster:    state.positions.length>0,
-      estimates: !!sn.estimates,
+      /* Told the establishment, the question is answerable and the answer is
+         all of them. Not told, the most the app can honestly claim is that
+         there is something here — one position may be the whole team. */
+      roster:    estabOf() ? state.positions.length>=estabOf() : state.positions.length>0,
+      estimates: !!sn.estimates && state.positions.length>0,
       /* Saving the cost centre lands you on the forecast, so "been there" alone
          would tick step 4 before there was a complement to forecast. Reading an
          empty year is not reading your year. */
@@ -2921,7 +2955,12 @@ a:hover{color:var(--ink)}
     window.scrollTo(0,0);
     if(tab==="paycal") renderCal();
     if(tab==="cost") renderCost();
-    if(tab==="estimates"||tab==="forecast"||tab==="scenario"){
+    /* Step 5 is deliberately absent. Estimates and the forecast are things you
+       finish by looking — a manager with no overtime has nothing to type, and
+       reading the forecast IS the step. Testing a change is not: you have not
+       tested one until you have added one, so step 5 is ticked where the move
+       is made, not here. */
+    if(tab==="estimates"||tab==="forecast"){
       if(!state.seen) state.seen={};
       if(!state.seen[tab]){ state.seen[tab]=true; save(); }
     }
@@ -3480,7 +3519,10 @@ a:hover{color:var(--ink)}
     b.addEventListener("click",function(){
       var m=newMove(b.getAttribute("data-kind"));
       if(!m){ var old=b.textContent; b.textContent="Nothing eligible"; setTimeout(function(){b.textContent=old;},1600); return; }
-      moves.push(m); renderScenario();
+      moves.push(m);
+      if(!state.seen) state.seen={};
+      if(!state.seen.scenario){ state.seen.scenario=true; save(); }
+      renderScenario(); paintSteps();
     });
   });
   el("s-clear").addEventListener("click",function(){ moves=[]; renderScenario(); });
@@ -3567,6 +3609,7 @@ a:hover{color:var(--ink)}
     state.cc={ name:el("c-name").value.trim(), code:el("c-code").value.trim(),
       fy:el("c-fy").value||"2026-04-01", periods:sPeriods(el("c-periods").value||26),
       salaryBudget:num(el("c-sal").value),
+      estab:Math.round(num(el("c-estab").value))||0,
       bandMinor:num(el("c-minor").value)||5, bandMajor:num(el("c-major").value)||15,
       /* This rebuilds the whole cost centre from the form, and the province
          is not on this form — it is set on the pay calendar. Rebuilding
@@ -3608,6 +3651,7 @@ a:hover{color:var(--ink)}
     el("roll-msg").textContent="Rolled forward to "+label+". Check your salary budget — it is still last year's.";
   });
   el("est-bar-go").addEventListener("click",function(){ show("roster"); openGrid(); });
+  el("short-go").addEventListener("click",function(){ show("roster"); });
   el("stale-go").addEventListener("click",function(){
     show("setup");
     var c=el("roll-card");
