@@ -4,7 +4,7 @@
    will keep serving the copy they already have. This is the single most common
    reason an update appears to do nothing. */
 
-const CACHE_VERSION = "onstrength-v74";
+const CACHE_VERSION = "onstrength-v75";
 
 const SHELL = [
   "./",
@@ -13,6 +13,7 @@ const SHELL = [
   "./help.html",
   "./privacy.html",
   "./cost/",
+  "./task/",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",

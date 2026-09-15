@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-sUVoLaLMzYR5gSc0QsSsSMA0H9DQ8yfl8aBHnEwxK5I=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-Or/CBtMxntsVyfQva1LNDbCDYES6shauAjG73PYJJEc=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -30,6 +30,11 @@
   --base:#1D6E8E; --base-soft:#E3F0F6; --on-base:#FFFFFF;
   --est:#B87A1E; --est-soft:#FBF0DC;
   --good:#12805C; --bad:#C2503A; --bad-soft:#FBE7E2;
+  /* Stage hues, assigned in this order and never by size. Checked rather than
+     chosen — the first set had the teal and the green identical to a
+     deuteranope, and the order matters as much as the values: green next to
+     plum fails where green next to blue passes. */
+  --s1:#0E7C5A; --s2:#2264B8; --s3:#B87A1E; --s4:#93456F;
   --hero-a:#1D6E8E; --hero-b:#134F67; --hero-over-a:#B3543C; --hero-over-b:#8A3A26;
   --focus:#17607F; --ring:rgba(23,96,127,.22);
   --shadow-sm:0 1px 2px rgba(17,26,33,.04),0 1px 3px rgba(17,26,33,.05);
@@ -44,6 +49,9 @@
     --base:#54AECD; --base-soft:#16334A; --on-base:#08131A;
     --est:#E4B061; --est-soft:#33290F;
     --good:#4FC79A; --bad:#E28A72; --bad-soft:#3A1F18;
+    /* Their own steps against the dark surface, not a flip of the light ones —
+       every light value fails the lightness band here. */
+    --s1:#3CA37E; --s2:#5892DE; --s3:#BC8A3E; --s4:#BA6C94;
     --hero-a:#1B6A89; --hero-b:#113F55; --hero-over-a:#9E4A34; --hero-over-b:#6E2E1E;
     --focus:#57B6DC; --ring:rgba(87,182,220,.28);
     --shadow-sm:0 1px 2px rgba(0,0,0,.28),0 1px 3px rgba(0,0,0,.34);
@@ -478,6 +486,45 @@ a:hover{color:var(--ink)}
 .pghelp::before{content:"?";display:inline-flex;align-items:center;justify-content:center;
   width:15px;height:15px;border-radius:50%;background:var(--base-soft);color:var(--base);
   font-size:10px;font-weight:700;flex-shrink:0}
+
+/* ---- costing a task ----------------------------------------------------
+   The stage colours are assigned in the order the stages appear, never by
+   size, and they are checked rather than chosen: the first set I picked had
+   the teal and the green indistinguishable to a deuteranope. Four is the
+   whole set — a fifth stage reuses them, because a generated hue is a hue
+   nobody validated. */
+.tstack{display:flex;height:26px;gap:2px}
+.tstack i{display:block;height:100%;min-width:3px}
+.tstack i:first-child{border-radius:5px 0 0 5px}
+.tstack i:last-child{border-radius:0 5px 5px 0}
+.tkey{display:flex;flex-wrap:wrap;gap:6px 16px}
+.tkey span{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2)}
+.tkey b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.sdot{width:9px;height:9px;border-radius:50%;flex:none}
+.tfind{background:var(--good-soft);border-top:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);padding:13px 16px;font-size:13.5px;line-height:1.5}
+.sthead{display:flex;align-items:center;gap:8px;padding:11px 16px 7px;background:var(--sunk);
+  border-bottom:1px solid var(--rule-2)}
+.stname{font-size:12px;font-weight:700;letter-spacing:.2px;text-transform:uppercase;
+  background:none;border:none;color:var(--ink);padding:2px 4px;border-radius:6px;
+  font-family:inherit;min-width:60px}
+.stname:focus{outline:2px solid var(--base);outline-offset:1px}
+.stsum{margin-left:auto;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.trow{display:flex;gap:8px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--rule-2)}
+.trow>.who{flex:1 1 130px;min-width:0}
+.trow select,.trow input{min-height:36px;border:1px solid var(--rule);border-radius:9px;
+  background:var(--surface);color:var(--ink);font:13px/1.2 inherit;padding:0 8px;width:100%}
+.trow .qty{flex:0 0 78px}
+.trow .tdel{flex:none;min-height:32px;padding:0 9px;border-radius:8px;border:1px solid var(--rule);
+  background:var(--surface);color:var(--muted);font:600 12px/1 inherit;cursor:pointer}
+.trow .tcost{flex:0 0 66px;text-align:right;font-size:12.5px;color:var(--muted);
+  font-variant-numeric:tabular-nums}
+.tli{display:flex;gap:10px;padding:11px 16px;border-bottom:1px solid var(--rule-2);align-items:center}
+.tli:last-child{border-bottom:none}
+.tli .g{flex:1;min-width:0;display:flex;align-items:center;gap:8px;font-size:13.5px}
+.tli .g em{font-style:normal;display:block;color:var(--muted);font-size:11.5px}
+.tli .n{font-size:13px;white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums}
+.tli .n em{font-style:normal;display:block;color:var(--muted);font-size:11.5px;font-weight:500}
 
 /* ---- print -------------------------------------------------------------
    The app is a five-tab thing where four tabs are hidden at any moment, so
@@ -1005,6 +1052,7 @@ a:hover{color:var(--ink)}
             round or keep with the file.</div>
           <div class="row" style="gap:9px;justify-content:flex-start;flex-wrap:wrap">
             <button class="btn-ghost btn-sm" id="x-cost" style="width:auto;padding:0 16px">Cost a position</button>
+            <button class="btn-ghost btn-sm" id="x-task" style="width:auto;padding:0 16px">Cost a task</button>
             <button class="btn-ghost btn-sm" id="x-print" style="width:auto;padding:0 16px">Print or save as PDF</button>
             <button class="btn-ghost btn-sm" id="x-csv" style="width:auto;padding:0 16px">Spreadsheet (Excel)</button>
           </div>
@@ -1072,6 +1120,126 @@ a:hover{color:var(--ink)}
         <button class="btn-primary" id="q-add" style="width:auto;padding:0 20px">Add this to a complement</button>
         <span class="note" style="flex:1 1 200px">Nothing here is saved unless you add it.</span>
       </div>
+    </div>
+  </section>
+
+  <!-- ---- cost a task -----------------------------------------------------
+       The question no system in the organisation answers, because nobody ever
+       divides a salary by an hour. A stage is only a label on a group of rows:
+       no dates, no order, no dependencies. Leave every stage name blank and it
+       is one flat list, which is the shape most tasks want. What the grouping
+       buys is the subtotal, and the subtotal is where the finding is — on a
+       typical report, review and rework are a third of the cost, and that is
+       a conversation you cannot have with a lump sum. -->
+  <section id="p-task" class="stack g18 hidden">
+    <div>
+      <h1 class="h-title">Cost a task</h1>
+      <div class="sub">What a piece of recurring work actually costs. No roster needed.</div>
+      <a class="pghelp" href="help.html">How to use it</a>
+    </div>
+
+    <div class="card pad stack g14">
+      <div class="cgrid">
+        <label class="fld" style="grid-column:1/-1"><span>What is it</span>
+          <input id="t-name" type="text" maxlength="120" placeholder="Quarterly performance report"></label>
+        <label class="fld"><span>How often</span><select id="t-every"></select></label>
+        <label class="fld"><span>Count time in</span><select id="t-unit">
+          <option value="days">Days</option><option value="hours">Hours</option></select></label>
+      </div>
+    </div>
+
+    <div class="card" id="t-stages"></div>
+
+    <div class="row" style="gap:10px;flex-wrap:wrap">
+      <button class="btn-quiet" id="t-add-row">Add someone</button>
+      <button class="btn-quiet" id="t-add-stage">Add a stage</button>
+      <button class="btn-quiet" id="t-clear">Start again</button>
+    </div>
+
+    <!-- Nearly everyone forgets the review chain, and on a real report it is
+         about a third of the cost. Offering the rows is the difference between
+         a number that surprises somebody and a number that confirms what they
+         already assumed. -->
+    <div class="card pad stack g10 hidden" id="t-sugg" style="border-left:4px solid var(--est)">
+      <div style="font-size:13px;font-weight:600">Who else touches it?</div>
+      <div class="note">Almost nobody counts the review chain, and it is usually a third of the cost.</div>
+      <div class="row" style="gap:8px;flex-wrap:wrap" id="t-sugg-chips"></div>
+    </div>
+
+    <div class="card">
+      <div class="qans">
+        <div class="qa">
+          <div class="eyebrow" id="t-ans-lab">A year of it</div>
+          <div class="qbig" id="t-year">—</div>
+          <div class="note" id="t-year-sub"></div>
+        </div>
+        <div class="qa second">
+          <div class="eyebrow">Each time</div>
+          <div class="qbig" id="t-each">—</div>
+          <div class="note" id="t-each-sub"></div>
+        </div>
+      </div>
+
+      <div class="rulel"></div>
+      <div class="pad stack g10">
+        <div class="eyebrow">Where it goes</div>
+        <div class="tstack" id="t-bar" role="img" aria-label="Share of the cost by stage"></div>
+        <div class="tkey" id="t-key"></div>
+      </div>
+
+      <div class="tfind hidden" id="t-find"></div>
+      <div id="t-rows"></div>
+
+      <div class="rulel"></div>
+      <div class="pad stack g10">
+        <div class="seg" role="group" aria-label="Which rate">
+          <button id="t-rate-full" aria-pressed="true">Full cost to the Crown</button>
+          <button id="t-rate-bud" aria-pressed="false">Cost to your budget</button>
+        </div>
+        <div class="note" id="t-rate-note"></div>
+      </div>
+
+      <div class="rulel"></div>
+      <div class="pad stack g6">
+        <div class="eyebrow">If the estimate is wrong</div>
+        <div class="cal-lines" id="t-whatif"></div>
+      </div>
+
+      <div class="qfoot">
+        <button class="btn-primary" id="t-save" style="width:auto;padding:0 20px">Save this task</button>
+        <span class="note" style="flex:1 1 200px">Nothing here is saved unless you save it.</span>
+      </div>
+    </div>
+
+    <!-- The assumptions are on the same screen as the answer, because both of
+         them are arguable and somebody will argue. Published tables, your
+         assumptions, stated separately — the same bargain as the estimates. -->
+    <div class="card pad stack g14">
+      <div class="eyebrow">The assumptions behind the rate</div>
+      <div class="note" id="t-assum-sum"></div>
+      <div class="cgrid">
+        <label class="fld"><span>Statutory holidays (days)</span><input id="t-stat" type="number" min="0" max="60" step="1" inputmode="numeric"></label>
+        <label class="fld"><span>Vacation (days)</span><input id="t-vac" type="number" min="0" max="60" step="1" inputmode="numeric"></label>
+        <label class="fld"><span>Sick leave taken (days)</span><input id="t-sick" type="number" min="0" max="60" step="1" inputmode="numeric"></label>
+        <label class="fld"><span>Other leave (days)</span><input id="t-other" type="number" min="0" max="60" step="1" inputmode="numeric"></label>
+      </div>
+      <div class="note">On top of salary, for the full-cost answer — the rates Finance's own
+        proposal-costing guidance applies:</div>
+      <div class="cgrid">
+        <label class="fld"><span>Benefit plan (%)</span><input id="t-ebp" type="number" min="0" max="200" step="0.5" inputmode="decimal"></label>
+        <label class="fld"><span>Accommodation (%)</span><input id="t-accom" type="number" min="0" max="200" step="0.5" inputmode="decimal"></label>
+        <label class="fld"><span>IT (%)</span><input id="t-it" type="number" min="0" max="200" step="0.5" inputmode="decimal"></label>
+      </div>
+      <button class="btn-quiet" id="t-assum-reset" style="align-self:flex-start">Back to the published defaults</button>
+    </div>
+
+    <div class="card hidden" id="t-saved">
+      <div class="pad row" style="gap:12px;flex-wrap:wrap">
+        <span style="font-size:13.5px;font-weight:600">Recurring work</span>
+        <span class="num" id="t-saved-sum" style="margin-left:auto;font-size:13px"></span>
+      </div>
+      <div class="rule"></div>
+      <div id="t-saved-list"></div>
     </div>
   </section>
 
@@ -1222,6 +1390,7 @@ a:hover{color:var(--ink)}
   <div class="utilsep" aria-hidden="true"><span>Handy</span></div>
   <button class="tab navutil" role="tab" data-tab="paycal" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 3v4"/><path d="M16 3v4"/></svg>Pay calendar<span class="pill" id="rail-pay"></span></button>
   <button class="tab navutil" role="tab" data-tab="cost" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Cost a position</button>
+  <button class="tab navutil" role="tab" data-tab="task" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10"/><path d="M4 12h16"/><path d="M4 18h7"/><circle cx="18" cy="6" r="2"/></svg>Cost a task</button>
   <a class="tab navhelp" href="help.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 114.1 2.3c-.9.7-1.7 1.1-1.7 2.2"/><path d="M12 17.2h.01"/></svg>How to use it</a>
   <div class="railfoot">
     <div class="rule"></div>
@@ -1239,7 +1408,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v74";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v75";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -1342,6 +1511,32 @@ a:hover{color:var(--ink)}
   function sPeriods(v){ var n=Math.round(sNum(v,0,1e9)); return (n>=1&&n<=53)?n:26; }
 
 
+  /* The loading percentages and the leave deductions. They live up here with
+     the other constants rather than beside the arithmetic that uses them,
+     because blank() reads them and blank() runs before anything else. */
+  var LOAD_DEFAULT = { ebp:27, accom:13, it:4 };
+  var LEAVE_DEFAULT = { stat:11, vac:20, sick:9, other:3 };
+  /* 37.5 x 52.176. The odd weeks matter: 52.176 is 365.25/7, so it carries the
+     extra day and the leap year, and it is what the agreements annualise on. */
+  var STD_PAID_HOURS = 1956.6, STD_DAY = 7.5;
+  /* label, and how many times a year it happens. null means "work it out from
+     the weeks actually worked", which is not 52. */
+  var EVERY = {
+    once:    { lab:"Once",            n:1,    one:true },
+    week:    { lab:"Every week",      n:null },
+    biweek:  { lab:"Every two weeks", n:null, half:true },
+    month:   { lab:"Every month",     n:12 },
+    quarter: { lab:"Every quarter",   n:4 },
+    half:    { lab:"Twice a year",    n:2 },
+    year:    { lab:"Once a year",     n:1 }
+  };
+  function timesAYear(k){
+    var e=EVERY[k]||EVERY.year;
+    if(e.n!=null) return e.n;
+    var w=weeksWorked();
+    return e.half?w/2:w;
+  }
+
   function sanitise(p){
     var out=blank(), seen={}, n=0;
     if(!p||typeof p!=="object") return out;
@@ -1417,12 +1612,68 @@ a:hover{color:var(--ink)}
                 Object.prototype.hasOwnProperty.call(p.nicknames,q.id))?p.nicknames[q.id]:null;
       if(nick&&out.positions[out.positions.length-1].mode!=="vacant") out.nicknames[id]=sText(nick,80);
     });
+
+    /* The two sets of assumptions behind an hourly rate. Absent from an older
+       saved roster, which is the normal case, so each field falls back to its
+       default individually rather than the object being all or nothing. */
+    var lv=p.leave&&typeof p.leave==="object"?p.leave:{};
+    ["stat","vac","sick","other"].forEach(function(k){
+      if(lv[k]!=null) out.leave[k]=sNum(lv[k],0,60);
+    });
+    var ld=p.load&&typeof p.load==="object"?p.load:{};
+    ["ebp","accom","it"].forEach(function(k){
+      if(ld[k]!=null) out.load[k]=sNum(ld[k],0,200);
+    });
+
+    /* Costed work. A stage is only a label on a group of rows — no dates, no
+       order, no dependencies — so the shape stays two deep and a task with no
+       stage names is one unnamed stage holding everything. */
+    var tseen={}, tn=0;
+    (Array.isArray(p.tasks)?p.tasks:[]).slice(0,200).forEach(function(t){
+      if(!t||typeof t!=="object") return;
+      var id=sId(t.id);
+      if(!id||tseen[id]) id="t"+(++tn)+"_"+Date.now().toString(36);
+      tseen[id]=1;
+      var stages=[];
+      (Array.isArray(t.stages)?t.stages:[]).slice(0,20).forEach(function(s){
+        if(!s||typeof s!=="object") return;
+        var rows=[];
+        (Array.isArray(s.rows)?s.rows:[]).slice(0,50).forEach(function(r){
+          if(!r||typeof r!=="object") return;
+          var grp=sText(r.group,24), lvl=sText(r.level,24);
+          var stp=Math.round(sNum(r.step,0,99));
+          if(grp&&!hasLevel(grp,lvl)){ grp=""; lvl=""; stp=0; }
+          else if(grp&&isRange(grp)) stp=0;
+          else if(grp&&stp>RATES[grp].levels[lvl].length) stp=0;
+          /* A row may name somebody on the roster. The link is by id only —
+             the level is still stored on the row, so deleting the position
+             leaves the costing intact instead of silently rezeroing it. */
+          var pid=sId(r.pid);
+          if(pid&&!out.positions.some(function(q){ return q.id===pid; })) pid="";
+          rows.push({ label:sText(r.label,80), group:grp, level:lvl, step:stp,
+                      qty:sNum(r.qty,0,10000), pid:pid });
+        });
+        stages.push({ name:sText(s.name,60), rows:rows });
+      });
+      if(!stages.length) stages=[{ name:"", rows:[] }];
+      out.tasks.push({ id:id, name:sText(t.name,120),
+        /* How often, as a word rather than a count — because "weekly" is not
+           52 times. It is however many weeks are left once leave and statutory
+           holidays come out, and that figure moves when the assumptions do. */
+        every:(Object.prototype.hasOwnProperty.call(EVERY,t.every)?t.every:"year"),
+        unit:(t.unit==="hours"?"hours":"days"),
+        stages:stages });
+    });
     return out;
   }
 
   function blank(){
     return { cc:{ name:"", code:"", fy:"2026-04-01", periods:26, salaryBudget:0, estab:0, bandMinor:5, bandMajor:15, prov:"" },
-      estimates:{}, positions:[], nicknames:{}, seen:{} };
+      estimates:{}, positions:[], nicknames:{}, seen:{},
+      leave:{ stat:LEAVE_DEFAULT.stat, vac:LEAVE_DEFAULT.vac,
+              sick:LEAVE_DEFAULT.sick, other:LEAVE_DEFAULT.other },
+      load:{ ebp:LOAD_DEFAULT.ebp, accom:LOAD_DEFAULT.accom, it:LOAD_DEFAULT.it },
+      tasks:[] };
   }
   /* If reading storage fails, the startup save() must not then commit the
      blank over the top — that turns any parse or sanitise error into a wipe.
@@ -1912,6 +2163,67 @@ a:hover{color:var(--ink)}
     var r=rateFor(g,l,st); if(r==null) return 0;
     return isHourly(g) ? r*groupHours(g) : r;
   }
+  /* ---- what an hour of somebody's time costs ---------------------------
+     Salary forecasting never needs this, which is why no system in the
+     organisation produces it: government does not bill, so nobody ever
+     divides a salary by an hour. Costing a piece of work does need it, and
+     the division has two contentious halves.
+
+     The numerator. Finance's own proposal-costing guidance says what to add
+     on top of salary: 27% employee benefit plan, 13% PSPC accommodation, 4%
+     Shared Services for IT. That is the Crown's number for what a body
+     costs. A manager's own envelope pays none of it — only the salary — so
+     both answers are kept and both are shown. "Can I afford it" and "is this
+     worth doing" are different questions.
+
+     The denominator. Paid hours are not available hours. Out of the 1,956.6
+     a 37.5-hour agreement pays for, statutory holidays, vacation, the sick
+     leave people actually take and a few days of family and personal leave
+     come off the top. Every one of those deductions is arguable, which is
+     exactly why they are stored, shown on screen and editable rather than
+     baked into a constant. Published tables, your assumptions, stated
+     separately — the same bargain as the estimates. */
+  function paidHoursOf(g){
+    var h=hasRate(g)?num(RATES[g].hours):0;
+    return h>0?h:STD_PAID_HOURS;
+  }
+  function dayHoursOf(g){
+    var w=groupWeek(g);
+    return w>0?w/5:STD_DAY;
+  }
+  function leaveOf(){
+    var o=state.leave||{};
+    return { stat:sNum(o.stat==null?LEAVE_DEFAULT.stat:o.stat,0,60),
+             vac: sNum(o.vac ==null?LEAVE_DEFAULT.vac :o.vac ,0,60),
+             sick:sNum(o.sick==null?LEAVE_DEFAULT.sick:o.sick,0,60),
+             other:sNum(o.other==null?LEAVE_DEFAULT.other:o.other,0,60) };
+  }
+  function loadOf(){
+    var o=state.load||{};
+    return { ebp: sNum(o.ebp  ==null?LOAD_DEFAULT.ebp  :o.ebp ,0,200),
+             accom:sNum(o.accom==null?LOAD_DEFAULT.accom:o.accom,0,200),
+             it:   sNum(o.it   ==null?LOAD_DEFAULT.it   :o.it   ,0,200) };
+  }
+  function loadFactor(){ var L=loadOf(); return 1+(L.ebp+L.accom+L.it)/100; }
+  function leaveDays(){ var v=leaveOf(); return v.stat+v.vac+v.sick+v.other; }
+  function productiveHours(g){
+    var h=paidHoursOf(g)-leaveDays()*dayHoursOf(g);
+    return h>0?h:1;
+  }
+  /* Weeks actually worked, derived from the same deductions rather than a
+     round number picked to look reasonable. A weekly meeting does not happen
+     52 times; it happens about 43.6, and the two answers differ by a fifth. */
+  function weeksWorked(){
+    var w=groupWeek("")||STD_DAY*5;
+    return productiveHours("")/w;
+  }
+  /* full=true gives the cost to the Crown, full=false the cost to the
+     manager's salary envelope. */
+  function hourlyRate(g,l,st,full){
+    var ann=scenarioRate(g,l,st); if(!ann) return 0;
+    return ann*(full?loadFactor():1)/productiveHours(g);
+  }
+
   function paidHours(){ return num(el("f-hours").value)||groupHours(el("f-group").value); }
   function annualOf(g,l,st){
     if(!g) return num(el("f-salary").value);
@@ -2632,6 +2944,220 @@ a:hover{color:var(--ink)}
       });
     });
   }
+  /* ---- costing a task --------------------------------------------------
+     Kept out of state until it is saved, the same bargain as Cost a position:
+     somebody sent this link by a colleague should be able to answer their
+     question and close the tab having left nothing behind. */
+  var tdraft=null, tFull=true;
+  var STAGE_HUES=["--s1","--s2","--s3","--s4"];
+  function hueOf(i){ return "var("+STAGE_HUES[i%STAGE_HUES.length]+")"; }
+  function newRow(){ return { label:"", group:"EC", level:"", step:0, qty:0, pid:"" }; }
+  function newTask(){
+    return { id:"", name:"", every:"quarter", unit:"days",
+             stages:[{ name:"", rows:[newRow()] }] };
+  }
+  function tDayHours(){ return STD_DAY; }
+  /* Whatever the manager is counting in, the arithmetic is in hours. */
+  function rowHours(t,r){ return num(r.qty)*(t.unit==="hours"?1:tDayHours()); }
+  function rowRate(r){
+    if(r.pid){
+      var p=null;
+      state.positions.forEach(function(q){ if(q.id===r.pid) p=q; });
+      if(p&&p.group) return hourlyRate(p.group,p.level,p.step,tFull);
+      if(p) return (num(p.salary)*(tFull?loadFactor():1))/productiveHours("");
+    }
+    return hourlyRate(r.group,r.level,r.step,tFull);
+  }
+  function rowCost(t,r){ return rowHours(t,r)*rowRate(r); }
+  function taskTotals(t){
+    var per=0, hrs=0, stages=[];
+    (t.stages||[]).forEach(function(s){
+      var sc=0, sh=0;
+      (s.rows||[]).forEach(function(r){ sc+=rowCost(t,r); sh+=rowHours(t,r); });
+      stages.push({ name:s.name, cost:sc, hours:sh, rows:(s.rows||[]).length });
+      per+=sc; hrs+=sh;
+    });
+    var n=timesAYear(t.every);
+    return { per:per, hours:hrs, times:n, year:per*n, yearHours:hrs*n, stages:stages };
+  }
+  function tLabelOf(r){
+    if(r.pid){
+      var nm="";
+      state.positions.forEach(function(q){ if(q.id===r.pid) nm=nickOf(q.id)||q.title||q.num||"Position"; });
+      if(nm) return nm;
+    }
+    return r.label||(r.level||r.group||"Someone");
+  }
+
+  function renderTaskStages(){
+    var t=tdraft, host=el("t-stages");
+    /* One unnamed stage is not a stage, it is a list — so the header is only
+       drawn once there is something to distinguish. */
+    var named=t.stages.length>1||!!t.stages[0].name;
+    var tot=taskTotals(t), h="";
+    t.stages.forEach(function(s,si){
+      if(named) h+='<div class="sthead"><i class="sdot" style="background:'+hueOf(si)+'"></i>'+
+        '<input class="stname" data-stage="'+si+'" value="'+esc(s.name)+'" placeholder="Stage '+(si+1)+'" maxlength="60">'+
+        '<span class="stsum">'+money(tot.stages[si].cost)+"</span></div>";
+      s.rows.forEach(function(r,ri){
+        h+='<div class="trow" data-stage="'+si+'" data-row="'+ri+'">'+
+          '<span class="who"><select class="t-who" data-stage="'+si+'" data-row="'+ri+'">'+tWhoOptions(r)+"</select></span>"+
+          '<span class="qty"><input class="t-qty" data-stage="'+si+'" data-row="'+ri+'" type="number" min="0" step="0.5" inputmode="decimal" value="'+
+            (num(r.qty)||"")+'" placeholder="0"></span>'+
+          '<span class="tcost">'+(num(r.qty)?money(rowCost(t,r)):"—")+"</span>"+
+          '<button class="tdel" data-del="'+si+"."+ri+'" aria-label="Remove this row">✕</button></div>';
+      });
+    });
+    host.innerHTML=h;
+  }
+  /* One control for who: the people on the roster first, then every published
+     level. A manager who has a complement should never retype a classification
+     they have already entered. */
+  function tWhoOptions(r){
+    var o="", any=false;
+    if(state.positions.length){
+      o+='<optgroup label="Your complement">';
+      state.positions.forEach(function(p){
+        var nm=nickOf(p.id)||p.title||p.num||"Position";
+        o+='<option value="p:'+esc(p.id)+'"'+(r.pid===p.id?" selected":"")+">"+
+          esc(nm)+(p.level?" · "+esc(p.level):"")+"</option>";
+        any=true;
+      });
+      o+="</optgroup>";
+    }
+    o+='<optgroup label="By level">';
+    Object.keys(RATES).sort().forEach(function(g){
+      Object.keys(RATES[g].levels).forEach(function(l){
+        var sel=(!r.pid&&r.group===g&&r.level===l)?" selected":"";
+        o+='<option value="l:'+esc(g)+":"+esc(l)+'"'+sel+">"+esc(l)+"</option>";
+      });
+    });
+    o+="</optgroup>";
+    if(!r.pid&&!r.level) o='<option value="" selected>Pick a level…</option>'+o;
+    return o;
+  }
+
+  var TASK_SUGG=[
+    { lab:"Your review", stage:"Review", level:"EC-06", qty:0.5 },
+    { lab:"Director", stage:"Review", level:"EX-01", qty:0.25 },
+    { lab:"DG sign-off", stage:"Review", level:"EX-03", qty:0.0625 },
+    { lab:"Rounds of rework", stage:"Rework", level:"EC-05", qty:1 },
+    { lab:"A meeting about it", stage:"Review", level:"EC-05", qty:0.25 }
+  ];
+  function renderTaskSugg(){
+    var t=tdraft, filled=taskTotals(t).per>0;
+    var names={}; t.stages.forEach(function(s){ names[s.name.toLowerCase()]=1; });
+    var chips=TASK_SUGG.filter(function(s){ return !names[s.stage.toLowerCase()]; });
+    el("t-sugg").classList.toggle("hidden",!filled||!chips.length);
+    el("t-sugg-chips").innerHTML=chips.map(function(s,i){
+      return '<button class="btn-quiet btn-sm" data-sugg="'+TASK_SUGG.indexOf(s)+'">'+esc(s.lab)+"</button>";
+    }).join("");
+  }
+
+  function renderTask(){
+    if(!tdraft) tdraft=newTask();
+    var t=tdraft, tot=taskTotals(t);
+    el("t-name").value=t.name;
+    el("t-every").value=t.every;
+    el("t-unit").value=t.unit;
+    renderTaskStages();
+    renderTaskSugg();
+
+    var one=(EVERY[t.every]||{}).one;
+    el("t-ans-lab").textContent=one?"What it costs":"A year of it";
+    el("t-year").textContent=tot.per?money(tot.year):"—";
+    el("t-year-sub").textContent=tot.per
+      ? (one? Math.round(tot.hours)+" hours"
+            : Math.round(tot.times*10)/10+" times a year · "+Math.round(tot.yearHours)+" hours")
+      : "Add who works on it and how long it takes.";
+    el("t-each").textContent=tot.per?money(tot.per):"—";
+    el("t-each-sub").textContent=tot.per?Math.round(tot.hours*10)/10+" hours each time":"";
+
+    /* Colour by the order the stages appear, never by size — and only when
+       there is more than one, because a single full-width bar says nothing. */
+    var shown=tot.stages.filter(function(s){ return s.cost>0; });
+    var many=shown.length>1;
+    el("t-bar").innerHTML=many?tot.stages.map(function(s,i){
+      return s.cost>0?'<i style="flex:'+(s.cost/tot.per*100)+';background:'+hueOf(i)+'"></i>':"";
+    }).join(""):"";
+    el("t-key").innerHTML=many?tot.stages.map(function(s,i){
+      return s.cost>0?'<span><i class="sdot" style="background:'+hueOf(i)+'"></i>'+
+        esc(s.name||"Stage "+(i+1))+" <b>"+Math.round(s.cost/tot.per*100)+"%</b></span>":"";
+    }).join(""):"";
+
+    /* The finding, when there is one: checking and redoing is the part nobody
+       counts, and on a real report it is about a third. Only said when the
+       stages are actually named, because otherwise it is guesswork. */
+    var rw=0;
+    tot.stages.forEach(function(s){
+      if(/review|rework|approv|sign|meeting/i.test(s.name||"")) rw+=s.cost;
+    });
+    var pct=tot.per?Math.round(rw/tot.per*100):0;
+    el("t-find").classList.toggle("hidden",!(many&&pct>=15));
+    if(many&&pct>=15) el("t-find").innerHTML="<b>Checking and redoing it is "+pct+
+      "% of this</b> — "+money(rw*tot.times)+" a year.";
+
+    el("t-rows").innerHTML=tot.stages.map(function(s,i){
+      if(!s.cost) return "";
+      return '<div class="tli"><span class="g"><i class="sdot" style="background:'+hueOf(i)+'"></i>'+
+        "<span>"+esc(s.name||"Stage "+(i+1))+"<em>"+Math.round(s.hours*10)/10+" hours"+
+        (one?"":" each time")+"</em></span></span>"+
+        '<span class="n">'+money(s.cost*tot.times)+"<em>"+
+        Math.round(s.cost/tot.per*100)+"%</em></span></div>";
+    }).join("");
+
+    el("t-rate-full").setAttribute("aria-pressed",tFull?"true":"false");
+    el("t-rate-bud").setAttribute("aria-pressed",tFull?"false":"true");
+    var L=loadOf();
+    el("t-rate-note").textContent=tFull
+      ? "Salary plus "+L.ebp+"% benefit plan, "+L.accom+"% accommodation and "+L.it+
+        "% IT — what it costs the Crown. Your own envelope pays only the salary."
+      : "Salary only — what comes out of your envelope. The Crown pays "+
+        Math.round((loadFactor()-1)*100)+"% more than this.";
+
+    var wf=[];
+    if(tot.per){
+      wf.push(["If it takes half again as long",money(tot.year*1.5)]);
+      if(rw) wf.push(["Without the checking and redoing",money((tot.per-rw)*tot.times)]);
+      if(!one&&t.every!=="half") wf.push(["If it happened half as often",money(tot.year/2)]);
+    }
+    el("t-whatif").innerHTML=wf.map(function(r){
+      return '<div class="li" style="padding:7px 0;border:none"><span class="grow note">'+esc(r[0])+
+        '</span><span class="num" style="font-size:12.5px">'+r[1]+"</span></div>";
+    }).join("");
+
+    var v=leaveOf();
+    el("t-stat").value=v.stat; el("t-vac").value=v.vac;
+    el("t-sick").value=v.sick; el("t-other").value=v.other;
+    el("t-ebp").value=L.ebp; el("t-accom").value=L.accom; el("t-it").value=L.it;
+    el("t-assum-sum").textContent=
+      Math.round(productiveHours("")*10)/10+" productive hours a year, from "+
+      STD_PAID_HOURS+" paid less "+leaveDays()+" days of leave and holidays. "+
+      "Weekly work happens "+Math.round(weeksWorked()*10)/10+" times a year, not 52.";
+
+    renderSavedTasks();
+  }
+
+  function renderSavedTasks(){
+    var list=state.tasks||[];
+    el("t-saved").classList.toggle("hidden",!list.length);
+    if(!list.length) return;
+    var rows=list.map(function(t){ return { t:t, y:taskTotals(t).year }; })
+                 .sort(function(a,b){ return b.y-a.y; });
+    var sum=0; rows.forEach(function(r){ sum+=r.y; });
+    var bud=num(state.cc&&state.cc.salaryBudget);
+    el("t-saved-sum").textContent=money(sum)+" a year"+
+      (bud?" · "+(sum/bud*100).toFixed(1)+"% of your salary budget":"");
+    el("t-saved-list").innerHTML=rows.map(function(r){
+      var n=timesAYear(r.t.every);
+      return '<div class="tli"><span class="g"><span>'+esc(r.t.name||"Untitled task")+
+        "<em>"+(EVERY[r.t.every]||EVERY.year).lab.toLowerCase()+" · "+
+        Math.round(taskTotals(r.t).yearHours)+" hours a year</em></span></span>"+
+        '<span class="n">'+money(r.y)+"</span>"+
+        '<button class="tdel" data-untask="'+esc(r.t.id)+'" aria-label="Remove">✕</button></div>';
+    }).join("");
+  }
+
   function renderCost(){
     var g=el("q-group").value, range=isRange(g);
     el("q-sal-wrap").classList.toggle("hidden",!range);
@@ -2946,7 +3472,7 @@ a:hover{color:var(--ink)}
   }
 
   // ---- tabs -------------------------------------------------------------
-  var PAGES=["setup","roster","estimates","forecast","scenario","paycal","cost"];
+  var PAGES=["setup","roster","estimates","forecast","scenario","paycal","cost","task"];
   function show(tab){
     PAGES.forEach(function(p){ el("p-"+p).classList.toggle("hidden",p!==tab); });
     Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){
@@ -2955,6 +3481,7 @@ a:hover{color:var(--ink)}
     window.scrollTo(0,0);
     if(tab==="paycal") renderCal();
     if(tab==="cost") renderCost();
+    if(tab==="task") renderTask();
     /* Step 5 is deliberately absent. Estimates and the forecast are things you
        finish by looking — a manager with no overtime has nothing to type, and
        reading the forecast IS the step. Testing a change is not: you have not
@@ -3122,6 +3649,121 @@ a:hover{color:var(--ink)}
      wondering what filling it costs. */
   el("x-cost").addEventListener("click",function(){ show("cost"); });
   el("x-cost2").addEventListener("click",function(){ show("cost"); });
+  el("x-task").addEventListener("click",function(){ show("task"); });
+
+  /* ---- costing a task: wiring ------------------------------------------
+     On a phone the bottom bar is five slots and they belong to the five
+     steps, so this is not a tab there. It is reached from where the question
+     occurs — you have seen what the team costs and the next thought is what
+     it is spent on. */
+  Object.keys(EVERY).forEach(function(k){
+    var o=document.createElement("option");
+    o.value=k; o.textContent=EVERY[k].lab;
+    el("t-every").appendChild(o);
+  });
+  function tTouch(){ renderTask(); }
+  el("t-name").addEventListener("input",function(){ tdraft.name=this.value; });
+  el("t-every").addEventListener("change",function(){ tdraft.every=this.value; tTouch(); });
+  el("t-unit").addEventListener("change",function(){ tdraft.unit=this.value; tTouch(); });
+
+  el("t-stages").addEventListener("change",function(e){
+    var t=e.target, si=+t.getAttribute("data-stage"), ri=+t.getAttribute("data-row");
+    if(t.classList.contains("t-who")){
+      var v=t.value, r=tdraft.stages[si].rows[ri];
+      if(v.indexOf("p:")===0){ r.pid=v.slice(2); }
+      else if(v.indexOf("l:")===0){
+        var parts=v.slice(2).split(":");
+        r.pid=""; r.group=parts[0]; r.level=parts[1]; r.step=0;
+      }
+      tTouch();
+    }
+  });
+  el("t-stages").addEventListener("input",function(e){
+    var t=e.target, si=+t.getAttribute("data-stage"), ri=+t.getAttribute("data-row");
+    if(t.classList.contains("t-qty")){ tdraft.stages[si].rows[ri].qty=num(t.value); tTouch(); }
+    else if(t.classList.contains("stname")){
+      tdraft.stages[si].name=t.value;
+      /* Repainting on every keystroke would take the caret with it, so only
+         the subtotals and the answer move while a stage is being named. */
+      renderTaskSugg();
+      var tot=taskTotals(tdraft);
+      Array.prototype.forEach.call(document.querySelectorAll("#t-stages .stsum"),function(n,i){
+        n.textContent=money(tot.stages[i].cost);
+      });
+    }
+  });
+  el("t-stages").addEventListener("click",function(e){
+    var d=e.target.getAttribute&&e.target.getAttribute("data-del");
+    if(!d) return;
+    var p=d.split("."), si=+p[0], ri=+p[1];
+    tdraft.stages[si].rows.splice(ri,1);
+    if(!tdraft.stages[si].rows.length&&tdraft.stages.length>1) tdraft.stages.splice(si,1);
+    if(!tdraft.stages.length) tdraft.stages=[{name:"",rows:[newRow()]}];
+    if(!tdraft.stages[0].rows.length) tdraft.stages[0].rows.push(newRow());
+    tTouch();
+  });
+  el("t-add-row").addEventListener("click",function(){
+    tdraft.stages[tdraft.stages.length-1].rows.push(newRow()); tTouch();
+  });
+  el("t-add-stage").addEventListener("click",function(){
+    tdraft.stages.push({ name:"", rows:[newRow()] }); tTouch();
+  });
+  el("t-clear").addEventListener("click",function(){ tdraft=newTask(); tTouch(); });
+
+  el("t-sugg-chips").addEventListener("click",function(e){
+    var i=e.target.getAttribute&&e.target.getAttribute("data-sugg");
+    if(i==null) return;
+    var s=TASK_SUGG[+i], grp=s.level.split("-")[0];
+    if(!hasLevel(grp,s.level)) return;
+    /* Named stages only exist once somebody names one, so the first suggestion
+       accepted also names the pile that is already there. */
+    var st=null;
+    tdraft.stages.forEach(function(x){ if(x.name.toLowerCase()===s.stage.toLowerCase()) st=x; });
+    if(!st){ st={ name:s.stage, rows:[] }; tdraft.stages.push(st); }
+    st.rows.push({ label:s.lab, group:grp, level:s.level, step:0, qty:s.qty, pid:"" });
+    tTouch();
+  });
+
+  el("t-rate-full").addEventListener("click",function(){ tFull=true; tTouch(); });
+  el("t-rate-bud").addEventListener("click",function(){ tFull=false; tTouch(); });
+
+  [["t-stat","stat"],["t-vac","vac"],["t-sick","sick"],["t-other","other"]].forEach(function(p){
+    el(p[0]).addEventListener("input",function(){
+      if(!state.leave) state.leave={};
+      state.leave[p[1]]=sNum(this.value,0,60); save(); tTouch();
+    });
+  });
+  [["t-ebp","ebp"],["t-accom","accom"],["t-it","it"]].forEach(function(p){
+    el(p[0]).addEventListener("input",function(){
+      if(!state.load) state.load={};
+      state.load[p[1]]=sNum(this.value,0,200); save(); tTouch();
+    });
+  });
+  el("t-assum-reset").addEventListener("click",function(){
+    state.leave={ stat:LEAVE_DEFAULT.stat, vac:LEAVE_DEFAULT.vac,
+                  sick:LEAVE_DEFAULT.sick, other:LEAVE_DEFAULT.other };
+    state.load={ ebp:LOAD_DEFAULT.ebp, accom:LOAD_DEFAULT.accom, it:LOAD_DEFAULT.it };
+    save(); tTouch();
+  });
+
+  el("t-save").addEventListener("click",function(){
+    var tot=taskTotals(tdraft);
+    if(!tot.per) return;
+    if(!state.tasks) state.tasks=[];
+    var copy=JSON.parse(JSON.stringify(tdraft));
+    copy.id=copy.id||("t"+Date.now().toString(36));
+    copy.name=copy.name||"Untitled task";
+    var found=false;
+    state.tasks.forEach(function(x,i){ if(x.id===copy.id){ state.tasks[i]=copy; found=true; } });
+    if(!found) state.tasks.push(copy);
+    save(); tdraft=newTask(); tTouch();
+  });
+  el("t-saved-list").addEventListener("click",function(e){
+    var id=e.target.getAttribute&&e.target.getAttribute("data-untask");
+    if(!id) return;
+    state.tasks=(state.tasks||[]).filter(function(x){ return x.id!==id; });
+    save(); tTouch();
+  });
   el("x-print").addEventListener("click",doPrint);
   el("x-print2").addEventListener("click",doPrint);
 
@@ -3781,9 +4423,11 @@ a:hover{color:var(--ink)}
      someone the answer, so it goes straight to it. */
   /* onstrength.ca/cost lands here. Someone arriving from a colleague's message
      with one question gets the answer screen and nothing else asked of them. */
-  var wantCost=false;
+  var wantCost=false, wantTask=false;
   try{ wantCost=/[?&]cost(=1)?(&|$)/.test(location.search); }catch(e){}
-  show(wantCost?"cost":(demoMode?"forecast":"setup"));
+  /* And onstrength.ca/task the same way, for the other one-question link. */
+  try{ wantTask=/[?&]task(=1)?(&|$)/.test(location.search); }catch(e){}
+  show(wantTask?"task":wantCost?"cost":(demoMode?"forecast":"setup"));
 
   /* app.html?tour=1 starts the walkthrough on demand. The intro card only
      appears on a first visit, so without this the tour would be unreachable
