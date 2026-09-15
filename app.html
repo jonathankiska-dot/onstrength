@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-T3UFX8gOArO1b9BzXKGPuqgLqZwFDZufIBqW3o2g7QU=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-CdbqJl9EUuvDICSoE4rYpR6GAopIVpFHdhX2RDY/mDc=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -1404,7 +1404,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v76";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v77";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -4433,11 +4433,13 @@ a:hover{color:var(--ink)}
      someone the answer, so it goes straight to it. */
   /* onstrength.ca/cost lands here. Someone arriving from a colleague's message
      with one question gets the answer screen and nothing else asked of them. */
-  var wantCost=false, wantTask=false;
+  var wantCost=false, wantTask=false, wantCal=false;
   try{ wantCost=/[?&]cost(=1)?(&|$)/.test(location.search); }catch(e){}
   /* And onstrength.ca/task the same way, for the other one-question link. */
   try{ wantTask=/[?&]task(=1)?(&|$)/.test(location.search); }catch(e){}
-  show(wantTask?"task":wantCost?"cost":(demoMode?"forecast":"setup"));
+  /* The front page offers the calendar as a door of its own, so it needs one. */
+  try{ wantCal=/[?&]paycal(=1)?(&|$)/.test(location.search); }catch(e){}
+  show(wantTask?"task":wantCost?"cost":wantCal?"paycal":(demoMode?"forecast":"setup"));
 
   /* app.html?tour=1 starts the walkthrough on demand. The intro card only
      appears on a first visit, so without this the tour would be unreachable
