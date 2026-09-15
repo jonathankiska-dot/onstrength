@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-e1UYs/1aYBJS+R+i4U8wwBOj86kaGMd0YVIePkCXWrE=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-hPVVum8mLz+HFkEcEEhSFPtC8EUBS5M/ngkxg0fejiw=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -770,6 +770,7 @@ a:hover{color:var(--ink)}
         <div class="row" style="gap:9px;flex-wrap:wrap">
           <button class="btn-ghost" id="add-position" style="flex:1 1 170px">Add a position</button>
           <button class="btn-ghost" id="add-many" style="flex:1 1 170px">Add several at once</button>
+          <button class="btn-ghost" id="add-paste" style="flex:1 1 170px">Paste from a spreadsheet</button>
         </div>
         <!-- The same two controls as the forecast page. Wanting a copy of the
              complement while you are looking at the complement is not an odd
@@ -814,6 +815,61 @@ a:hover{color:var(--ink)}
              to still be open on the desk. -->
         <button class="btn-ghost btn-sm hidden" id="b-steps-now"
           style="align-self:flex-start;width:auto;padding:0 16px">Set their steps</button>
+      </div>
+
+      <!-- The roster is already written down. It is in a spreadsheet from
+           finance, or on a printout, and asking somebody to retype nineteen
+           positions into a form is the reason most people stop.
+
+           What makes reading it tractable is that a classification identifies
+           itself: the app holds all 3,454 published codes, so a cell either is
+           one or it is not, and there is no column to map. Everything else is
+           read off the same row and shown before anything is added.
+
+           Selecting is the mapping. In a spreadsheet you drag over the columns
+           you want before copying; from a photograph you drag over the part of
+           the page you want, and the phone's own text recognition does the
+           reading. So this needs no camera, no file picker and no OCR — only a
+           box that is forgiving about what lands in it. -->
+      <div class="card pad stack g14 hidden lift" id="paste">
+        <div class="row"><span style="font-size:15px;font-weight:700">Paste from a spreadsheet</span>
+          <button class="btn-quiet" id="paste-close">Close</button></div>
+        <div class="rule"></div>
+        <div class="note">Select the columns you want — the classification, and the step if you
+          have it — then copy and paste them here. Leave the names out. From a printout, take a
+          photo, select the text on the picture, and paste that.</div>
+
+        <textarea id="p-box" rows="6" spellcheck="false"
+          aria-label="Paste your roster here"
+          placeholder="EC-05&#9;4&#10;EC-04&#9;2&#10;AS-02&#9;3"
+          style="width:100%;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;
+                 border:1px solid var(--rule);border-radius:10px;background:var(--surface);
+                 color:var(--ink);padding:10px 11px;resize:vertical"></textarea>
+
+        <div class="row" style="gap:9px;flex-wrap:wrap;justify-content:flex-start">
+          <button class="btn-quiet" id="p-read">See what it found</button>
+          <button class="btn-quiet" id="p-clear">Clear</button>
+        </div>
+
+        <div class="hidden stack g10" id="p-result">
+          <div class="rule"></div>
+          <div class="row" style="gap:10px;flex-wrap:wrap">
+            <span style="font-size:13.5px;font-weight:600" id="p-count"></span>
+            <span class="note" id="p-skip" style="flex:1 1 180px"></span>
+          </div>
+          <div class="card stack" id="p-rows" style="max-height:280px;overflow:auto"></div>
+          <!-- Off by default. A column of text beside a classification is as
+               likely to be who is in the job as what the job is called, and a
+               person's name is the one thing here worth being careful with. -->
+          <label style="display:flex;gap:9px;align-items:center;cursor:pointer">
+            <input type="checkbox" id="p-titles"
+              style="width:16px;height:16px;min-height:0;padding:0;margin:0;flex:0 0 16px;
+                     accent-color:var(--base)">
+            <span class="note" style="color:var(--ink-2)">Bring the text in as job titles</span>
+          </label>
+          <button class="btn-primary full" id="p-add">Add them</button>
+        </div>
+        <div class="note" id="p-msg"></div>
       </div>
 
       <div class="card pad stack g14 hidden lift" id="editor">
@@ -1412,7 +1468,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v82";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v83";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -2394,6 +2450,14 @@ a:hover{color:var(--ink)}
     if(el("bulk").scrollIntoView) el("bulk").scrollIntoView({block:"nearest"});
   }
   function closeBulk(){ el("bulk").classList.add("hidden"); }
+  function openPaste(){
+    closeEditor(); closeBulk();
+    el("paste").classList.remove("hidden");
+    el("p-msg").textContent="";
+    if(el("paste").scrollIntoView) el("paste").scrollIntoView({block:"nearest"});
+    if(el("p-box").focus) el("p-box").focus();
+  }
+  function closePaste(){ el("paste").classList.add("hidden"); }
 
   // ---- estimates --------------------------------------------------------
   /* Shows for a moment and fades. Long enough to be noticed while typing,
@@ -3182,6 +3246,190 @@ a:hover{color:var(--ink)}
         '<span class="n">'+money(r.y)+"</span>"+
         '<button class="tdel" data-untask="'+esc(r.t.id)+'" aria-label="Remove">✕</button></div>';
     }).join("");
+  }
+
+  /* ---- reading a roster out of a spreadsheet ---------------------------
+     The anchor is that a classification identifies itself. Every published
+     code is in the table, so a cell either resolves against it or it does
+     not, and nothing has to be guessed about which column is which. */
+  var LEVELIDX=null;
+  function pKey(s){ return String(s==null?"":s).replace(/[^A-Za-z0-9]/g,"").toUpperCase(); }
+  function levelIndex(){
+    if(LEVELIDX) return LEVELIDX;
+    LEVELIDX={};
+    Object.keys(RATES).forEach(function(g){
+      Object.keys(RATES[g].levels).forEach(function(l){
+        LEVELIDX[pKey(l)]={ g:g, l:l, n:RATES[g].levels[l].length };
+      });
+    });
+    return LEVELIDX;
+  }
+  function pLookup(cell){
+    var idx=levelIndex(), k=pKey(cell);
+    if(k.length<3||k.length>12) return null;
+    if(Object.prototype.hasOwnProperty.call(idx,k)) return idx[k];
+    /* People write EC5 for EC-05 and the published table does not. */
+    var m=/^([A-Z]{2,6})0*(\d{1,2})$/.exec(k);
+    if(m){
+      var k2=m[1]+(m[2].length<2?"0"+m[2]:m[2]);
+      if(Object.prototype.hasOwnProperty.call(idx,k2)) return idx[k2];
+    }
+    return null;
+  }
+
+  var P_HEAD={ level:/(class|level|group)/i, step:/(step|increment)/i,
+    fte:/(fte|assigned|part.?time|%)/i, start:/(start|from|effective|arriv)/i,
+    end:/(end|until|leav|depart)/i, title:/(title|job|role|descr)/i,
+    name:/(name|incumbent|employee|occupant)/i };
+  var P_STATUS=/^(filled|vacant|active|occupied|staffed|indeterminate|term|acting|casual|student|n\/?a|tbd|-|—)$/i;
+  var P_DATE=/\b(\d{4}-\d{1,2}-\d{1,2}|\d{1,2}\/\d{1,2}\/\d{2,4})\b/;
+
+  function pDate(s){
+    var m=P_DATE.exec(String(s||"")); if(!m) return "";
+    var t=m[1];
+    if(t.indexOf("-")>0){
+      var a=t.split("-");
+      return a[0]+"-"+("0"+a[1]).slice(-2)+"-"+("0"+a[2]).slice(-2);
+    }
+    /* Ambiguous by nature. Day-first is what the public service writes. */
+    var b=t.split("/"), y=b[2].length===2?("20"+b[2]):b[2];
+    return y+"-"+("0"+b[1]).slice(-2)+"-"+("0"+b[0]).slice(-2);
+  }
+
+  /* Headers, when the paste has them, remove every remaining guess — and are
+     the reason an "Incumbent" column can be dropped rather than mistaken for
+     a job title. */
+  function pHeaders(cells){
+    var map={}, hits=0;
+    cells.forEach(function(c,i){
+      var t=String(c||"").trim(); if(!t) return;
+      for(var k in P_HEAD){
+        if(!Object.prototype.hasOwnProperty.call(P_HEAD,k)) continue;
+        if(map[k]==null&&P_HEAD[k].test(t)){ map[k]=i; hits++; return; }
+      }
+    });
+    return hits>=2?map:null;
+  }
+
+  function pRow(line,tabbed,head){
+    var cells=tabbed?line.split("\t"):line.split(/\s+/);
+    var at=-1, got=null;
+    if(head&&head.level!=null&&cells[head.level]!=null){
+      got=pLookup(cells[head.level]); if(got) at=head.level;
+    }
+    for(var i=0;!got&&i<cells.length;i++){ got=pLookup(cells[i]); if(got) at=i; }
+    if(!got) return null;
+
+    var r={ group:got.g, level:got.l, step:0, fte:100, start:"", end:"",
+            mode:"filled", title:"", num:"" };
+    var whole=line;
+    if(/\bvacant\b/i.test(whole)) r.mode="vacant";
+
+    function setStep(v){
+      var n=parseInt(v,10);
+      if(isFinite(n)&&n>=1&&n<=got.n&&!r.step) r.step=n;
+    }
+    function setFte(v){
+      var n=parseFloat(String(v).replace("%",""));
+      if(isFinite(n)&&n>0&&n<=100) r.fte=Math.round(n);
+    }
+
+    if(head){
+      if(head.step!=null) setStep(cells[head.step]);
+      if(head.fte!=null) setFte(cells[head.fte]);
+      if(head.start!=null) r.start=pDate(cells[head.start]);
+      if(head.end!=null) r.end=pDate(cells[head.end]);
+      if(head.title!=null) r.title=String(cells[head.title]||"").trim();
+    } else if(tabbed){
+      for(var j=0;j<cells.length;j++){
+        if(j===at) continue;
+        var c=String(cells[j]||"").trim(); if(!c||P_STATUS.test(c)) continue;
+        if(P_DATE.test(c)){ if(!r.start) r.start=pDate(c); continue; }
+        if(/^\d{1,3}%$/.test(c)){ setFte(c); continue; }
+        /* A bare number is a step while it could be one, and time otherwise.
+           Steps run to sixteen on one group, so the split is at the level's
+           own count rather than a round number. */
+        if(/^\d{1,3}$/.test(c)){
+          var n=parseInt(c,10);
+          if(n>=1&&n<=got.n&&!r.step) r.step=n; else if(n>=10&&n<=100) r.fte=n;
+          continue;
+        }
+        if(/[A-Za-z]{3,}/.test(c)&&c.length>r.title.length) r.title=c;
+      }
+    } else {
+      /* No tabs: text off a photograph, or a line somebody typed. What comes
+         before the classification is the job; what comes after is detail. */
+      var before=cells.slice(0,at).filter(function(c){
+        return /[A-Za-z]{3,}/.test(c)&&!P_STATUS.test(c);
+      }).join(" ").trim();
+      r.title=before;
+      var after=cells.slice(at+1).join(" ");
+      var sm=/(?:step|level)\s*(\d{1,2})/i.exec(after)||/^\s*(\d{1,2})\b/.exec(after);
+      if(sm) setStep(sm[1]);
+      var fm=/(\d{1,3})\s*%/.exec(whole); if(fm) setFte(fm[1]);
+      if(P_DATE.test(whole)) r.start=pDate(whole);
+    }
+    if(r.mode==="vacant") r.title=r.title||r.level;
+    if(r.title.length>60) r.title=r.title.slice(0,60);
+    return r;
+  }
+
+  function pParse(text){
+    var lines=String(text||"").split(/\r?\n/);
+    var tabbed=text.indexOf("\t")>=0;
+    var head=null;
+    if(tabbed){
+      for(var i=0;i<Math.min(3,lines.length)&&!head;i++){
+        var cs=lines[i].split("\t");
+        if(!cs.some(function(c){ return !!pLookup(c); })) head=pHeaders(cs);
+      }
+    }
+    var rows=[], skipped=0, seen=0;
+    lines.forEach(function(ln){
+      if(!ln.replace(/[\s\t]/g,"")) return;
+      seen++;
+      var r=pRow(ln,tabbed,head);
+      if(r) rows.push(r); else skipped++;
+    });
+    /* A single line holding several codes is a list somebody typed or
+       dictated, not a table — every code in it is a position of its own. */
+    if(rows.length<2){
+      var all=[];
+      String(text||"").split(/[\s,;|]+/).forEach(function(t){
+        var g=pLookup(t); if(g) all.push({ group:g.g, level:g.l, step:0, fte:100,
+          start:"", end:"", mode:"filled", title:"", num:"" });
+      });
+      if(all.length>rows.length){ rows=all; skipped=0; seen=all.length; }
+    }
+    return { rows:rows, skipped:skipped, lines:seen, headers:!!head };
+  }
+
+  var pFound=null;
+  function renderPaste(){
+    var f=pFound;
+    el("p-result").classList.toggle("hidden",!(f&&f.rows.length));
+    if(!f||!f.rows.length) return;
+    var n=f.rows.length;
+    el("p-count").textContent=n+" position"+(n===1?"":"s")+" found";
+    el("p-skip").textContent=f.skipped
+      ? f.skipped+" line"+(f.skipped===1?"":"s")+" had no classification in "+
+        (f.skipped===1?"it":"them")+" and "+(f.skipped===1?"was":"were")+" left out."
+      : (f.headers?"Column headings recognised.":"");
+    var titles=el("p-titles").checked;
+    el("p-rows").innerHTML=f.rows.map(function(r){
+      var bits=[];
+      if(r.step) bits.push("step "+r.step); else bits.push("step not set");
+      if(r.fte!==100) bits.push(r.fte+"% time");
+      if(r.mode==="vacant") bits.push("vacant");
+      if(r.start) bits.push("from "+shortDate(toTs(r.start)));
+      return '<div class="li" style="padding:9px 14px"><span class="grow stack g6">'+
+        '<span style="font-size:13.5px;font-weight:600">'+esc(r.level)+
+        (titles&&r.title?' <span style="font-weight:400;color:var(--muted)">· '+esc(r.title)+"</span>":"")+
+        "</span><span class=\"note\">"+esc(bits.join(" · "))+"</span></span>"+
+        '<span class="num" style="font-size:12.5px">'+
+        money(scenarioRate(r.group,r.level,r.step))+"</span></div>";
+    }).join("");
+    el("p-add").textContent="Add "+n+" position"+(n===1?"":"s");
   }
 
   function renderCost(){
@@ -4129,6 +4377,58 @@ a:hover{color:var(--ink)}
   el("b-steps-now").addEventListener("click",function(){ closeBulk(); openGrid(); });
   el("add-many").addEventListener("click",openBulk);
   el("bulk-close").addEventListener("click",closeBulk);
+
+  el("add-paste").addEventListener("click",openPaste);
+  el("paste-close").addEventListener("click",closePaste);
+  function pRead(){
+    var raw=el("p-box").value;
+    if(!raw.trim()){
+      pFound=null; renderPaste();
+      el("p-msg").textContent="Paste your roster into the box first.";
+      return;
+    }
+    pFound=pParse(raw);
+    el("p-msg").textContent=pFound.rows.length?"":
+      "No classifications in that. Check the codes look like EC-05 or AS-02, and that the "+
+      "classification column is part of what you copied.";
+    renderPaste();
+  }
+  el("p-read").addEventListener("click",pRead);
+  /* Pasting is the act — asking for a second click to see the result is one
+     step more than the moment needs. */
+  el("p-box").addEventListener("paste",function(){ setTimeout(pRead,0); });
+  el("p-titles").addEventListener("change",renderPaste);
+  el("p-clear").addEventListener("click",function(){
+    el("p-box").value=""; pFound=null; el("p-msg").textContent=""; renderPaste();
+  });
+  el("p-add").addEventListener("click",function(){
+    if(!pFound||!pFound.rows.length) return;
+    var room=2000-state.positions.length;
+    if(room<=0){ el("p-msg").textContent="This roster is already at 2,000 positions, which is the limit."; return; }
+    var rows=pFound.rows.slice(0,room), short=pFound.rows.length>room;
+    var titles=el("p-titles").checked, stamp=Date.now().toString(36), unset=0;
+    rows.forEach(function(r,i){
+      var hourly=isHourly(r.group), banded=isRange(r.group);
+      var rate=rateFor(r.group,r.level,banded?1:r.step)||0;
+      if(!banded&&!r.step) unset++;
+      state.positions.push({
+        id:"i"+stamp+"_"+i+"_"+Math.floor(Math.random()*100000),
+        num:r.num||"", title:(titles&&r.title)?r.title:r.level,
+        group:r.group, level:r.level, step:banded?0:r.step,
+        /* The salary is looked up here rather than carried in from the paste.
+           A pasted figure is somebody else's arithmetic, possibly from a stale
+           sheet, and the published table is the whole point. */
+        salary:hourly?rate*groupHours(r.group):rate,
+        hours:hourly?groupHours(r.group):0,
+        fte:r.fte, ftedate:"", ftenext:0, incdate:"", next:0,
+        mode:r.mode, start:r.start||"", end:r.end||"", ufrom:"", uto:"" });
+    });
+    save(); renderAll();
+    el("p-box").value=""; pFound=null; renderPaste();
+    el("p-msg").textContent=rows.length+" position"+(rows.length===1?"":"s")+" added"+
+      (short?" — that filled the roster to its 2,000 limit":"")+
+      (unset?". "+unset+" of them have no step, so they are costed at the middle of their level until you set them.":".");
+  });
   el("b-group").addEventListener("change",function(){
     var g=el("b-group").value;
     fillLevels("b-level",g,null);
