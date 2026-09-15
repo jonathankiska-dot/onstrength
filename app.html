@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-CdbqJl9EUuvDICSoE4rYpR6GAopIVpFHdhX2RDY/mDc=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-yBdhzqafITWP8ajA65/zFVBr2L9p9Ax4BBpjL0U4GrA=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -597,7 +597,7 @@ a:hover{color:var(--ink)}
     </div>
 
     <h1 class="h-title">Set up your cost centre</h1>
-    <a class="pghelp" href="help.html">How to use it</a>
+    <a class="pghelp" href="help.html#setup">How to use it</a>
 
     <!-- Both calculators answer a question cold, in a minute, with no setup at
          all — and both were reachable only from the forecast, three steps in.
@@ -718,7 +718,7 @@ a:hover{color:var(--ink)}
       <h1 class="h-title">Build your complement</h1>
       <span class="num" style="font-size:11px;color:var(--muted)" id="roster-count"></span>
     </div>
-    <a class="pghelp" href="help.html">How to use it</a>
+    <a class="pghelp" href="help.html#complement">How to use it</a>
     <!-- Shown once, when a roster built on the old flat 1,950 is corrected. A
          salary that moves without saying why is the failure this project has
          actually suffered, so it says why. -->
@@ -911,7 +911,7 @@ a:hover{color:var(--ink)}
   <!-- ESTIMATES -->
   <section id="p-estimates" class="stack g18 hidden">
     <h1 class="h-title">Add your estimates</h1>
-    <a class="pghelp" href="help.html">How to use it</a>
+    <a class="pghelp" href="help.html#estimates">How to use it</a>
 
     <div class="cols lean">
       <!-- Room comes first in the source so it is the first thing read on a
@@ -962,7 +962,7 @@ a:hover{color:var(--ink)}
       <div class="stack g6">
         <div class="eyebrow" id="cc-label">Cost centre</div>
         <h1 class="h-title">Where you'll land</h1>
-        <a class="pghelp" href="help.html">How to use it</a>
+        <a class="pghelp" href="help.html#forecast">How to use it</a>
       </div>
       <div class="num" style="font-size:11px;color:var(--muted);text-align:right" id="fy-label"></div>
     </div>
@@ -1087,7 +1087,7 @@ a:hover{color:var(--ink)}
     <div>
       <h1 class="h-title">Cost a position</h1>
       <div class="sub">No cost centre, no roster, nothing saved. Pick a job, get the number.</div>
-      <a class="pghelp" href="help.html">How to use it</a>
+      <a class="pghelp" href="help.html#cost">How this works</a>
     </div>
 
     <div class="card pad stack g14">
@@ -1146,7 +1146,7 @@ a:hover{color:var(--ink)}
     <div>
       <h1 class="h-title">Cost a task</h1>
       <div class="sub">What a piece of recurring work actually costs. No roster needed.</div>
-      <a class="pghelp" href="help.html">How to use it</a>
+      <a class="pghelp" href="help.html#task">How this works</a>
     </div>
 
     <div class="card pad stack g14">
@@ -1249,7 +1249,7 @@ a:hover{color:var(--ink)}
     <div>
       <h1 class="h-title">Pay calendar</h1>
       <div class="sub">Pay days and statutory holidays, from the published calendar.</div>
-      <a class="pghelp" href="help.html">How to use it</a>
+      <a class="pghelp" href="help.html#paycal">How this works</a>
     </div>
 
     <div class="card pad stack g10 lift" style="border-color:var(--base);background:var(--base-soft)">
@@ -1301,7 +1301,7 @@ a:hover{color:var(--ink)}
     <div class="stack g6">
       <h1 class="h-title">Test a change</h1>
       <div class="sub">Stack up changes you are considering and see where the year lands if they all happen.</div>
-      <a class="pghelp" href="help.html">How to use it</a>
+      <a class="pghelp" href="help.html#whatif">How to use it</a>
     </div>
     <div class="cols">
       <div class="stack g14">
@@ -1404,7 +1404,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v77";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v78";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
