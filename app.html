@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-Or/CBtMxntsVyfQva1LNDbCDYES6shauAjG73PYJJEc=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-T3UFX8gOArO1b9BzXKGPuqgLqZwFDZufIBqW3o2g7QU=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -599,6 +599,17 @@ a:hover{color:var(--ink)}
     <h1 class="h-title">Set up your cost centre</h1>
     <a class="pghelp" href="help.html">How to use it</a>
 
+    <!-- Both calculators answer a question cold, in a minute, with no setup at
+         all — and both were reachable only from the forecast, three steps in.
+         Somebody with one question was being asked to complete a five-step
+         process to find out the app could already have answered it. -->
+    <div class="card pad row" id="quick-tools" style="gap:10px;flex-wrap:wrap;border-left:4px solid var(--base)">
+      <span class="note" style="flex:1 1 220px">Got one quick question? Neither of these needs a
+        cost centre, a complement, or anything saved.</span>
+      <button class="btn-quiet" id="q-jump">Cost a position</button>
+      <button class="btn-quiet" id="t-jump">Cost a task</button>
+    </div>
+
     <div class="cols">
       <div class="card pad stack g14">
         <div class="eyebrow">Your cost centre</div>
@@ -1166,43 +1177,32 @@ a:hover{color:var(--ink)}
       <div class="row" style="gap:8px;flex-wrap:wrap" id="t-sugg-chips"></div>
     </div>
 
+    <!-- One number, not two. Two big figures side by side under two headings
+         read as a form to be filled rather than an answer already given — the
+         first person to see it asked what they were supposed to type in them. -->
     <div class="card">
-      <div class="qans">
-        <div class="qa">
-          <div class="eyebrow" id="t-ans-lab">A year of it</div>
-          <div class="qbig" id="t-year">—</div>
-          <div class="note" id="t-year-sub"></div>
-        </div>
-        <div class="qa second">
-          <div class="eyebrow">Each time</div>
-          <div class="qbig" id="t-each">—</div>
-          <div class="note" id="t-each-sub"></div>
-        </div>
+      <div class="pad stack g6">
+        <div class="qbig" id="t-year">—</div>
+        <div class="note" id="t-year-sub">Add who works on it and how long it takes.</div>
       </div>
 
-      <div class="rulel"></div>
-      <div class="pad stack g10">
-        <div class="eyebrow">Where it goes</div>
-        <div class="tstack" id="t-bar" role="img" aria-label="Share of the cost by stage"></div>
-        <div class="tkey" id="t-key"></div>
+      <div class="hidden" id="t-split">
+        <div class="rulel"></div>
+        <div class="pad stack g10">
+          <div class="tstack" id="t-bar" role="img" aria-label="Share of the cost by stage"></div>
+          <div class="tkey" id="t-key"></div>
+        </div>
       </div>
 
       <div class="tfind hidden" id="t-find"></div>
       <div id="t-rows"></div>
 
-      <div class="rulel"></div>
-      <div class="pad stack g10">
-        <div class="seg" role="group" aria-label="Which rate">
-          <button id="t-rate-full" aria-pressed="true">Full cost to the Crown</button>
-          <button id="t-rate-bud" aria-pressed="false">Cost to your budget</button>
+      <div class="hidden" id="t-whatif-wrap">
+        <div class="rulel"></div>
+        <div class="pad stack g6">
+          <div class="eyebrow">If the estimate is wrong</div>
+          <div class="cal-lines" id="t-whatif"></div>
         </div>
-        <div class="note" id="t-rate-note"></div>
-      </div>
-
-      <div class="rulel"></div>
-      <div class="pad stack g6">
-        <div class="eyebrow">If the estimate is wrong</div>
-        <div class="cal-lines" id="t-whatif"></div>
       </div>
 
       <div class="qfoot">
@@ -1211,11 +1211,14 @@ a:hover{color:var(--ink)}
       </div>
     </div>
 
-    <!-- The assumptions are on the same screen as the answer, because both of
-         them are arguable and somebody will argue. Published tables, your
-         assumptions, stated separately — the same bargain as the estimates. -->
-    <div class="card pad stack g14">
-      <div class="eyebrow">The assumptions behind the rate</div>
+    <!-- The deductions behind the hourly rate are arguable and somebody will
+         argue, so they stay on the same screen as the answer — but folded away,
+         because they are a thing you check once and then never look at again.
+         The employer-cost loading came out entirely: a manager's envelope pays
+         salary and nothing else, so what it costs the Crown is somebody else's
+         number and was only ever a second answer to get wrong. -->
+    <details class="card pad stack g14" id="t-assum">
+      <summary style="cursor:pointer;font-size:13px;font-weight:600">How the hourly rate is worked out</summary>
       <div class="note" id="t-assum-sum"></div>
       <div class="cgrid">
         <label class="fld"><span>Statutory holidays (days)</span><input id="t-stat" type="number" min="0" max="60" step="1" inputmode="numeric"></label>
@@ -1223,15 +1226,8 @@ a:hover{color:var(--ink)}
         <label class="fld"><span>Sick leave taken (days)</span><input id="t-sick" type="number" min="0" max="60" step="1" inputmode="numeric"></label>
         <label class="fld"><span>Other leave (days)</span><input id="t-other" type="number" min="0" max="60" step="1" inputmode="numeric"></label>
       </div>
-      <div class="note">On top of salary, for the full-cost answer — the rates Finance's own
-        proposal-costing guidance applies:</div>
-      <div class="cgrid">
-        <label class="fld"><span>Benefit plan (%)</span><input id="t-ebp" type="number" min="0" max="200" step="0.5" inputmode="decimal"></label>
-        <label class="fld"><span>Accommodation (%)</span><input id="t-accom" type="number" min="0" max="200" step="0.5" inputmode="decimal"></label>
-        <label class="fld"><span>IT (%)</span><input id="t-it" type="number" min="0" max="200" step="0.5" inputmode="decimal"></label>
-      </div>
       <button class="btn-quiet" id="t-assum-reset" style="align-self:flex-start">Back to the published defaults</button>
-    </div>
+    </details>
 
     <div class="card hidden" id="t-saved">
       <div class="pad row" style="gap:12px;flex-wrap:wrap">
@@ -1408,7 +1404,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v75";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v76";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -2948,13 +2944,32 @@ a:hover{color:var(--ink)}
      Kept out of state until it is saved, the same bargain as Cost a position:
      somebody sent this link by a colleague should be able to answer their
      question and close the tab having left nothing behind. */
-  var tdraft=null, tFull=true;
+  /* Salary only, always. A manager's envelope pays salary and nothing else —
+     the benefit plan, accommodation and IT are carried centrally and are not
+     their money. Showing what it costs the Crown was a second answer that
+     nobody in the job asked for, and a second answer is a second thing to get
+     wrong in a meeting. The loading is still computed for anything that needs
+     a full-cost comparison later; it just is not on this screen. */
+  var tdraft=null, tFull=false;
   var STAGE_HUES=["--s1","--s2","--s3","--s4"];
   function hueOf(i){ return "var("+STAGE_HUES[i%STAGE_HUES.length]+")"; }
-  function newRow(){ return { label:"", group:"EC", level:"", step:0, qty:0, pid:"" }; }
+  /* A manager who has built a complement should not be hunting through a list
+     of 3,454 published steps for somebody already on their own roster. A new
+     row lands on the next person who is not in the task yet, so the common
+     case is a number typed and nothing chosen at all. */
+  function newRow(t){
+    var used={};
+    if(t) (t.stages||[]).forEach(function(s){
+      (s.rows||[]).forEach(function(r){ if(r.pid) used[r.pid]=1; });
+    });
+    var pick="";
+    state.positions.forEach(function(p){ if(!pick&&!used[p.id]) pick=p.id; });
+    return { label:"", group:pick?"":"EC", level:"", step:0, qty:0, pid:pick };
+  }
   function newTask(){
-    return { id:"", name:"", every:"quarter", unit:"days",
-             stages:[{ name:"", rows:[newRow()] }] };
+    var t={ id:"", name:"", every:"quarter", unit:"days", stages:[{ name:"", rows:[] }] };
+    t.stages[0].rows.push(newRow(t));
+    return t;
   }
   function tDayHours(){ return STD_DAY; }
   /* Whatever the manager is counting in, the arithmetic is in hours. */
@@ -3025,15 +3040,24 @@ a:hover{color:var(--ink)}
       });
       o+="</optgroup>";
     }
-    o+='<optgroup label="By level">';
-    Object.keys(RATES).sort().forEach(function(g){
+    /* One optgroup per classification rather than 720 levels in a single flat
+       list — a native select with one group is a wall, and on a phone it is an
+       unscrollable one. The groups already on the roster come first, because
+       those are the ones this manager actually uses. */
+    var mine={}, order=[];
+    state.positions.forEach(function(p){
+      if(p.group&&hasRate(p.group)&&!mine[p.group]){ mine[p.group]=1; order.push(p.group); }
+    });
+    Object.keys(RATES).sort().forEach(function(g){ if(!mine[g]) order.push(g); });
+    order.forEach(function(g){
+      o+='<optgroup label="'+esc(g)+" — "+esc(RATES[g].name)+'">';
       Object.keys(RATES[g].levels).forEach(function(l){
         var sel=(!r.pid&&r.group===g&&r.level===l)?" selected":"";
         o+='<option value="l:'+esc(g)+":"+esc(l)+'"'+sel+">"+esc(l)+"</option>";
       });
+      o+="</optgroup>";
     });
-    o+="</optgroup>";
-    if(!r.pid&&!r.level) o='<option value="" selected>Pick a level…</option>'+o;
+    if(!r.pid&&!r.level) o='<option value="" selected>Pick someone or a level…</option>'+o;
     return o;
   }
 
@@ -3063,20 +3087,22 @@ a:hover{color:var(--ink)}
     renderTaskStages();
     renderTaskSugg();
 
+    /* One number and a sentence. The sentence carries what the second big
+       figure used to: how often, what each one costs, how many hours. */
     var one=(EVERY[t.every]||{}).one;
-    el("t-ans-lab").textContent=one?"What it costs":"A year of it";
     el("t-year").textContent=tot.per?money(tot.year):"—";
     el("t-year-sub").textContent=tot.per
-      ? (one? Math.round(tot.hours)+" hours"
-            : Math.round(tot.times*10)/10+" times a year · "+Math.round(tot.yearHours)+" hours")
+      ? (one
+          ? "one-off · "+Math.round(tot.hours*10)/10+" hours"
+          : "a year — "+money(tot.per)+" each time, "+
+            Math.round(tot.times*10)/10+" times, "+Math.round(tot.yearHours)+" hours")
       : "Add who works on it and how long it takes.";
-    el("t-each").textContent=tot.per?money(tot.per):"—";
-    el("t-each-sub").textContent=tot.per?Math.round(tot.hours*10)/10+" hours each time":"";
 
     /* Colour by the order the stages appear, never by size — and only when
        there is more than one, because a single full-width bar says nothing. */
     var shown=tot.stages.filter(function(s){ return s.cost>0; });
     var many=shown.length>1;
+    el("t-split").classList.toggle("hidden",!many);
     el("t-bar").innerHTML=many?tot.stages.map(function(s,i){
       return s.cost>0?'<i style="flex:'+(s.cost/tot.per*100)+';background:'+hueOf(i)+'"></i>':"";
     }).join(""):"";
@@ -3106,21 +3132,13 @@ a:hover{color:var(--ink)}
         Math.round(s.cost/tot.per*100)+"%</em></span></div>";
     }).join("");
 
-    el("t-rate-full").setAttribute("aria-pressed",tFull?"true":"false");
-    el("t-rate-bud").setAttribute("aria-pressed",tFull?"false":"true");
-    var L=loadOf();
-    el("t-rate-note").textContent=tFull
-      ? "Salary plus "+L.ebp+"% benefit plan, "+L.accom+"% accommodation and "+L.it+
-        "% IT — what it costs the Crown. Your own envelope pays only the salary."
-      : "Salary only — what comes out of your envelope. The Crown pays "+
-        Math.round((loadFactor()-1)*100)+"% more than this.";
-
     var wf=[];
     if(tot.per){
       wf.push(["If it takes half again as long",money(tot.year*1.5)]);
       if(rw) wf.push(["Without the checking and redoing",money((tot.per-rw)*tot.times)]);
       if(!one&&t.every!=="half") wf.push(["If it happened half as often",money(tot.year/2)]);
     }
+    el("t-whatif-wrap").classList.toggle("hidden",!wf.length);
     el("t-whatif").innerHTML=wf.map(function(r){
       return '<div class="li" style="padding:7px 0;border:none"><span class="grow note">'+esc(r[0])+
         '</span><span class="num" style="font-size:12.5px">'+r[1]+"</span></div>";
@@ -3129,11 +3147,11 @@ a:hover{color:var(--ink)}
     var v=leaveOf();
     el("t-stat").value=v.stat; el("t-vac").value=v.vac;
     el("t-sick").value=v.sick; el("t-other").value=v.other;
-    el("t-ebp").value=L.ebp; el("t-accom").value=L.accom; el("t-it").value=L.it;
     el("t-assum-sum").textContent=
-      Math.round(productiveHours("")*10)/10+" productive hours a year, from "+
-      STD_PAID_HOURS+" paid less "+leaveDays()+" days of leave and holidays. "+
-      "Weekly work happens "+Math.round(weeksWorked()*10)/10+" times a year, not 52.";
+      "Salary divided by "+Math.round(productiveHours("")*10)/10+
+      " productive hours a year — "+STD_PAID_HOURS+" paid, less "+leaveDays()+
+      " days of leave and statutory holidays. A day is "+STD_DAY+" hours, and weekly work "+
+      "happens "+Math.round(weeksWorked()*10)/10+" times a year, not 52.";
 
     renderSavedTasks();
   }
@@ -3650,6 +3668,8 @@ a:hover{color:var(--ink)}
   el("x-cost").addEventListener("click",function(){ show("cost"); });
   el("x-cost2").addEventListener("click",function(){ show("cost"); });
   el("x-task").addEventListener("click",function(){ show("task"); });
+  el("q-jump").addEventListener("click",function(){ show("cost"); });
+  el("t-jump").addEventListener("click",function(){ show("task"); });
 
   /* ---- costing a task: wiring ------------------------------------------
      On a phone the bottom bar is five slots and they belong to the five
@@ -3698,15 +3718,15 @@ a:hover{color:var(--ink)}
     var p=d.split("."), si=+p[0], ri=+p[1];
     tdraft.stages[si].rows.splice(ri,1);
     if(!tdraft.stages[si].rows.length&&tdraft.stages.length>1) tdraft.stages.splice(si,1);
-    if(!tdraft.stages.length) tdraft.stages=[{name:"",rows:[newRow()]}];
-    if(!tdraft.stages[0].rows.length) tdraft.stages[0].rows.push(newRow());
+    if(!tdraft.stages.length) tdraft.stages=[{name:"",rows:[newRow(tdraft)]}];
+    if(!tdraft.stages[0].rows.length) tdraft.stages[0].rows.push(newRow(tdraft));
     tTouch();
   });
   el("t-add-row").addEventListener("click",function(){
-    tdraft.stages[tdraft.stages.length-1].rows.push(newRow()); tTouch();
+    tdraft.stages[tdraft.stages.length-1].rows.push(newRow(tdraft)); tTouch();
   });
   el("t-add-stage").addEventListener("click",function(){
-    tdraft.stages.push({ name:"", rows:[newRow()] }); tTouch();
+    tdraft.stages.push({ name:"", rows:[newRow(tdraft)] }); tTouch();
   });
   el("t-clear").addEventListener("click",function(){ tdraft=newTask(); tTouch(); });
 
@@ -3724,25 +3744,15 @@ a:hover{color:var(--ink)}
     tTouch();
   });
 
-  el("t-rate-full").addEventListener("click",function(){ tFull=true; tTouch(); });
-  el("t-rate-bud").addEventListener("click",function(){ tFull=false; tTouch(); });
-
   [["t-stat","stat"],["t-vac","vac"],["t-sick","sick"],["t-other","other"]].forEach(function(p){
     el(p[0]).addEventListener("input",function(){
       if(!state.leave) state.leave={};
       state.leave[p[1]]=sNum(this.value,0,60); save(); tTouch();
     });
   });
-  [["t-ebp","ebp"],["t-accom","accom"],["t-it","it"]].forEach(function(p){
-    el(p[0]).addEventListener("input",function(){
-      if(!state.load) state.load={};
-      state.load[p[1]]=sNum(this.value,0,200); save(); tTouch();
-    });
-  });
   el("t-assum-reset").addEventListener("click",function(){
     state.leave={ stat:LEAVE_DEFAULT.stat, vac:LEAVE_DEFAULT.vac,
                   sick:LEAVE_DEFAULT.sick, other:LEAVE_DEFAULT.other };
-    state.load={ ebp:LOAD_DEFAULT.ebp, accom:LOAD_DEFAULT.accom, it:LOAD_DEFAULT.it };
     save(); tTouch();
   });
 
