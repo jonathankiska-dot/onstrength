@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-PXUQc/zz1N681bq33x6cU4JoqJTk/DpFfCP6H3SP9so=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-WVCdJUXFUbD7Hw/mpK8g8DNZKMXuX0Ay5BY/laGHgzA=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -127,8 +127,14 @@ button:active,.btn:active{transform:translateY(1px)}
 .btn-ghost:hover{border-color:var(--muted);background:var(--sunk)}
 .btn-quiet{background:transparent;color:var(--base);border:none;min-height:40px;padding:0 6px;font-size:13.5px}
 .btn-sm{min-height:40px;font-size:13px;padding:0 12px}
+/* The ring used to be a 22%-alpha tint, which measures 1.4:1 against white —
+   fainter than the rules it sat next to. On the borderless controls, which is
+   most of the app's navigation, it was the only sign of where you were and it
+   could not be seen. Two layers so it reads on any ground: the surface colour
+   first, then the accent. */
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,
-a:focus-visible{outline:none;border-color:var(--focus);box-shadow:0 0 0 3px var(--ring)}
+summary:focus-visible,a:focus-visible{outline:none;border-color:var(--focus);
+  box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--focus)}
 
 label.f{display:flex;flex-direction:column;gap:5px}
 label.f>span{font-size:12.5px;color:var(--ink-2);font-weight:500;letter-spacing:.1px}
@@ -493,12 +499,35 @@ a:hover{color:var(--ink)}
   width:15px;height:15px;border-radius:50%;background:var(--base-soft);color:var(--base);
   font-size:10px;font-weight:700;flex-shrink:0}
 
+/* On a phone the answer sat under the form and under the tab bar, so you
+   typed a start date and nothing appeared to happen — the number was there,
+   two hundred pixels below the fold. The answer goes first on a narrow screen
+   instead: it reads as "—" until there is something to say, and then it is
+   already where you are looking. Ordered rather than moved, so the source
+   still reads question-then-answer for anyone using it with a screen reader
+   or a keyboard. */
+@media (max-width:899px){
+  #p-cost{display:flex;flex-direction:column}
+  #p-cost>div:first-child{order:0}
+  #p-cost .q-ans{order:1}
+  #p-cost .q-ask{order:2}
+}
+
 /* ---- costing a task ----------------------------------------------------
    The stage colours are assigned in the order the stages appear, never by
    size, and they are checked rather than chosen: the first set I picked had
    the teal and the green indistinguishable to a deuteranope. Four is the
    whole set — a fifth stage reuses them, because a generated hue is a hue
    nobody validated. */
+/* The library emits a fixed pixel width, which on a 320px phone pushed the
+   page sideways. Scaled to the box instead, capped so it does not balloon. */
+/* A borderless <button> takes the user agent's buttontext — black — unless
+   it is told otherwise, so every roster row and its salary vanished into the
+   dark background. Nothing in the app's own colours was wrong; the colour was
+   never set at all. */
+button.li,button.li *{color:inherit}
+#qr-box{max-width:100%}
+#qr-box svg{display:block;width:100%;height:auto;max-width:300px}
 .tstack{display:flex;height:26px;gap:2px}
 .tstack i{display:block;height:100%;min-width:3px}
 .tstack i:first-child{border-radius:5px 0 0 5px}
@@ -520,7 +549,8 @@ a:hover{color:var(--ink)}
 .trow>.who{flex:1 1 130px;min-width:0}
 .trow select,.trow input{min-height:36px;border:1px solid var(--rule);border-radius:9px;
   background:var(--surface);color:var(--ink);font:13px/1.2 inherit;padding:0 8px;width:100%}
-.trow .qty{flex:0 0 78px}
+.trow .cnt{flex:0 0 56px}
+.trow .qty{flex:0 0 74px}
 .trow .tdel{flex:none;min-height:32px;padding:0 9px;border-radius:8px;border:1px solid var(--rule);
   background:var(--surface);color:var(--muted);font:600 12px/1 inherit;cursor:pointer}
 .trow .tcost{flex:0 0 66px;text-align:right;font-size:12.5px;color:var(--muted);
@@ -675,7 +705,7 @@ a:hover{color:var(--ink)}
               move a roster to another device.</div>
           </div>
           <label style="display:flex;gap:9px;align-items:center;cursor:pointer">
-            <input type="checkbox" id="x-names"
+            <input type="checkbox" id="x-names" aria-label="Include the names you gave positions"
               style="width:16px;height:16px;min-height:0;padding:0;margin:0;flex:0 0 16px;
                      accent-color:var(--base)">
             <span class="note" style="color:var(--ink-2)">Include the names you gave positions</span>
@@ -887,12 +917,24 @@ a:hover{color:var(--ink)}
             <span style="font-size:13.5px;font-weight:600" id="p-count"></span>
             <span class="note" id="p-skip" style="flex:1 1 180px"></span>
           </div>
+          <!-- "EC-05  4" is four EC-05s on a headcount sheet and one EC-05 at
+               step 4 on a position listing, and nothing in the row says which.
+               Guessing wrong is silent and produces a roster that looks right,
+               so the guess is stated out loud and can be flipped in one tap. -->
+          <div class="card pad stack g10 hidden" id="p-ambig"
+               style="border-left:4px solid var(--est);background:var(--sunk)">
+            <div class="note" id="p-ambig-txt"></div>
+            <div class="seg" role="group" aria-label="What the numbers mean">
+              <button id="p-as-step" aria-pressed="true">Steps</button>
+              <button id="p-as-count" aria-pressed="false">How many positions</button>
+            </div>
+          </div>
           <div class="card stack" id="p-rows" style="max-height:280px;overflow:auto"></div>
           <!-- Off by default. A column of text beside a classification is as
                likely to be who is in the job as what the job is called, and a
                person's name is the one thing here worth being careful with. -->
           <label style="display:flex;gap:9px;align-items:center;cursor:pointer">
-            <input type="checkbox" id="p-titles"
+            <input type="checkbox" id="p-titles" aria-label="Bring the text in as job titles"
               style="width:16px;height:16px;min-height:0;padding:0;margin:0;flex:0 0 16px;
                      accent-color:var(--base)">
             <span class="note" style="color:var(--ink-2)">Bring the text in as job titles</span>
@@ -1184,7 +1226,7 @@ a:hover{color:var(--ink)}
       <a class="pghelp" href="help.html#cost">How this works</a>
     </div>
 
-    <div class="card pad stack g14">
+    <div class="card pad stack g14 q-ask">
       <div class="cgrid">
         <label class="fld"><span>Group</span><select id="q-group"></select></label>
         <label class="fld"><span>Level</span><select id="q-level"></select></label>
@@ -1202,7 +1244,7 @@ a:hover{color:var(--ink)}
       </div>
     </div>
 
-    <div class="card">
+    <div class="card q-ans">
       <div class="qans">
         <div class="qa">
           <div class="eyebrow">Rest of this fiscal year</div>
@@ -1502,7 +1544,7 @@ a:hover{color:var(--ink)}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v84";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v86";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -1745,7 +1787,8 @@ a:hover{color:var(--ink)}
           var pid=sId(r.pid);
           if(pid&&!out.positions.some(function(q){ return q.id===pid; })) pid="";
           rows.push({ label:sText(r.label,80), group:grp, level:lvl, step:stp,
-                      qty:sNum(r.qty,0,10000), pid:pid });
+                      qty:sNum(r.qty,0,10000), n:Math.max(1,Math.round(sNum(r.n,1,200))||1),
+                      pid:pid });
         });
         stages.push({ name:sText(s.name,60), rows:rows });
       });
@@ -2510,7 +2553,7 @@ a:hover{color:var(--ink)}
         '<span class="grow stack g6" style="min-width:0">'+
           '<span style="font-size:13.5px;font-weight:500">'+esc(L.name)+"</span>"+
           '<span class="note">'+esc(L.hint)+"</span></span>"+
-        '<input class="num-in" data-est="'+L.id+'" inputmode="decimal" placeholder="0" style="width:120px;flex-shrink:0;text-align:right" value="'+
+        '<input class="num-in" data-est="'+L.id+'" aria-label="'+esc(L.name)+' for the year" inputmode="decimal" placeholder="0" style="width:120px;flex-shrink:0;text-align:right" value="'+
           esc(grouped(state.estimates[L.id]))+'"></div>';
     }).join("");
     Array.prototype.forEach.call(el("est-list").querySelectorAll("[data-est]"),function(inp){
@@ -3063,6 +3106,8 @@ a:hover{color:var(--ink)}
      of 3,454 published steps for somebody already on their own roster. A new
      row lands on the next person who is not in the task yet, so the common
      case is a number typed and nothing chosen at all. */
+  /* A standing meeting is nine people doing the same hour. Nine rows meant
+     nine trips through a select of every published level, to say one thing. */
   function newRow(t){
     var used={};
     if(t) (t.stages||[]).forEach(function(s){
@@ -3070,16 +3115,25 @@ a:hover{color:var(--ink)}
     });
     var pick="";
     state.positions.forEach(function(p){ if(!pick&&!used[p.id]) pick=p.id; });
-    return { label:"", group:pick?"":"EC", level:"", step:0, qty:0, pid:pick };
+    return { label:"", group:pick?"":"EC", level:"", step:0, qty:0, n:1, pid:pick };
   }
+  /* Somebody arriving from "what that standing Tuesday meeting costs" should
+     not have to undo two dropdowns before they can start. Somebody opening it
+     from the rail is more likely to have a report in mind, where days is the
+     unit people think in. The door decides. */
   function newTask(){
-    var t={ id:"", name:"", every:"quarter", unit:"days", stages:[{ name:"", rows:[] }] };
+    var meeting=false;
+    try{ meeting=/[?&]task(=1)?(&|$)/.test(location.search); }catch(e){}
+    var t={ id:"", name:"", every:meeting?"week":"quarter",
+            unit:meeting?"hours":"days", stages:[{ name:"", rows:[] }] };
     t.stages[0].rows.push(newRow(t));
     return t;
   }
   function tDayHours(){ return STD_DAY; }
   /* Whatever the manager is counting in, the arithmetic is in hours. */
-  function rowHours(t,r){ return num(r.qty)*(t.unit==="hours"?1:tDayHours()); }
+  function rowHours(t,r){
+    return num(r.qty)*(t.unit==="hours"?1:tDayHours())*Math.max(1,Math.round(num(r.n))||1);
+  }
   function rowRate(r){
     if(r.pid){
       var p=null;
@@ -3118,12 +3172,15 @@ a:hover{color:var(--ink)}
     var tot=taskTotals(t), h="";
     t.stages.forEach(function(s,si){
       if(named) h+='<div class="sthead"><i class="sdot" style="background:'+hueOf(si)+'"></i>'+
-        '<input class="stname" data-stage="'+si+'" value="'+esc(s.name)+'" placeholder="Stage '+(si+1)+'" maxlength="60">'+
+        '<input class="stname" aria-label="Name for this stage" data-stage="'+si+'" value="'+esc(s.name)+'" placeholder="Stage '+(si+1)+'" maxlength="60">'+
         '<span class="stsum">'+money(tot.stages[si].cost)+"</span></div>";
       s.rows.forEach(function(r,ri){
         h+='<div class="trow" data-stage="'+si+'" data-row="'+ri+'">'+
-          '<span class="who"><select class="t-who" data-stage="'+si+'" data-row="'+ri+'">'+tWhoOptions(r)+"</select></span>"+
-          '<span class="qty"><input class="t-qty" data-stage="'+si+'" data-row="'+ri+'" type="number" min="0" step="0.5" inputmode="decimal" value="'+
+          '<span class="who"><select class="t-who" aria-label="Who does this part" data-stage="'+si+'" data-row="'+ri+'">'+tWhoOptions(r)+"</select></span>"+
+          '<span class="cnt"><input class="t-n" aria-label="How many people" data-stage="'+si+'" data-row="'+ri+
+            '" type="number" min="1" max="200" step="1" inputmode="numeric" value="'+
+            (Math.max(1,Math.round(num(r.n))||1))+'"></span>'+
+          '<span class="qty"><input class="t-qty" aria-label="How long" data-stage="'+si+'" data-row="'+ri+'" type="number" min="0" step="0.5" inputmode="decimal" value="'+
             (num(r.qty)||"")+'" placeholder="0"></span>'+
           '<span class="tcost">'+(num(r.qty)?money(rowCost(t,r)):"—")+"</span>"+
           '<button class="tdel" data-del="'+si+"."+ri+'" aria-label="Remove this row">✕</button></div>';
@@ -3519,19 +3576,42 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     return { rows:rows, skipped:skipped, lines:seen, headers:!!head };
   }
 
-  var pFound=null;
+  var pFound=null, pAsCount=false;
+  /* Rows whose bare number could be either reading. A step is only plausible
+     while it is within the level's own ladder, so a 12 beside an EC-05 is a
+     headcount and says so; a 3 is genuinely ambiguous and has to be asked. */
+  function pExpand(rows){
+    if(!pAsCount) return rows;
+    var out=[];
+    rows.forEach(function(r){
+      var n=r.step>1?r.step:1;
+      for(var i=0;i<n;i++){
+        var c={}; for(var k in r) if(Object.prototype.hasOwnProperty.call(r,k)) c[k]=r[k];
+        c.step=0; out.push(c);
+      }
+    });
+    return out;
+  }
   function renderPaste(){
     var f=pFound;
     el("p-result").classList.toggle("hidden",!(f&&f.rows.length));
     if(!f||!f.rows.length) return;
-    var n=f.rows.length;
+    var rows=pExpand(f.rows), n=rows.length;
+    var withStep=0;
+    f.rows.forEach(function(r){ if(r.step) withStep++; });
+    el("p-ambig").classList.toggle("hidden",!withStep);
+    if(withStep) el("p-ambig-txt").textContent=
+      "There is a number beside "+withStep+" of these. On a position listing that is the step; "+
+      "on a headcount sheet it is how many of that classification you have.";
+    el("p-as-step").setAttribute("aria-pressed",pAsCount?"false":"true");
+    el("p-as-count").setAttribute("aria-pressed",pAsCount?"true":"false");
     el("p-count").textContent=n+" position"+(n===1?"":"s")+" found";
     el("p-skip").textContent=f.skipped
       ? f.skipped+" line"+(f.skipped===1?"":"s")+" had no classification in "+
         (f.skipped===1?"it":"them")+" and "+(f.skipped===1?"was":"were")+" left out."
       : (f.headers?"Column headings recognised.":"");
     var titles=el("p-titles").checked;
-    el("p-rows").innerHTML=f.rows.map(function(r){
+    el("p-rows").innerHTML=rows.map(function(r){
       var bits=[];
       if(r.step) bits.push("step "+r.step); else bits.push("step not set");
       if(r.fte!==100) bits.push(r.fte+"% time");
@@ -3985,8 +4065,21 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     var c=state.cc;
     return (c.code?("CC "+c.code):"")+(c.code&&c.name?" · ":"")+(c.name||"")||"Cost centre";
   }
+  /* This used to read "1 April 2026 to 30 March 2027", which invites the
+     reader to conclude a day has gone missing — and a manager who thinks the
+     tool has lost a day stops trusting every other figure on the page.
+
+     Nothing is lost. A year here is however many pay periods you set, each of
+     fourteen days, because that is how a salary is actually paid: 26 x 14 is
+     364, and 26 lots of one twenty-sixth is exactly the published annual rate
+     to the cent. Stretch the span to a calendar 365 and a full-year position
+     begins costing 100.27% of its own salary, which would be a real error
+     rather than a cosmetic one. So the span is described by what it is — a
+     count of pay periods from a start date — and the end date, an artefact of
+     that count rather than a fact about the fiscal year, is not stated as
+     though it were one. */
   function fyText(){
-    return fmtDate(fyStart())+" to "+fmtDate(fyEnd()-DAY)+" · "+nPeriods()+" pay periods";
+    return nPeriods()+" pay periods from "+fmtDate(fyStart());
   }
 
   function buildPrintout(){
@@ -4072,6 +4165,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
   el("t-stages").addEventListener("input",function(e){
     var t=e.target, si=+t.getAttribute("data-stage"), ri=+t.getAttribute("data-row");
     if(t.classList.contains("t-qty")){ tdraft.stages[si].rows[ri].qty=num(t.value); tTouch(); }
+    else if(t.classList.contains("t-n")){
+      tdraft.stages[si].rows[ri].n=Math.max(1,Math.round(num(t.value))||1); tTouch();
+    }
     else if(t.classList.contains("stname")){
       tdraft.stages[si].name=t.value;
       /* Repainting on every keystroke would take the caret with it, so only
@@ -4502,7 +4598,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       el("p-msg").textContent="Paste your roster into the box first.";
       return;
     }
-    pFound=pParse(raw);
+    pFound=pParse(raw); pAsCount=false;
     el("p-msg").textContent=pFound.rows.length?"":
       "No classifications in that. Check the codes look like EC-05 or AS-02, and that the "+
       "classification column is part of what you copied.";
@@ -4513,6 +4609,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
      step more than the moment needs. */
   el("p-box").addEventListener("paste",function(){ setTimeout(pRead,0); });
   el("p-titles").addEventListener("change",renderPaste);
+  el("p-as-step").addEventListener("click",function(){ pAsCount=false; renderPaste(); });
+  el("p-as-count").addEventListener("click",function(){ pAsCount=true; renderPaste(); });
   el("p-clear").addEventListener("click",function(){
     el("p-box").value=""; pFound=null; el("p-msg").textContent=""; renderPaste();
   });
@@ -4520,7 +4618,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     if(!pFound||!pFound.rows.length) return;
     var room=2000-state.positions.length;
     if(room<=0){ el("p-msg").textContent="This roster is already at 2,000 positions, which is the limit."; return; }
-    var rows=pFound.rows.slice(0,room), short=pFound.rows.length>room;
+    var all=pExpand(pFound.rows);
+    var rows=all.slice(0,room), short=all.length>room;
     var titles=el("p-titles").checked, stamp=Date.now().toString(36), unset=0;
     rows.forEach(function(r,i){
       var hourly=isHourly(r.group), banded=isRange(r.group);
@@ -4656,17 +4755,21 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       el("qr-wrap").classList.remove("hidden");
       el("qr-box").innerHTML=""; return;
     }
-    var text=rosterToText();
+    /* It has to be a web address. A camera pointed at a code holding bare
+       text offers to search for it and nothing else — the roster arrived
+       intact and the phone had no idea what to do with it. Costs about forty
+       characters and one QR version; buys the feature working at all. */
+    var text=rosterLink();
     try{
       var q=qrcode(0,"M");
       q.addData(text);
       q.make();
       var n=q.getModuleCount(), cell=Math.max(3,Math.min(7,Math.round(300/n)));
-      el("qr-box").innerHTML=q.createSvgTag({ cellSize:cell, margin:cell*2 });
+      el("qr-box").innerHTML=q.createSvgTag({ cellSize:cell, margin:cell*2, scalable:true });
       el("qr-wrap").classList.remove("hidden");
       el("qr-copy").classList.remove("hidden");
       el("qr-msg").textContent=state.positions.length+" position"+
-        (state.positions.length===1?"":"s")+" · "+text.length+" characters. "+
+        (state.positions.length===1?"":"s")+" · "+rosterToText().length+" characters. "+
         "It is a snapshot — change the roster and show a fresh code. Names are never on it.";
     }catch(e){
       el("qr-wrap").classList.remove("hidden");
