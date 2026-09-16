@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-eHaUacav0EH8gBe/yJzr6nLVOe1yoVNQL3YJitTQkc0=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-JfH8d3T2PmiSsF6MQ170wkuQsavr7CDClOtuWt//lKg=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -1544,7 +1544,7 @@ button.li,button.li *{color:inherit}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v87";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v88";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -3454,18 +3454,20 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     end:/(end|until|leav|depart)/i, title:/(title|job|role|descr)/i,
     name:/(name|incumbent|employee|occupant)/i };
   var P_STATUS=/^(filled|vacant|active|occupied|staffed|indeterminate|term|acting|casual|student|n\/?a|tbd|-|—)$/i;
-  var P_DATE=/\b(\d{4}-\d{1,2}-\d{1,2}|\d{1,2}\/\d{1,2}\/\d{2,4})\b/;
+  /* Excel writes the date in the machine's locale, so 1 August 2018 arrives
+     as 2018-08-01 here and 01-08-2018 there. Only the first was read, and a
+     whole column of start dates went quietly missing. */
+  var P_DATE=/\b(\d{4}-\d{1,2}-\d{1,2}|\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})\b/;
 
   function pDate(s){
     var m=P_DATE.exec(String(s||"")); if(!m) return "";
-    var t=m[1];
-    if(t.indexOf("-")>0){
-      var a=t.split("-");
-      return a[0]+"-"+("0"+a[1]).slice(-2)+"-"+("0"+a[2]).slice(-2);
-    }
-    /* Ambiguous by nature. Day-first is what the public service writes. */
-    var b=t.split("/"), y=b[2].length===2?("20"+b[2]):b[2];
-    return y+"-"+("0"+b[1]).slice(-2)+"-"+("0"+b[0]).slice(-2);
+    var a=m[1].split(/[-\/]/);
+    /* Year first when it is written first. Otherwise day first, which is
+       what the public service writes and what Excel hands over in a
+       Canadian or British locale — 01-08-2018 is the first of August. */
+    if(a[0].length===4) return a[0]+"-"+("0"+a[1]).slice(-2)+"-"+("0"+a[2]).slice(-2);
+    var y=a[2].length===2?("20"+a[2]):a[2];
+    return y+"-"+("0"+a[1]).slice(-2)+"-"+("0"+a[0]).slice(-2);
   }
 
   /* Headers, when the paste has them, remove every remaining guess — and are
@@ -3511,7 +3513,33 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       if(head.fte!=null) setFte(cells[head.fte]);
       if(head.start!=null) r.start=pDate(cells[head.start]);
       if(head.end!=null) r.end=pDate(cells[head.end]);
-      if(head.title!=null) r.title=String(cells[head.title]||"").trim();
+      /* A column of text is the job title only when it is not the column the
+         classification came out of. A sheet that files EC-01 under "Title"
+         would otherwise give every position the title "EC-1". */
+      if(head.title!=null&&head.title!==at) r.title=String(cells[head.title]||"").trim();
+      /* Nothing in the headings named the step, so read it the way a sheet
+         with no headings is read: a bare number, in a column the headings
+         did not already spend on something else.
+
+         This is the case that matters. A heading is a word somebody typed;
+         a classification is checkable against the published table. When the
+         two disagree the table wins, and the column the heading called
+         "Level" is then free to be what it actually holds — which, on a
+         sheet that files the classification under "Title", is the step. */
+      if(!r.step){
+        var spent={};
+        ["step","fte","start","end","title","name"].forEach(function(k){
+          if(head[k]!=null) spent[head[k]]=1;
+        });
+        spent[at]=1;
+        for(var h=0;h<cells.length;h++){
+          if(spent[h]) continue;
+          if(/^\d{1,2}$/.test(String(cells[h]||"").trim())){
+            setStep(cells[h]);
+            if(r.step) break;
+          }
+        }
+      }
     } else if(tabbed){
       for(var j=0;j<cells.length;j++){
         if(j===at) continue;
@@ -3556,12 +3584,21 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         if(!cs.some(function(c){ return !!pLookup(c); })) head=pHeaders(cs);
       }
     }
-    var rows=[], skipped=0, seen=0;
+    var rows=[], skipped=0, seen=0, nearly=[];
     lines.forEach(function(ln){
       if(!ln.replace(/[\s\t]/g,"")) return;
       seen++;
       var r=pRow(ln,tabbed,head);
-      if(r) rows.push(r); else skipped++;
+      if(r){ rows.push(r); return; }
+      skipped++;
+      /* A cell shaped like a classification that is not one is a mistake in
+         the sheet rather than a header row — FI-5, when the FI group stops
+         at FI-04. Counting it with the header rows and saying nothing is how
+         somebody ends up with a team one position short and no idea why. */
+      (tabbed?ln.split("\t"):ln.split(/\s+/)).forEach(function(c){
+        var t=String(c||"").trim();
+        if(/^[A-Za-z]{2,6}[-\s]?\d{1,2}$/.test(t)&&!pLookup(t)&&nearly.indexOf(t)<0) nearly.push(t);
+      });
     });
     /* A single line holding several codes is a list somebody typed or
        dictated, not a table — every code in it is a position of its own. */
@@ -3571,9 +3608,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         var g=pLookup(t); if(g) all.push({ group:g.g, level:g.l, step:0, fte:100,
           start:"", end:"", mode:"filled", title:"", num:"" });
       });
-      if(all.length>rows.length){ rows=all; skipped=0; seen=all.length; }
+      if(all.length>rows.length){ rows=all; skipped=0; seen=all.length; nearly=[]; }
     }
-    return { rows:rows, skipped:skipped, lines:seen, headers:!!head };
+    return { rows:rows, skipped:skipped, lines:seen, headers:!!head, nearly:nearly };
   }
 
   var pFound=null, pAsCount=false;
@@ -3606,17 +3643,30 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     el("p-as-step").setAttribute("aria-pressed",pAsCount?"false":"true");
     el("p-as-count").setAttribute("aria-pressed",pAsCount?"true":"false");
     el("p-count").textContent=n+" position"+(n===1?"":"s")+" found";
-    el("p-skip").textContent=f.skipped
+    var skipMsg=f.skipped
       ? f.skipped+" line"+(f.skipped===1?"":"s")+" had no classification in "+
         (f.skipped===1?"it":"them")+" and "+(f.skipped===1?"was":"were")+" left out."
       : (f.headers?"Column headings recognised.":"");
+    /* Named, because this one is worth going back to the sheet about. */
+    if(f.nearly&&f.nearly.length) skipMsg+=(skipMsg?" ":"")+
+      (f.nearly.length===1?"One of them reads like a classification but is not in the published tables: "
+                          :"Some of them read like classifications but are not in the published tables: ")+
+      f.nearly.join(", ")+".";
+    el("p-skip").textContent=skipMsg;
     var titles=el("p-titles").checked;
     el("p-rows").innerHTML=rows.map(function(r){
       var bits=[];
       if(r.step) bits.push("step "+r.step); else bits.push("step not set");
       if(r.fte!==100) bits.push(r.fte+"% time");
       if(r.mode==="vacant") bits.push("vacant");
-      if(r.start) bits.push("from "+shortDate(toTs(r.start)));
+      /* A start date already behind the fiscal year is a hire date off the
+         sheet, not an arrival. "from Aug 1" would read as this coming August
+         and a part year of pay; it is neither. The position costs the whole
+         year either way, so this says the year and says since. */
+      if(r.start){
+        var st=toTs(r.start);
+        bits.push(st<fyStart() ? "since "+r.start.slice(0,4) : "from "+shortDate(st));
+      }
       return '<div class="li" style="padding:9px 14px"><span class="grow stack g6">'+
         '<span style="font-size:13.5px;font-weight:600">'+esc(r.level)+
         (titles&&r.title?' <span style="font-weight:400;color:var(--muted)">· '+esc(r.title)+"</span>":"")+
