@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-WVCdJUXFUbD7Hw/mpK8g8DNZKMXuX0Ay5BY/laGHgzA=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; img-src 'self' data:; font-src https://fonts.gstatic.com; style-src 'unsafe-inline' https://fonts.googleapis.com; script-src 'sha256-eHaUacav0EH8gBe/yJzr6nLVOe1yoVNQL3YJitTQkc0=' 'sha256-hix5n22vBGWLfCtpJGMy93MVwlY9pCtgAGOLI8PMoXQ='; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; manifest-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Salary planning tool for public sector managers. Plan a cost centre year from its complement, by pay period.">
 <meta name="theme-color" content="#F4F5FA" media="(prefers-color-scheme: light)">
@@ -618,11 +618,11 @@ button.li,button.li *{color:inherit}
         <div class="stack g6">
           <div class="eyebrow" style="color:var(--base)">Start small</div>
           <div class="introp">One position, or one standing meeting. Both are on the list on the
-            left, both take a minute, and neither needs a cost centre or a complement.</div>
+            left, both take a minute, and neither needs a cost centre or a team built.</div>
         </div>
         <div class="stack g6">
           <div class="eyebrow" style="color:var(--base)">Or the whole team</div>
-          <div class="introp">Build your complement once and every position is costed to the day
+          <div class="introp">Build your team once and every position is costed to the day
             — vacancies, step increases, part-time, people arriving and leaving — against the
             budget you were given.</div>
         </div>
@@ -649,7 +649,7 @@ button.li,button.li *{color:inherit}
          process to find out the app could already have answered it. -->
     <div class="card pad row" id="quick-tools" style="gap:10px;flex-wrap:wrap;border-left:4px solid var(--base)">
       <span class="note" style="flex:1 1 220px">Got one quick question? Neither of these needs a
-        cost centre, a complement, or anything saved.</span>
+        cost centre, a team, or anything saved.</span>
       <button class="btn-quiet" id="q-jump">Cost a position</button>
       <button class="btn-quiet" id="t-jump">Cost a task</button>
     </div>
@@ -702,7 +702,7 @@ button.li,button.li *{color:inherit}
           <div class="stack g6">
             <div style="font-size:13px;font-weight:600">Save a copy</div>
             <div class="note">Nothing is uploaded, so this is your only backup — and the way to
-              move a roster to another device.</div>
+              move it to another device.</div>
           </div>
           <label style="display:flex;gap:9px;align-items:center;cursor:pointer">
             <input type="checkbox" id="x-names" aria-label="Include the names you gave positions"
@@ -711,7 +711,7 @@ button.li,button.li *{color:inherit}
             <span class="note" style="color:var(--ink-2)">Include the names you gave positions</span>
           </label>
           <textarea id="x-box" rows="3" spellcheck="false" readonly aria-label="Your saved copy"
-            placeholder="Your roster appears here"
+            placeholder="Your team appears here"
             style="width:100%;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
                    background:var(--sunk);color:var(--ink-2);border:1px solid var(--rule);
                    border-radius:9px;padding:10px;resize:vertical"></textarea>
@@ -783,7 +783,7 @@ button.li,button.li *{color:inherit}
   <!-- COMPLEMENT -->
   <section id="p-roster" class="stack g18 hidden">
     <div class="row">
-      <h1 class="h-title">Build your complement</h1>
+      <h1 class="h-title">Build your team</h1>
       <span class="num" style="font-size:11px;color:var(--muted)" id="roster-count"></span>
     </div>
     <a class="pghelp" href="help.html#complement">How to use it</a>
@@ -900,7 +900,7 @@ button.li,button.li *{color:inherit}
           photo, select the text on the picture, and paste that.</div>
 
         <textarea id="p-box" rows="6" spellcheck="false"
-          aria-label="Paste your roster here"
+          aria-label="Paste your positions here"
           placeholder="EC-05&#9;4&#10;EC-04&#9;2&#10;AS-02&#9;3"
           style="width:100%;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;
                  border:1px solid var(--rule);border-radius:10px;background:var(--surface);
@@ -1059,7 +1059,7 @@ button.li,button.li *{color:inherit}
           <div class="stack g10">
             <div class="row"><span style="font-size:13.5px;color:var(--ink-2)">Salary budget</span>
               <span class="num" style="font-size:13.5px" id="e-budget">—</span></div>
-            <div class="row"><span style="font-size:13.5px;color:var(--ink-2)">Base salary, from your complement</span>
+            <div class="row"><span style="font-size:13.5px;color:var(--ink-2)">Base salary, from your team</span>
               <span class="num" style="font-size:13.5px" id="e-base">—</span></div>
             <div class="rule"></div>
             <div class="row"><span style="font-size:13.5px;font-weight:600" id="e-room-lab">Left for estimates</span>
@@ -1072,7 +1072,7 @@ button.li,button.li *{color:inherit}
       <div class="est-main card pad stack g14">
         <div class="stack g6">
           <div class="eyebrow">What you expect on top of base pay</div>
-          <div class="note">Your estimate for the whole year. Base salary is costed exactly from your complement; these are the judgement calls.</div>
+          <div class="note">Your estimate for the whole year. Base salary is costed exactly from your team; these are the judgement calls.</div>
         </div>
         <div class="stack g14" id="est-list"></div>
         <div class="rule"></div>
@@ -1195,7 +1195,7 @@ button.li,button.li *{color:inherit}
              want to do their own arithmetic to it. -->
         <div class="card pad stack g10">
           <div style="font-size:13px;font-weight:600">Take it with you</div>
-          <div class="note">The forecast and the whole complement, as a document you can hand
+          <div class="note">The forecast and the whole team, as a document you can hand
             round or keep with the file.</div>
           <div class="row" style="gap:9px;justify-content:flex-start;flex-wrap:wrap">
             <button class="btn-ghost btn-sm" id="x-cost" style="width:auto;padding:0 16px">Cost a position</button>
@@ -1222,7 +1222,7 @@ button.li,button.li *{color:inherit}
   <section id="p-cost" class="stack g18 hidden">
     <div>
       <h1 class="h-title">Cost a position</h1>
-      <div class="sub">No cost centre, no roster, nothing saved. Pick a job, get the number.</div>
+      <div class="sub">No cost centre, nothing to build, nothing saved. Pick a position, get the number.</div>
       <a class="pghelp" href="help.html#cost">How this works</a>
     </div>
 
@@ -1264,7 +1264,7 @@ button.li,button.li *{color:inherit}
         <div class="cal-lines" id="q-cover"></div>
       </div>
       <div class="qfoot">
-        <button class="btn-primary" id="q-add" style="width:auto;padding:0 20px">Add this to a complement</button>
+        <button class="btn-primary" id="q-add" style="width:auto;padding:0 20px">Add this to your team</button>
         <span class="note" style="flex:1 1 200px">Nothing here is saved unless you add it.</span>
       </div>
     </div>
@@ -1281,7 +1281,7 @@ button.li,button.li *{color:inherit}
   <section id="p-task" class="stack g18 hidden">
     <div>
       <h1 class="h-title">Cost a task</h1>
-      <div class="sub">What a piece of recurring work actually costs. No roster needed.</div>
+      <div class="sub">What a piece of recurring work actually costs. Nothing to set up.</div>
       <a class="pghelp" href="help.html#task">How this works</a>
     </div>
 
@@ -1468,7 +1468,7 @@ button.li,button.li *{color:inherit}
           <button class="btn-ghost" id="s-clear">Discard all</button>
           <button class="btn-primary full" id="s-apply">Make these real</button>
         </div>
-        <div class="note">Making them real writes the changes onto your complement. Nothing is saved until you do.</div>
+        <div class="note">Making them real writes the changes onto your team. Nothing is saved until you do.</div>
       </div>
     </div>
   </section>
@@ -1519,7 +1519,7 @@ button.li,button.li *{color:inherit}
        numbers as an instruction rather than as one job with five parts. -->
   <div class="utilsep railtop" aria-hidden="true"><span>Cost a team</span></div>
   <button class="tab" role="tab" data-tab="setup" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-2.9 1.2V21a2 2 0 11-4 0v-.1A1.7 1.7 0 007 19.4a1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1A1.7 1.7 0 003 15a2 2 0 010-4 1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1A1.7 1.7 0 009 4.6 2 2 0 0111 3a2 2 0 014 0 1.7 1.7 0 001.1 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V11a2 2 0 010 4z"/></svg><span class="tlab"><i class="stepno">Step 1</i><span class="t-short">Cost centre</span><span class="t-full">Set up your cost centre</span></span></button>
-  <button class="tab" role="tab" data-tab="roster" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8"/><path d="M8 13h8"/><path d="M8 17h4"/></svg><span class="tlab"><i class="stepno">Step 2</i><span class="t-short">Complement</span><span class="t-full">Build your complement</span></span></button>
+  <button class="tab" role="tab" data-tab="roster" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8"/><path d="M8 13h8"/><path d="M8 17h4"/></svg><span class="tlab"><i class="stepno">Step 2</i><span class="t-short">Team</span><span class="t-full">Build your team</span></span></button>
   <button class="tab" role="tab" data-tab="estimates" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2.4"/><path d="M9 7h6"/><path d="M9 11.5h.01"/><path d="M12 11.5h.01"/><path d="M15 11.5h.01"/><path d="M9 15.5h.01"/><path d="M12 15.5h.01"/><path d="M15 15.5v3.5"/><path d="M9 19h3.5"/></svg><span class="tlab"><i class="stepno">Step 3</i><span class="t-short">Estimates</span><span class="t-full">Add your estimates</span></span></button>
   <button class="tab" role="tab" data-tab="forecast" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 5-8"/><path d="M3 21h18"/></svg><span class="tlab"><i class="stepno">Step 4</i><span class="t-short">Forecast</span><span class="t-full">Your forecast</span></span></button>
   <button class="tab" role="tab" data-tab="scenario" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3-3"/><path d="M20 16H7l3 3"/></svg><span class="tlab"><i class="stepno">Step 5</i><span class="t-short">What if</span><span class="t-full">Test a change</span></span></button>
@@ -1544,7 +1544,7 @@ button.li,button.li *{color:inherit}
 (function () {
   "use strict";
   var DAY = 86400000, KEY = "complement.v3";
-  var APP_VERSION = "v86";   // keep in step with CACHE_VERSION in sw.js
+  var APP_VERSION = "v87";   // keep in step with CACHE_VERSION in sw.js
 
   /* Put a LinkedIn (or any) URL here and every "Kiska Management Consultants"
      in the app becomes a link to it. Leave it empty and they stay plain text —
@@ -1974,7 +1974,7 @@ button.li,button.li *{color:inherit}
   }
   var ADVICE = {
     bigSurplus:{ tone:"est", label:"Large surplus",
-      early:{ t:"You are not going to spend this.", m:"A gap this wide before the summer is rarely timing. It usually means vacancies nobody intends to fill, or a budget built on a complement you do not actually have.",
+      early:{ t:"You are not going to spend this.", m:"A gap this wide before the summer is rarely timing. It usually means vacancies nobody intends to fill, or a budget built on a team you do not actually have.",
         a:["Check that every vacancy has a start date somebody believes in.","Ask whether the funded establishment matches the plan you were given.","Raise it with Finance now — a surplus you declare in June is a decision, one they find in February is a problem."], q:"Why was the budget set this high?" },
       mid:{ t:"Decide what happens to this, now.", m:"Anything not posted by now will not have someone in the chair before March. From here the surplus is largely locked in.",
         a:["Decide which vacancies you are genuinely filling this year, and close the rest.","Put the money against something concrete on the What if tab.","Start the transfer conversation — approvals take longer than the spending does."], q:"What is driving this, and what are you doing with it?" },
@@ -2014,7 +2014,7 @@ button.li,button.li *{color:inherit}
       end:{ t:"Over budget at year end.", m:"The task now is a clear, defensible explanation.", a:["Write it while you still remember the detail."], q:"What happened?" } },
     bigOver:{ tone:"bad", label:"Serious overrun",
       early:{ t:"Check the numbers before you do anything else.", m:"An overrun this large is more often a data problem than a real one — a salary at the wrong level, a vacancy marked filled, hours set wrong.",
-        a:["Check the largest positions on your complement first.","Check your estimates are annual figures, not monthly.","If it survives that, escalate today."], q:"Is this real?" },
+        a:["Check the largest positions on your team first.","Check your estimates are annual figures, not monthly.","If it survives that, escalate today."], q:"Is this real?" },
       mid:{ t:"Check the numbers, then escalate today.", m:"If the figure is right, this is beyond what a cost centre absorbs on its own.",
         a:["Rule out a data error first.","Then tell your director and Finance the same day.","Bring options, not just the number."], q:"Is this real, and what do you need?" },
       late:{ t:"Escalate immediately.", m:"At this size and this late, this is a departmental problem rather than a cost centre one.",
@@ -2025,7 +2025,7 @@ button.li,button.li *{color:inherit}
   function financeNote(f){
     var cc=state.cc, now=new Date(), out=[];
     out.push((cc.code?"CC "+cc.code+" — ":"")+(cc.name||"Cost centre")+" — salary plan as at "+MONTHS[now.getUTCMonth()]+" "+now.getUTCFullYear()+".");
-    out.push("Salary budget "+money(f.budget)+". Base salary from the complement "+money(f.base)+
+    out.push("Salary budget "+money(f.budget)+". Base salary from the team "+money(f.base)+
       ", plus "+money(f.est)+" of estimated other salary costs. Projected "+money(f.projected)+
       " — "+(f.variance>=0?"a surplus of ":"an overrun of ")+money(Math.abs(f.variance))+
       " ("+Math.abs(f.variance/f.budget*100).toFixed(1)+"%).");
@@ -2095,7 +2095,7 @@ button.li,button.li *{color:inherit}
     var ended=Date.now()>fyEnd()&&state.positions.length>0;
     el("stale").classList.toggle("hidden",!ended);
     if(ended) el("stale-txt").textContent="This forecast covers a year that ended on "+fmtDate(fyEnd()-DAY)+
-      ". Carry the complement you have already built into the new year rather than typing it again.";
+      ". Carry the team you have already built into the new year rather than typing it again.";
 
     var over=f.variance<0;
     el("var-label").textContent=over?"Projected overrun":"Projected surplus";
@@ -2117,7 +2117,7 @@ button.li,button.li *{color:inherit}
     el("lg-dot3").style.background="rgba(0,0,0,.3)";
     el("lg-rest").textContent=money(Math.abs(f.variance));
 
-    var rows=[["Salary budget",f.budget,""],["Base salary, from your complement",-f.base,"Costed by pay period from the published tables"]];
+    var rows=[["Salary budget",f.budget,""],["Base salary, from your team",-f.base,"Costed by pay period from the published tables"]];
     EST_LINES.forEach(function(L){
       var v=num(state.estimates[L.id]);
       if(v) rows.push([L.name,-v,"Your estimate for the year"]);
@@ -2580,8 +2580,8 @@ button.li,button.li *{color:inherit}
     el("e-room").style.color=f.budget?(over?"var(--bad)":"var(--good)"):"var(--muted)";
     var n;
     if(!f.budget) n="Set a salary budget on the Setup tab and this will show how much room your estimates have.";
-    else if(!state.positions.length) n="Add your positions on the Complement tab first \u2014 base pay is most of the year, and this figure is not meaningful without it.";
-    else if(over) n="Your complement already costs more than the budget. Anything you enter here adds to the overrun.";
+    else if(!state.positions.length) n="Add your positions on the Team tab first \u2014 base pay is most of the year, and this figure is not meaningful without it.";
+    else if(over) n="Your team already costs more than the budget. Anything you enter here adds to the overrun.";
     else n="Your estimates currently use "+(room?Math.round(estTotal()/room*100):0)+"% of that room.";
     el("e-note").textContent=n;
   }
@@ -2736,9 +2736,9 @@ button.li,button.li *{color:inherit}
     if(!el("roll-card")) return;
     var go=el("roll-go"), what=el("roll-what");
     if(!state.positions.length){
-      el("roll-lead").textContent="Next April this carries your complement into the new year — "+
+      el("roll-lead").textContent="Next April this carries your team into the new year — "+
         "increments applied, dated changes folded in — instead of making you type it all again. "+
-        "Build your complement first.";
+        "Build your team first.";
       what.textContent=""; go.classList.add("hidden"); return;
     }
     go.classList.remove("hidden");
@@ -2961,7 +2961,7 @@ button.li,button.li *{color:inherit}
       eyebrow:"Step 1 · Set up your cost centre",
       cap:"Start with what you were given. Your budget, and when your fiscal year begins — everything else is measured against this." },
     { tab:"roster",    sel:"#roster-list",
-      eyebrow:"Step 2 · Build your complement",
+      eyebrow:"Step 2 · Build your team",
       cap:"Add every position you are responsible for, filled or vacant. Pick the group, level and step; the published rate fills itself in." },
     { tab:"estimates", sel:"#e-room",
       eyebrow:"Step 3 · Add your estimates",
@@ -2971,7 +2971,7 @@ button.li,button.li *{color:inherit}
       cap:"Where the year lands, and what to do about it. This is the screen you will live on." },
     { tab:"scenario",  sel:"#move-add",
       eyebrow:"Step 5 · Test a change",
-      cap:"Try a change before you make it — hold a vacancy, move a start date — without touching your real complement." }
+      cap:"Try a change before you make it — hold a vacancy, move a start date — without touching your real team." }
   ];
 
   var tourAt = -1, tourTimer = null, tourSaved = null, tourWasDemo = false;
@@ -3194,7 +3194,7 @@ button.li,button.li *{color:inherit}
   function tWhoOptions(r){
     var o="", any=false;
     if(state.positions.length){
-      o+='<optgroup label="Your complement">';
+      o+='<optgroup label="Your team">';
       state.positions.forEach(function(p){
         var nm=nickOf(p.id)||p.title||p.num||"Position";
         o+='<option value="p:'+esc(p.id)+'"'+(r.pid===p.id?" selected":"")+">"+
@@ -4089,7 +4089,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
     h+="<h2>Where the year lands</h2><table><tbody>"+
        '<tr><td>Salary budget</td><td class="r">'+money(f.budget)+"</td></tr>"+
-       '<tr><td>Base salary, from the complement</td><td class="r">−'+money(f.base).replace("$","$")+"</td></tr>";
+       '<tr><td>Base salary, from the team</td><td class="r">−'+money(f.base).replace("$","$")+"</td></tr>";
     EST_LINES.forEach(function(L){
       var v=num((state.estimates||{})[L.id]);
       if(v) h+="<tr><td>"+esc(L.name)+'</td><td class="r">−'+money(v)+"</td></tr>";
@@ -4464,7 +4464,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
   }
   function doSheet(){
     if(!state.positions.length){ el("out-msg").textContent="Add some positions first."; return; }
-    var name="onstrength-"+(state.cc.code||"complement")+"-"+toIso(Date.now())+".xlsx";
+    var name="onstrength-"+(state.cc.code||"team")+"-"+toIso(Date.now())+".xlsx";
     try{
       deliver(buildXlsx(),name);
     }catch(e){
@@ -4595,7 +4595,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     var raw=el("p-box").value;
     if(!raw.trim()){
       pFound=null; renderPaste();
-      el("p-msg").textContent="Paste your roster into the box first.";
+      el("p-msg").textContent="Paste your positions into the box first.";
       return;
     }
     pFound=pParse(raw); pAsCount=false;
@@ -4617,7 +4617,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
   el("p-add").addEventListener("click",function(){
     if(!pFound||!pFound.rows.length) return;
     var room=2000-state.positions.length;
-    if(room<=0){ el("p-msg").textContent="This roster is already at 2,000 positions, which is the limit."; return; }
+    if(room<=0){ el("p-msg").textContent="Your team is already at 2,000 positions, which is the limit."; return; }
     var all=pExpand(pFound.rows);
     var rows=all.slice(0,room), short=all.length>room;
     var titles=el("p-titles").checked, stamp=Date.now().toString(36), unset=0;
@@ -4640,7 +4640,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     save(); renderAll();
     el("p-box").value=""; pFound=null; renderPaste();
     el("p-msg").textContent=rows.length+" position"+(rows.length===1?"":"s")+" added"+
-      (short?" — that filled the roster to its 2,000 limit":"")+
+      (short?" — that filled your team to its 2,000 limit":"")+
       (unset?". "+unset+" of them have no step, so they are costed at the middle of their level until you set them.":".");
   });
   el("b-group").addEventListener("change",function(){
@@ -4658,7 +4658,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     var g=el("b-group").value, l=el("b-level").value, st=stepValue("b-step");
     if(!hasLevel(g,l)){ el("b-msg").textContent="Pick a group and a level first."; return; }
     var n=bulkCount(), room=2000-state.positions.length;
-    if(room<=0){ el("b-msg").textContent="This roster is already at 2,000 positions, which is the limit."; return; }
+    if(room<=0){ el("b-msg").textContent="Your team is already at 2,000 positions, which is the limit."; return; }
     var short=n>room; if(short) n=room;
     var banded=isRange(g), hourly=isHourly(g), rate=rateFor(g,l,banded?1:st)||0;
     var unsure=!banded&&!st;
@@ -4678,7 +4678,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     /* Left open on purpose: a complement is rarely one classification all the
        way down, and the next block is usually the next thing wanted. */
     el("b-msg").textContent=n+" "+l+" position"+(n===1?"":"s")+" added"+
-      (short?" — that filled the roster to its 2,000 limit":"")+
+      (short?" — that filled your team to its 2,000 limit":"")+
       (unsure?". Set their steps now while your report is open, or add another block."
              :". Add another block, or close this and start tailoring them.");
     el("b-steps-now").classList.toggle("hidden",!unsure);
@@ -4751,7 +4751,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
      whole thing about the same size on screen and comfortable to scan. */
   function qrShow(){
     if(!state.positions.length){
-      el("qr-msg").textContent="Build your complement first — there is nothing to send yet.";
+      el("qr-msg").textContent="Build your team first — there is nothing to send yet.";
       el("qr-wrap").classList.remove("hidden");
       el("qr-box").innerHTML=""; return;
     }
@@ -4770,11 +4770,11 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       el("qr-copy").classList.remove("hidden");
       el("qr-msg").textContent=state.positions.length+" position"+
         (state.positions.length===1?"":"s")+" · "+rosterToText().length+" characters. "+
-        "It is a snapshot — change the roster and show a fresh code. Names are never on it.";
+        "It is a snapshot — change your team and show a fresh code. Names are never on it.";
     }catch(e){
       el("qr-wrap").classList.remove("hidden");
       el("qr-box").innerHTML="";
-      el("qr-msg").textContent="This roster is too big for one code. Use Save a copy instead.";
+      el("qr-msg").textContent="Your team is too big for one code. Use Save a copy instead.";
     }
   }
   el("qr-show").addEventListener("click",qrShow);
@@ -4859,7 +4859,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       b.dataset.armed="1";
       renderRoll();                       // now that it is armed, show what it will do
       b.textContent="Roll forward, replacing this year";
-      el("roll-msg").textContent="This replaces the roster on screen with next year's. If you have "+
+      el("roll-msg").textContent="This replaces the team on screen with next year's. If you have "+
         "not saved a copy of this year, do that first — there is no undo.";
       setTimeout(function(){
         if(el("roll-go").dataset.armed==="1"){
@@ -4905,7 +4905,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     /* Replacing a real roster is the same act as erasing one, and this button
        sits directly above Erase. It arms the same way. */
     if(has&&b.dataset.armed!=="1"){
-      b.dataset.armed="1"; b.textContent="Click again — this replaces your roster";
+      b.dataset.armed="1"; b.textContent="Click again — this replaces your team";
       setTimeout(function(){ b.dataset.armed="0"; b.textContent="Load an example cost centre"; },3500);
       return;
     }
@@ -4992,7 +4992,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
   if(loadFailed){
     var warn=document.createElement("div");
     warn.className="demobar";
-    warn.innerHTML='<span><b>Your saved roster could not be read</b> and has been set aside '+
+    warn.innerHTML='<span><b>Your saved data could not be read</b> and has been set aside '+
       'rather than deleted. If you have a saved copy, restore it below.</span>';
     document.body.insertBefore(warn,document.body.firstChild);
   }
