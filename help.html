@@ -17,9 +17,9 @@
 <style>
 :root{
   --ground:#F4F5FA; --surface:#FFFFFF; --sunk:#F7F8FC;
-  --ink:#171B2E; --ink-2:#414863; --muted:#7B819E; --rule:#E6E8F2;
+  --ink:#171B2E; --ink-2:#414863; --muted:#616785; --rule:#E6E8F2;
   --base:#1D6E8E; --base-soft:#E3F0F6; --on-base:#FFFFFF;
-  --est:#B87A1E; --est-soft:#FBF0DC; --good:#12805C; --bad:#C2503A;
+  --est:#B87A1E; --est-ink:#8E5E17; --est-soft:#FBF0DC; --good:#117756; --bad:#AF4834;
   --shadow-sm:0 1px 2px rgba(17,26,33,.04),0 1px 3px rgba(17,26,33,.05);
   --shadow:0 1px 2px rgba(17,26,33,.05),0 8px 24px -12px rgba(17,26,33,.22);
   --ring:rgba(29,110,142,.24); --r-sm:12px; --r-md:20px;
@@ -27,9 +27,9 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --ground:#101322; --surface:#191D30; --sunk:#141827;
-    --ink:#EAECF7; --ink-2:#BCC1DA; --muted:#8B92B4; --rule:#2A3050;
+    --ink:#EAECF7; --ink-2:#BCC1DA; --muted:#9299B9; --rule:#2A3050;
     --base:#54AECD; --base-soft:#16334A; --on-base:#08131A;
-    --est:#E4B061; --est-soft:#33290F; --good:#4FC79A; --bad:#E28A72;
+    --est:#E4B061; --est-ink:#E4B061; --est-soft:#33290F; --good:#4FC79A; --bad:#E28A72;
   --shadow-sm:0 1px 2px rgba(0,0,0,.28),0 1px 3px rgba(0,0,0,.34);
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px -14px rgba(0,0,0,.7);
   --ring:rgba(79,163,196,.3);
@@ -37,9 +37,9 @@
 }
 :root[data-theme="dark"]{
   --ground:#101322; --surface:#191D30; --sunk:#141827;
-  --ink:#EAECF7; --ink-2:#BCC1DA; --muted:#8B92B4; --rule:#2A3050;
+  --ink:#EAECF7; --ink-2:#BCC1DA; --muted:#9299B9; --rule:#2A3050;
   --base:#54AECD; --base-soft:#16334A; --on-base:#08131A;
-  --est:#E4B061; --est-soft:#33290F; --good:#4FC79A; --bad:#E28A72;
+  --est:#E4B061; --est-ink:#E4B061; --est-soft:#33290F; --good:#4FC79A; --bad:#E28A72;
   --shadow-sm:0 1px 2px rgba(0,0,0,.28),0 1px 3px rgba(0,0,0,.34);
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px -14px rgba(0,0,0,.7);
   --ring:rgba(79,163,196,.3);
@@ -112,7 +112,7 @@ li{margin-bottom:8px}
 .tip p,.warn p{font-size:14.5px}
 .tip .lab,.warn .lab{font-size:10.5px;font-weight:700;letter-spacing:1.1px;
   text-transform:uppercase;display:block;margin-bottom:6px}
-.tip .lab{color:var(--base)} .warn .lab{color:var(--est)}
+.tip .lab{color:var(--base)} .warn .lab{color:var(--est-ink)}
 
 .shot{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r-md);
   padding:10px;max-width:330px;margin:20px 0;box-shadow:var(--shadow)}
@@ -501,7 +501,7 @@ footer .kmc{font-weight:600;color:var(--ink-2);text-decoration:none}
 
         <h3>The bar</h3>
         <p>Your budget, filled in. <span style="color:var(--base);font-weight:600">Teal</span> is
-          base salary, <span style="color:var(--est);font-weight:600">amber</span> is your
+          base salary, <span style="color:var(--est-ink);font-weight:600">amber</span> is your
           estimates, and the pale remainder is unspent. If the plan goes over, the amber turns
           red and runs past the end.</p>
 
@@ -642,7 +642,7 @@ footer .kmc{font-weight:600;color:var(--ink-2);text-decoration:none}
 
         <p>It shows you what it will do — how many increments, how many vacancies, what base
           salary comes out — before you commit, and it replaces what is on screen when you do.
-          Save a copy first if this year still matters.</p>
+          Create a backup first if this year still matters.</p>
 
         <div class="warn">
           <span class="lab">What it will not guess</span>
@@ -702,12 +702,12 @@ footer .kmc{font-weight:600;color:var(--ink-2);text-decoration:none}
             pops up. Nothing is sent anywhere — your positions are in the pattern itself, and your
             phone reads it off the screen. It is a snapshot, so show a fresh code after you
             change something, and names are never on it. For everything else — the budget, your
-            estimates — <strong>Save a copy</strong> produces one line of text and
-            <strong>Restore a copy</strong> reads it back. Restore only a copy you saved
+            estimates — <strong>Create a backup</strong> produces one line of text and
+            <strong>Restore from a backup</strong> reads it back. Restore only a backup you made
             yourself; this is the one place the tool accepts data it did not create.</li>
           <li><strong>Clearing your browser data clears this too</strong> — as does a private
             window, or an organisation that wipes browser storage on a schedule. For anything
-            you'd hate to retype, save a copy.</li>
+            you'd hate to retype, make a backup.</li>
           <li><strong>Your device lock is the only lock.</strong> There is no password on what
             you save, so don't use Onstrength on a shared machine — it stays in that browser for
             the next person.</li>

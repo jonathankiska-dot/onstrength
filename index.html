@@ -37,9 +37,9 @@
 <style>
 :root{
   --ground:#F4F5FA; --surface:#FFFFFF; --surface-2:#E8EAF3; --sunk:#F7F8FC;
-  --ink:#171B2E; --ink-2:#414863; --muted:#7B819E; --rule:#E6E8F2;
+  --ink:#171B2E; --ink-2:#414863; --muted:#616785; --rule:#E6E8F2;
   --base:#1D6E8E; --base-soft:#E3F0F6; --on-base:#FFFFFF;
-  --est:#B87A1E; --good:#12805C;
+  --est:#B87A1E; --good:#117756;
   --shadow-sm:0 1px 2px rgba(17,26,33,.04),0 1px 3px rgba(17,26,33,.05);
   --shadow:0 1px 2px rgba(17,26,33,.05),0 8px 24px -12px rgba(17,26,33,.22);
   --ring:rgba(29,110,142,.24); --r-sm:12px; --r-md:20px;
@@ -47,7 +47,7 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --ground:#101322; --surface:#191D30; --surface-2:#262C45; --sunk:#141827;
-    --ink:#EAECF7; --ink-2:#BCC1DA; --muted:#8B92B4; --rule:#2A3050;
+    --ink:#EAECF7; --ink-2:#BCC1DA; --muted:#9299B9; --rule:#2A3050;
     --base:#54AECD; --base-soft:#16334A; --on-base:#08131A;
     --est:#E4B061; --good:#4FC79A;
   --shadow-sm:0 1px 2px rgba(0,0,0,.28),0 1px 3px rgba(0,0,0,.34);
@@ -57,7 +57,7 @@
 }
 :root[data-theme="dark"]{
   --ground:#101322; --surface:#191D30; --surface-2:#262C45; --sunk:#141827;
-  --ink:#EAECF7; --ink-2:#BCC1DA; --muted:#8B92B4; --rule:#2A3050;
+  --ink:#EAECF7; --ink-2:#BCC1DA; --muted:#9299B9; --rule:#2A3050;
   --base:#54AECD; --base-soft:#16334A; --on-base:#08131A;
   --est:#E4B061; --good:#4FC79A;
   --shadow-sm:0 1px 2px rgba(0,0,0,.28),0 1px 3px rgba(0,0,0,.34);
@@ -185,7 +185,7 @@ section{padding:46px 0}
   letter-spacing:-.6px;color:var(--ink)}
 .offer-p{margin:0 auto 20px;max-width:52ch;font-size:15.5px;line-height:1.6;color:var(--ink-2)}
 .offer-cta{display:inline-flex;align-items:center;justify-content:center;
-  min-height:48px;padding:0 30px;border-radius:12px;background:var(--base);color:#fff;
+  min-height:48px;padding:0 30px;border-radius:12px;background:var(--base);color:var(--on-base);
   font-weight:600;font-size:15px;text-decoration:none}
 .offer-cta:hover{filter:brightness(1.08)}
 .offer-fine{margin:16px auto 0;max-width:46ch;font-size:13px;line-height:1.55;color:var(--muted)}
