@@ -4,7 +4,7 @@
    will keep serving the copy they already have. This is the single most common
    reason an update appears to do nothing. */
 
-const CACHE_VERSION = "onstrength-v92";
+const CACHE_VERSION = "onstrength-v93";
 
 const SHELL = [
   "./",
@@ -27,12 +27,23 @@ const SHELL = [
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_VERSION)
-      .then((cache) => cache.addAll(
+      /* One file at a time, and a failure on one does not lose the rest.
+
+         cache.addAll is atomic: if any single request in the list fails, it
+         rejects and NOTHING is written. terms.html was added to this list and
+         to a release, and the file itself did not make it onto the server —
+         so every visitor installed a worker with an empty cache and offline
+         stopped working entirely, while the app looked perfectly fine online.
+         Fifteen files cached, or zero, decided by one 404.
+
+         The shell only grows, and a new file is exactly the kind that gets
+         missed in an upload. A missing file should cost that one file. */
+      .then((cache) => Promise.all(SHELL.map((u) =>
         /* cache:"reload" so a deploy is not precached from the browser's own
            stale HTTP cache — the reason an update can appear to do nothing
            even after the worker version is bumped. */
-        SHELL.map((u) => new Request(u, { cache: "reload" }))
-      ))
+        cache.add(new Request(u, { cache: "reload" })).catch(() => null)
+      )))
       .then(() => self.skipWaiting())
       .catch(() => self.skipWaiting())
   );
@@ -62,8 +73,6 @@ self.addEventListener("fetch", (event) => {
      there is no cross-origin request left for this worker to handle, and a
      branch that would quietly permit one does not belong in a file whose
      whole claim is that the app talks to nobody. */
-  if (url.origin !== self.location.origin) return;
-
   if (url.origin !== self.location.origin) return;
 
   /* Pages: prefer the network so an update lands, fall back to cache offline.
