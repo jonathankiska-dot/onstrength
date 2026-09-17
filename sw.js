@@ -4,7 +4,7 @@
    will keep serving the copy they already have. This is the single most common
    reason an update appears to do nothing. */
 
-const CACHE_VERSION = "onstrength-v88";
+const CACHE_VERSION = "onstrength-v92";
 
 const SHELL = [
   "./",
@@ -12,6 +12,7 @@ const SHELL = [
   "./app.html",
   "./help.html",
   "./privacy.html",
+  "./terms.html",
   "./cost/",
   "./task/",
   "./manifest.webmanifest",
@@ -40,9 +41,11 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys()
+      /* The font cache goes too. The typeface is carried inside the page as
+         a data: URI now, so a cache of Google's copy is dead weight left on
+         the device from an older version. */
       .then((keys) => Promise.all(
-        keys.filter((k) => k !== CACHE_VERSION && k !== CACHE_VERSION + "-fonts")
-            .map((k) => caches.delete(k))
+        keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k))
       ))
       .then(() => self.clients.claim())
   );
@@ -54,20 +57,12 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(req.url);
 
-  // Google Fonts: serve from cache, refresh in the background.
-  if (url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com") {
-    event.respondWith(
-      caches.open(CACHE_VERSION + "-fonts").then((cache) =>
-        cache.match(req).then((hit) => {
-          const live = fetch(req)
-            .then((res) => { cache.put(req, res.clone()).catch(() => {}); return res; })
-            .catch(() => hit);
-          return hit || live;
-        })
-      )
-    );
-    return;
-  }
+  /* Nothing is fetched from anywhere but this origin. The typeface used to
+     come from Google and was cached here; it is now embedded in the page, so
+     there is no cross-origin request left for this worker to handle, and a
+     branch that would quietly permit one does not belong in a file whose
+     whole claim is that the app talks to nobody. */
+  if (url.origin !== self.location.origin) return;
 
   if (url.origin !== self.location.origin) return;
 
