@@ -93,7 +93,6 @@ header{padding:44px 0 8px;text-align:center}
    thing far better than a still of it ever did. */
 .hero{padding:38px 0 10px;max-width:34em;margin:0 auto;text-align:center}
 .hero .lede{margin-left:auto;margin-right:auto}
-.hero .cta{justify-content:center}
 h1{margin:0;font-size:32px;line-height:1.12;letter-spacing:-1.3px;font-weight:800;text-wrap:balance}
 .lede{font-size:16.5px;color:var(--ink-2);margin:16px 0 0;max-width:34em}
 .lede-turn{margin-top:14px}
@@ -102,18 +101,10 @@ h1{margin:0;font-size:32px;line-height:1.12;letter-spacing:-1.3px;font-weight:80
    a working tool reads as selling to someone who has already bought. */
 .tagline{font-size:12px;font-weight:700;letter-spacing:2.2px;text-transform:uppercase;
   color:var(--base);margin:0 0 14px}
-.cta{display:flex;flex-wrap:wrap;gap:11px;margin-top:26px;align-items:stretch}
-/* Equal width, so neither reads as the afterthought. */
-.cta .btn{flex:1 1 240px;text-align:center}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;
-  min-height:52px;padding:0 26px;border-radius:var(--r-sm);font-size:15.5px;font-weight:600;
-  font-family:inherit;text-decoration:none;border:1px solid transparent;cursor:pointer;
-  transition:background .14s ease,border-color .14s ease,box-shadow .14s ease,transform .06s ease}
-.btn:active{transform:translateY(1px)}
-.btn-primary{background:var(--base);color:var(--on-base);box-shadow:0 1px 2px rgba(17,26,33,.12)}
-.btn-primary:hover{filter:brightness(1.08)}
-.btn-ghost{background:var(--surface);color:var(--ink);border-color:var(--rule)}
-.btn-ghost:hover{border-color:var(--muted);background:var(--sunk)}
+/* The two big buttons went with the panel they sat in. Nothing on this page is
+   a button any more except the install chip, so the rules that dressed them
+   are gone rather than left to rot: unused CSS is the same drift as an unused
+   page, and this site has already had one of those. */
 a:focus-visible,button:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ring)}
 .reassure{font-size:13px;color:var(--muted);margin-top:14px}
 
@@ -133,13 +124,27 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:0 0 0 3px var(--rin
 .qd-p{display:block;font-size:13px;color:var(--muted);margin-top:5px;line-height:1.5}
 .qd-go{display:block;font-size:12.5px;font-weight:700;color:var(--base);margin-top:9px}
 
-/* The forecast is still the product; it is just no longer the entrance. Its own
-   border so it reads as the heavier of the choices rather than a fourth door. */
-.anchor{margin-top:16px;background:var(--surface);border:1px solid var(--base);
-  border-radius:var(--r-md);padding:20px;box-shadow:var(--shadow);text-align:left}
-.anchor-h{font-size:18px;font-weight:800;letter-spacing:-.5px}
-.anchor-p{font-size:14.5px;color:var(--ink-2);margin:7px 0 0;line-height:1.55}
-.anchor .cta{margin-top:15px}
+/* The forecast is still the product, and it stood apart in a heavier box with
+   two filled buttons in it — the one object in the hero that did not look like
+   the others. Reading down the page you met three cards that behaved one way
+   and then a panel that behaved another, which reads as two designs rather
+   than a hierarchy.
+
+   It is a door now, in the same protocol as its neighbours, and it carries its
+   weight by spanning the row and taking the house colour rather than by being
+   built differently. Hierarchy out of size and position, not out of a second
+   set of components. */
+.qd-lead{grid-column:1/-1;border-color:var(--base);box-shadow:var(--shadow)}
+.qd-lead .qd-h{font-size:16.5px}
+.qd-lead .qd-p{font-size:14px;color:var(--ink-2);max-width:54em}
+/* The tour was a ghost button beside a filled one. Two buttons side by side
+   ask the reader to choose before they know what either does; a link under the
+   door is the smaller invitation the smaller commitment deserves. */
+.qd-tour{margin:13px 0 0;font-size:13.5px;text-align:left}
+.qd-tour a{color:var(--base);font-weight:700;text-decoration:none}
+.qd-tour a::after{content:"\2192";font-weight:700;margin-left:5px}
+.qd-tour a:hover{text-decoration:underline}
+.qd-tour b{font-weight:500;color:var(--muted);margin-left:9px}
 .freeword{color:var(--ink-2)}
 
 /* ---- sections ---- */
@@ -281,23 +286,23 @@ footer a.kmc:hover{text-decoration:underline}
           <span class="qd-p">The next pay day, and the statutory holidays coming up.</span>
           <span class="qd-go">Look it up &rarr;</span>
         </a>
+
+        <!-- The whole tool, in the same protocol as the three questions above
+             it. "Rebuild the spreadsheet, chase the finance advisor" is a good
+             sentence in the wrong place: first on the page it picks a fight
+             with Finance before the reader knows what the tool is. Here it is
+             simply the reason. -->
+        <a class="qdoor qd-lead" href="app.html">
+          <span class="qd-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8"/><path d="M8 13h8"/><path d="M8 17h4"/></svg>Cost your team</span>
+          <span class="qd-p">Build it once and every position is costed by the day &mdash;
+            vacancies, step increases, part-time, people arriving and leaving &mdash; with where
+            your salary budget lands on 31 March. Instead of rebuilding the spreadsheet and
+            waiting on a number.</span>
+          <span class="qd-go">Manage your salary expenses &rarr;</span>
+        </a>
       </div>
 
-      <!-- The old opening line lives here now. "Rebuild the spreadsheet, chase
-           the finance advisor" is a good sentence in the wrong place: first on
-           the page it picks a fight with Finance before the reader knows what
-           the tool is. Last in this card it is simply the reason. -->
-      <div class="anchor">
-        <div class="anchor-h">Cost your team.</div>
-        <p class="anchor-p">Build it once and Onstrength costs every position by the day —
-          vacancies, step increases, part-time, people arriving and leaving — and tells you where
-          your salary budget lands on 31 March. Instead of rebuilding the spreadsheet and waiting
-          on a number.</p>
-        <div class="cta">
-          <a class="btn btn-primary" href="app.html">Open Onstrength</a>
-          <a class="btn btn-ghost" href="app.html?tour=1">Show me &mdash; 30 seconds</a>
-        </div>
-      </div>
+      <p class="qd-tour"><a href="app.html?tour=1">Show me how it works</a><b>30 seconds</b></p>
 
       <p class="reassure"><b class="freeword">Free.</b> Works on a phone, and offline once
         opened. A costing tool, not a system of record.
